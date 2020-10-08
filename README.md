@@ -1,0 +1,2 @@
+# Decentralised_Prediction_Market
+Decentralised Prediction Market application using Ethereum
