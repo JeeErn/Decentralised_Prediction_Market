@@ -1,4 +1,6 @@
 pragma solidity >=0.4.21 <0.7.0;
+// pragma solidity ^0.7.0;
+import "./Topic.sol";
 
 contract PredictionMarket {
     // Structs for users and arbitrators. Default scores = 100
@@ -17,7 +19,7 @@ contract PredictionMarket {
     mapping (address => Trader) public traders;
     mapping (address => Arbitrator) public arbitrators;
     // TODO: Uncomment mapping for marketTopic when Topic contract is completed
-    // mapping (address => Topic) public marketTopics;
+    mapping (address => Topic) public marketTopics;
 
 
     // Struct create functions
@@ -40,9 +42,18 @@ contract PredictionMarket {
         arbitrators[id] = Arbitrator(100, true);
     }
 
-    // TODO: To complete createTopic function when Topic contract is completed
+
+    // Topics
+    function createTopic(uint creatorBond, string memory name) public payable{
+        // Mapping shouldnt be name -> topic but this can suffice for now
+        // marketTopics[name] = Topic(creatorBond);
+    }
+
+
+    // // TODO: To complete createTopic function when Topic contract is completed
     // function createTopic(string _name, string _description, string[] _options, datetime _resolution, address _topicCreator, address[] _arbitrators) public {
     //     // create new topic
-    //     // add to map
+    //     return new Topic()
     // }
+
 }

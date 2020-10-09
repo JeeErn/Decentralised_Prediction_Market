@@ -1,3 +1,5 @@
+const { assert } = require("console");
+
 const PredictionMarket = artifacts.require("./PredictionMarket.sol");
 
 contract("PredictionMarket", accounts => {
@@ -5,7 +7,7 @@ contract("PredictionMarket", accounts => {
     before( async () => {
         predictionMarketInstance = await PredictionMarket.deployed();
     })
-    // it(decription, callback)
+    it(decription, callback)
     it("allows a user to create a trading account with default values", async () => {
         assert(predictionMarketInstance.address != "");
         await predictionMarketInstance.createTrader({from: accounts[0]});
@@ -34,4 +36,11 @@ contract("PredictionMarket", accounts => {
             assert(trader1.isValid, "created trader remains valid");
         };
     }); 
+
+    // it("Test Create new topic", async () => {
+    //     // Creates a new topic
+    //     const address = await predictionMarketInstance.createTopic("Test Topic"); 
+    //     const allTopics = await predictionMarketInstance.marketTopics("Test Topic");
+    //     console.log(allTopics);
+    // })
 })
