@@ -23,11 +23,10 @@ contract PredictionMarket {
     // Struct create functions
     function createTrader() public {
         address id = msg.sender;
-
-        // require that address has not been assigned to a trader
+        // // require that address has not been assigned to a trader
         require(!traders[id].isValid);
 
-        // create new trader with the default values
+        // // create new trader with the default values
         traders[id] = Trader(100, 100, true);
     }
 
