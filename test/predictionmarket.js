@@ -37,10 +37,30 @@ contract("PredictionMarket", accounts => {
         };
     }); 
 
-    // it("Test Create new topic", async () => {
-    //     // Creates a new topic
-    //     const address = await predictionMarketInstance.createTopic("Test Topic"); 
-    //     const allTopics = await predictionMarketInstance.marketTopics("Test Topic");
-    //     console.log(allTopics);
-    // })
+    it("allows a entity to create a arbitrator account with default values", async () => {
+        assert(predictionMarketInstance.address != "");
+        await predictionMarketInstance.createArbitrator({from: accounts[2]});
+        arbitrator = await predictionMarketInstance.arbitrators(accounts[2]);
+        assert(arbitrator.isValid, "arbitrator is init to valid");
+        assert(arbitrator.trustworthiness, 100, "arbitrator trustworthiness score is init to 100");
+    });
+
+    it("throws an exception when an existing arbitrator creates a new account", async () => {
+        await predictionMarketInstance.createArbitrator({ from: accounts[3] });
+        arbitrator = await predictionMarketInstance.arbitrators(accounts[3]);
+
+        // First creation is accepted
+        assert(arbitrator.isValid, "arbitrator is init to valid");
+        assert(arbitrator.winScore, 100, "arbitrator trustworthiness score is init to 100");
+
+        // Try to create again
+        try {
+            await predictionMarketInstance.createArbitrator({ from: accounts[3] });
+        } catch (error) {
+            assert(error.message.indexOf("revert") >= 0, "error message must contain revert");
+        } finally {
+            arbitrator1 = await predictionMarketInstance.traders(accounts[1]);
+            assert(arbitrator1.isValid, "created arbitrator remains valid");
+        };
+    }); 
 })
