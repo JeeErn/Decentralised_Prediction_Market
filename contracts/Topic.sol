@@ -77,8 +77,9 @@ contract Topic {
     return pendingVotes[option].price;
   } 
 
-  function getAllPendingVotePrice() view public returns(uint,uint,uint,uint){
-    return pendingVotes[0].price,pendingVotes[1].price,pendingVotes[2].price,pendingVotes[3].price;
+  function getAllPendingVotePrice() view public returns(uint){
+    // return pendingVotes[0].price,pendingVotes[1].price,pendingVotes[2].price,pendingVotes[3].price;
+    return pendingVotes[0].price;
   } 
 
   //TODO: get All Successful trades, return an array of array of addresses
