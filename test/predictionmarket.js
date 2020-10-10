@@ -7,7 +7,7 @@ contract("PredictionMarket", accounts => {
     before( async () => {
         predictionMarketInstance = await PredictionMarket.deployed();
     })
-    it(decription, callback)
+    // it(decription, callback)
     it("allows a user to create a trading account with default values", async () => {
         assert(predictionMarketInstance.address != "");
         await predictionMarketInstance.createTrader({from: accounts[0]});
