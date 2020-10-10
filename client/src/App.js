@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import SimpleStorageContract from "./contracts/SimpleStorage.json";
 import PredictionMarketContract from "./contracts/PredictionMarket.json";
 import getWeb3 from "./getWeb3";
 
@@ -18,7 +17,6 @@ class App extends Component {
         const networkId = await web3.eth.net.getId();
         const deployedNetwork = PredictionMarketContract.networks[networkId];
 
-        // const deployedNetwork = SimpleStorageContract.networks[networkId];
         const instance = new web3.eth.Contract(
           PredictionMarketContract.abi,
           deployedNetwork && deployedNetwork.address,
