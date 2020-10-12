@@ -1,42 +1,27 @@
 import React, { useEffect, useState } from 'react'
 import Topic from "./components/Topic";
 import PredictionMarketContract from './contracts/PredictionMarket.json'
+import TopicContract from './contracts/Topic.json'
 import { useGetWeb3 } from './hooks/useGetWeb3'
-
 import './App.css'
+// Hooks
+import useGetAccounts from './hooks/useGetAccounts';
+import useGetContractInstance from './hooks/useGetContractInstance';
 
 function App (props) {
-  const [accounts, setAccounts] = useState(null)
-  const [contract, setContract] = useState(null)
-  const web3 = useGetWeb3()
 
-  useEffect(() => {
-    if (web3) {
-      try{
-      web3.eth.getAccounts().then(accounts => { setAccounts(accounts) })
-      web3.eth.net.getId().then((netId) => {
-        const deployedNetwork = PredictionMarketContract.networks[netId]
-        const instance = new web3.eth.Contract(
-          PredictionMarketContract.abi,
-          deployedNetwork && deployedNetwork.address
-        )
-        setContract(instance)
-      })
-        } catch(error) {
-          // Catch any errors for any of the above operations.
-          alert(
-            `Failed to load web3, accounts, or contract. Check console for details.`,
-          );
-          console.error(error);
-      }
-    }
-  }, [web3])
+  const web3 = useGetWeb3();
+  const accounts = useGetAccounts({web3});
+  const predictionMarketInstance = useGetContractInstance({web3, contract: PredictionMarketContract})
 
-  console.log(contract);
+  //TODO:  Here for testing purposes, the contract addresses should be retrieved from predictionMarketInstance.getTopics(). That should set topicInsance accordingly.
+  const topicInstance = useGetContractInstance({web3, contract: TopicContract})
+  console.log(topicInstance);
+ 
   return (
-    <div>
-      Hello
-    </div>
+    <>
+      <Topic topicInstance= {topicInstance} accountAddress={accounts ? accounts[0] : null}/>
+    </>
   )
 }
 
