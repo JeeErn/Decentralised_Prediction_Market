@@ -5,7 +5,7 @@ const Topic = artifacts.require("./Topic.sol");
 contract("Topic", accounts => {
     let topicInstance = null; 
     before( async () => {
-        topicInstance = await Topic.new("Test");
+        topicInstance = await Topic.new(accounts[0], "Test", "", [], 0, 0);
     })
 
 
