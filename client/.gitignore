@@ -24,3 +24,6 @@ yarn-error.log*
 
 # contract json files
 /contracts
+
+#local
+/.env
