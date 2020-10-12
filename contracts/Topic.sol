@@ -3,13 +3,14 @@ pragma solidity >=0.4.21 <0.7.0;
 // pragma solidity ^0.7.0;
 
 contract Topic {
-  address topicCreator;
 
-  string name;
-  string description;
-  string[] options;
-  uint marketCap;
-  uint creatorBond;
+  address payable public topicCreator;
+  string public name;
+  string public description;
+  bytes32[] public options;
+  uint public marketCap;
+  uint public creatorBond;
+  uint256 public expiryDate;
 
   // Pending votes
   voteStruct[4] pendingVotes;
@@ -25,10 +26,17 @@ contract Topic {
     address[4] shareOwners;
   }
 
-  constructor (string memory _name) public payable {
-      // topicCreator = msg.sender;
-      name = _name;
-  }
+  constructor (
+      address payable _creator, string memory _name, string memory _description, bytes32[] memory _options, uint _bondValue, uint256 _expiryDate
+    ) public payable {
+        topicCreator = _creator;
+        name = _name;
+        description = _description;
+        options = _options;
+        marketCap = 0;
+        creatorBond = _bondValue;
+        expiryDate = _expiryDate;
+    }
 
   function voteOption(uint amount, uint option) public payable returns(bool){
     // 1. Transfer the money in
@@ -86,8 +94,15 @@ contract Topic {
   // function getAllSuccessfulTrades()
 
   function balanceOf() external view returns(uint) {
-        return address(this).balance;
+    return address(this).balance;
+  }
+
+  function getOptions() public view returns (bytes32[] memory) {
+    uint len = options.length;
+    bytes32[] memory bytesArray = new bytes32[](len);
+    for (uint i = 0; i < len; i++) {
+      bytesArray[i] = options[i];
     }
-
-
+    return bytesArray;
+  }
 }
