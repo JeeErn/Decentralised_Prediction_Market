@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.4.21 <0.7.0;
-// pragma solidity ^0.7.0;
+// pragma solidity >=0.4.21 <0.7.0;
+pragma solidity ^0.7.0;
 
 contract Topic {
   address topicCreator;
 
-  string name;
+  string public name;
   string description;
   string[] options;
   uint marketCap;
@@ -26,9 +26,9 @@ contract Topic {
   }
 
   constructor (string memory _name) public payable {
-      // topicCreator = msg.sender;
       name = _name;
   }
+
 
   function voteOption(uint amount, uint option) public payable returns(bool){
     // 1. Transfer the money in
@@ -82,6 +82,10 @@ contract Topic {
     return pendingVotes[0].price;
   } 
 
+  // For testing purposes, can remove if need be
+  function getTestName() external view returns(uint){
+    return 1234;
+  }
   //TODO: get All Successful trades, return an array of array of addresses
   // function getAllSuccessfulTrades()
 

@@ -8,6 +8,10 @@ contract("Topic", accounts => {
         topicInstance = await Topic.new("Test");
     })
 
+    it("Test get name", async () => {
+        const name = await topicInstance.name(); 
+        assert(name === "Test", "Check name");
+    })
 
     it("Test vote", async () => {
         const balanceBef = await topicInstance.balanceOf(); 
