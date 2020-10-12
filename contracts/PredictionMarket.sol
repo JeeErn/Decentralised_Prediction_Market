@@ -57,7 +57,6 @@ contract PredictionMarket {
         uint bondValue = msg.value;
         Topic newTopic = new Topic(creatorId, name, description, options, bondValue, expiryDate);
         address payable topicAddress = address(uint160(address(newTopic))); // to cast from address to address payable
-        // topicAddress.transfer(bondValue);
         marketTopics[topicAddress] = newTopic;
         emit TopicCreated(topicAddress);
     }
@@ -68,7 +67,9 @@ contract PredictionMarket {
     //     return new Topic()
     // }
 
+    // ===============================================================
     // For testing purposes
+    // ===============================================================
     event TopicCreated(address _topicAddress);
 
     function getCreatorAddress(address payable topicAddress) public view returns (address payable) {
@@ -97,6 +98,10 @@ contract PredictionMarket {
 
     function getExpiryDate(address payable topicAddress) public view returns (uint256) {
         return marketTopics[topicAddress].expiryDate();
+    }
+
+    function getCurrentBalance() public view returns (uint) {
+        return address(this).balance;
     }
 
 }
