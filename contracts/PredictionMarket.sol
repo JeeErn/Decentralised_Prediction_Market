@@ -10,6 +10,7 @@ contract PredictionMarket {
     }
 
     struct Arbitrator {
+        string displayName;
         int trustworthiness;
         bool isValid;
     }
@@ -30,14 +31,14 @@ contract PredictionMarket {
         traders[id] = Trader(100, 100, true);
     }
 
-    function createArbitrator() public {
+    function createArbitrator(string memory _displayName) public {
         address id = msg.sender;
 
         // require that address has not been assigned to a arbitrator
         require(!arbitrators[id].isValid);
 
         // create new arbitrator with the default values
-        arbitrators[id] = Arbitrator(100, true);
+        arbitrators[id] = Arbitrator(_displayName, 100, true);
     }
 
 
