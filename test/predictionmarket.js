@@ -49,23 +49,25 @@ contract("PredictionMarket", accounts => {
     }); 
 
     it("allows a entity to create a arbitrator account with default values", async () => {
-        await predictionMarketInstance.createArbitrator({from: accounts[2]});
+        await predictionMarketInstance.createArbitrator("test1", {from: accounts[2]});
         const arbitrator = await predictionMarketInstance.arbitrators(accounts[2]);
         assert.isOk(arbitrator.isValid, "arbitrator is init to valid");
+        assert.strictEqual(arbitrator.displayName, "test1", "arbitrator display name is set correctly");
         assert.strictEqual(arbitrator.trustworthiness.toString(), "100", "arbitrator trustworthiness score is init to 100");
     });
 
     it("throws an exception when an existing arbitrator creates a new account", async () => {
-        await predictionMarketInstance.createArbitrator({ from: accounts[3] });
+        await predictionMarketInstance.createArbitrator("test2", { from: accounts[3] });
         const arbitrator = await predictionMarketInstance.arbitrators(accounts[3]);
 
         // First creation is accepted
         assert.isOk(arbitrator.isValid, "arbitrator is init to valid");
+        assert.strictEqual(arbitrator.displayName, "test2", "arbitrator display name is set correctly");
         assert.strictEqual(arbitrator.trustworthiness.toString(), "100", "arbitrator trustworthiness score is init to 100");
 
         // Try to create again
         try {
-            await predictionMarketInstance.createArbitrator({ from: accounts[3] });
+            await predictionMarketInstance.createArbitrator("test3", { from: accounts[3] });
         } catch (error) {
             assert.isOk(error.message.indexOf("revert") >= 0, "error message must contain revert");
         } finally {
