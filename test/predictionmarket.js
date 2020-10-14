@@ -76,6 +76,8 @@ contract("PredictionMarket", accounts => {
         };
     }); 
 
+    //TODO: Check if arbitrator can hold trading account and vice versa and create appropriate tests for that
+
     it("allows user to create a new topic", async () => {
         // set up variables
         const name = "test";
@@ -85,11 +87,13 @@ contract("PredictionMarket", accounts => {
         const expiryDate = (new Date()).getTime();
 
         // Create topic and retrieve address
+        // Note: accounts[0] trading account is already created as of above test
         await predictionMarketInstance.createTopic(name, description, optionsBytes, expiryDate, { from: accounts[0], value: 1.0 });
         events = await predictionMarketInstance.getPastEvents("TopicCreated");
         assert.isOk(events.length > 0, "events are not null");
         const topicAddress = events[0].returnValues._topicAddress;
 
+        // Assertions
         const allTopicAddresses = await predictionMarketInstance.getAllTopics();
         assert.isOk(allTopicAddresses.includes(topicAddress), "new topic address is in array of all topic addresses");
 
@@ -114,5 +118,45 @@ contract("PredictionMarket", accounts => {
 
         const currentContractBalance = await predictionMarketInstance.getCurrentBalance();
         assert.strictEqual(currentContractBalance.toString(), "1", "creator bond is transferred to contract's balance");
-    })
+    });
+
+    it("does not allow user with no trading account to create a new topic", async () => {
+        // set up variables
+        const name = "test";
+        const description = "test description foo bar";
+        const options = ["option 1", "option 2", "option 3", "option 4"];
+        const optionsBytes = stringToBytes(options)
+        const expiryDate = (new Date()).getTime();
+
+        try {
+            await predictionMarketInstance.createTopic(name, description, optionsBytes, expiryDate, { from: accounts[7], value: 1.0 });
+        } catch (error) {
+            assert.isOk(error.message.indexOf("revert") >= 0, "error message must contain revert");
+            events = await predictionMarketInstance.getPastEvents("TopicCreated");
+            assert.strictEqual(events.length, 0, "new event is not created");
+        } finally {
+            const allTopicAddresses = await predictionMarketInstance.getAllTopics();
+            assert.strictEqual(allTopicAddresses.length, 1, "only first topic created still exists");
+        }
+    });
+
+    it("does not allow user to create a new topic when sending 0 ETH for creator bond", async () => {
+        // set up variables
+        const name = "test";
+        const description = "test description foo bar";
+        const options = ["option 1", "option 2", "option 3", "option 4"];
+        const optionsBytes = stringToBytes(options)
+        const expiryDate = (new Date()).getTime();
+
+        try {
+            await predictionMarketInstance.createTopic(name, description, optionsBytes, expiryDate, { from: accounts[0], value: 0 });
+        } catch (error) {
+            assert.isOk(error.message.indexOf("revert") >= 0, "error message must contain revert");
+            events = await predictionMarketInstance.getPastEvents("TopicCreated");
+            assert.strictEqual(events.length, 0, "new event is not created");
+        } finally {
+            const allTopicAddresses = await predictionMarketInstance.getAllTopics();
+            assert.strictEqual(allTopicAddresses.length, 1, "only first topic created still exists");
+        }
+    });
 })
