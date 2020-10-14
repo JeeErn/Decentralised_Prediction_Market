@@ -85,10 +85,11 @@ contract("PredictionMarket", accounts => {
         const options = ["option 1", "option 2", "option 3", "option 4"];
         const optionsBytes = stringToBytes(options)
         const expiryDate = (new Date()).getTime();
+        const selectedArbitrators = [accounts[2], accounts[3]];
 
         // Create topic and retrieve address
         // Note: accounts[0] trading account is already created as of above test
-        await predictionMarketInstance.createTopic(name, description, optionsBytes, expiryDate, { from: accounts[0], value: 1.0 });
+        await predictionMarketInstance.createTopic(name, description, optionsBytes, expiryDate, selectedArbitrators, { from: accounts[0], value: 1.0 });
         events = await predictionMarketInstance.getPastEvents("TopicCreated");
         assert.isOk(events.length > 0, "events are not null");
         const topicAddress = events[0].returnValues._topicAddress;
@@ -110,11 +111,16 @@ contract("PredictionMarket", accounts => {
         const bytesOptions = await predictionMarketInstance.getOptions(topicAddress);
         const topicOptions = bytesToString(bytesOptions);
         for (i = 0; i < topicOptions.length; i++) {
-            assert.strictEqual(topicOptions[i], options[i], "option " + i.toString() +" is set correctly");
+            assert.strictEqual(topicOptions[i], options[i], "option " + i.toString() + " is set correctly");
         }
  
         const _expiryDate = await predictionMarketInstance.getExpiryDate(topicAddress);
         assert.strictEqual(_expiryDate.toString(), expiryDate.toString(), "expiry date is set correctly");
+
+        const _selectedArbitrators = await predictionMarketInstance.getSelectedArbitrators(topicAddress);
+        for (i = 0; i < _selectedArbitrators.length; i++) {
+            assert.strictEqual(_selectedArbitrators[i], selectedArbitrators[i], "arbitrator " + i.toString() + " is set correctly");
+        }
 
         const currentContractBalance = await predictionMarketInstance.getCurrentBalance();
         assert.strictEqual(currentContractBalance.toString(), "1", "creator bond is transferred to contract's balance");
@@ -127,9 +133,10 @@ contract("PredictionMarket", accounts => {
         const options = ["option 1", "option 2", "option 3", "option 4"];
         const optionsBytes = stringToBytes(options)
         const expiryDate = (new Date()).getTime();
+        const selectedArbitrators = [accounts[2], accounts[3]];
 
         try {
-            await predictionMarketInstance.createTopic(name, description, optionsBytes, expiryDate, { from: accounts[7], value: 1.0 });
+            await predictionMarketInstance.createTopic(name, description, optionsBytes, expiryDate, selectedArbitrators, { from: accounts[7], value: 1.0 });
         } catch (error) {
             assert.isOk(error.message.indexOf("revert") >= 0, "error message must contain revert");
             events = await predictionMarketInstance.getPastEvents("TopicCreated");
@@ -147,9 +154,55 @@ contract("PredictionMarket", accounts => {
         const options = ["option 1", "option 2", "option 3", "option 4"];
         const optionsBytes = stringToBytes(options)
         const expiryDate = (new Date()).getTime();
+        const selectedArbitrators = [accounts[2], accounts[3]];
 
         try {
-            await predictionMarketInstance.createTopic(name, description, optionsBytes, expiryDate, { from: accounts[0], value: 0 });
+            await predictionMarketInstance.createTopic(name, description, optionsBytes, expiryDate, selectedArbitrators, { from: accounts[0], value: 0 });
+        } catch (error) {
+            assert.isOk(error.message.indexOf("revert") >= 0, "error message must contain revert");
+            events = await predictionMarketInstance.getPastEvents("TopicCreated");
+            assert.strictEqual(events.length, 0, "new event is not created");
+        } finally {
+            const allTopicAddresses = await predictionMarketInstance.getAllTopics();
+            assert.strictEqual(allTopicAddresses.length, 1, "only first topic created still exists");
+        }
+    });
+
+    it("does not allow user to pick an non-arbitrator address as an arbitrator", async () => {
+        // set up variables
+        const name = "test";
+        const description = "test description foo bar";
+        const options = ["option 1", "option 2", "option 3", "option 4"];
+        const optionsBytes = stringToBytes(options)
+        const expiryDate = (new Date()).getTime();
+        const selectedArbitrators = [accounts[2], accounts[5]]; // accounts[2] and accounts[3] are arbitrators
+
+        try {
+            await predictionMarketInstance.createTopic(name, description, optionsBytes, expiryDate, selectedArbitrators, { from: accounts[0], value: 1.0 });
+        } catch (error) {
+            assert.isOk(error.message.indexOf("revert") >= 0, "error message must contain revert");
+            events = await predictionMarketInstance.getPastEvents("TopicCreated");
+            assert.strictEqual(events.length, 0, "new event is not created");
+        } finally {
+            const allTopicAddresses = await predictionMarketInstance.getAllTopics();
+            assert.strictEqual(allTopicAddresses.length, 1, "only first topic created still exists");
+        }
+    });
+
+    it("does not allow user to pick himself as an arbitrator", async () => {
+        // set up variables
+        const name = "test";
+        const description = "test description foo bar";
+        const options = ["option 1", "option 2", "option 3", "option 4"];
+        const optionsBytes = stringToBytes(options)
+        const expiryDate = (new Date()).getTime();
+        const selectedArbitrators = [accounts[2], accounts[3]]; // accounts[2] and accounts[3] are arbitrators
+
+        //create trader with accounts[2]
+        await predictionMarketInstance.createTrader({from: accounts[2]});
+
+        try {
+            await predictionMarketInstance.createTopic(name, description, optionsBytes, expiryDate, selectedArbitrators, { from: accounts[2], value: 1.0 });
         } catch (error) {
             assert.isOk(error.message.indexOf("revert") >= 0, "error message must contain revert");
             events = await predictionMarketInstance.getPastEvents("TopicCreated");
