@@ -90,6 +90,9 @@ contract("PredictionMarket", accounts => {
         assert.isOk(events.length > 0, "events are not null");
         const topicAddress = events[0].returnValues._topicAddress;
 
+        const allTopicAddresses = await predictionMarketInstance.getAllTopics();
+        assert.isOk(allTopicAddresses.includes(topicAddress), "new topic address is in array of all topic addresses");
+
         assert.strictEqual(await predictionMarketInstance.getCreatorAddress(topicAddress), accounts[0], "topic creator address is set correctly");
         assert.strictEqual(await predictionMarketInstance.getName(topicAddress), name, "name is set correctly");
         assert.strictEqual(await predictionMarketInstance.getDescription(topicAddress), description, "description is set correctly");
