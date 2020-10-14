@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
-// pragma solidity >=0.4.21 <0.7.0;
-pragma solidity ^0.7.0;
+pragma solidity >=0.4.21 <0.7.0;
+// pragma solidity ^0.7.0;
 
 contract Topic {
 
@@ -11,6 +11,7 @@ contract Topic {
   uint public marketCap;
   uint public creatorBond;
   uint256 public expiryDate;
+  address payable[] public arbitrators;
 
   // Pending votes
   voteStruct[4] pendingVotes;
@@ -27,7 +28,8 @@ contract Topic {
   }
 
   constructor (
-      address payable _creator, string memory _name, string memory _description, bytes32[] memory _options, uint _bondValue, uint256 _expiryDate
+      address payable _creator, string memory _name, string memory _description, bytes32[] memory _options, 
+      uint _bondValue, uint256 _expiryDate, address payable[] memory _arbitrators
     ) public payable {
         topicCreator = _creator;
         name = _name;
@@ -36,6 +38,7 @@ contract Topic {
         marketCap = 0;
         creatorBond = _bondValue;
         expiryDate = _expiryDate;
+        arbitrators = _arbitrators;
     }
 
 
@@ -92,7 +95,7 @@ contract Topic {
   } 
 
   // For testing purposes, can remove if need be
-  function getTestName() external view returns(uint){
+  function getTestName() external pure returns(uint){
     return 1234;
   }
   //TODO: get All Successful trades, return an array of array of addresses
@@ -103,11 +106,10 @@ contract Topic {
   }
 
   function getOptions() public view returns (bytes32[] memory) {
-    uint len = options.length;
-    bytes32[] memory bytesArray = new bytes32[](len);
-    for (uint i = 0; i < len; i++) {
-      bytesArray[i] = options[i];
-    }
-    return bytesArray;
+    return options;
+  }
+
+  function getArbitrators() public view returns (address payable[] memory) {
+    return arbitrators;
   }
 }
