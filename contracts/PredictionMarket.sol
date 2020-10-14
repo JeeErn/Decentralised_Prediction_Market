@@ -20,6 +20,8 @@ contract PredictionMarket {
     mapping (address => Arbitrator) public arbitrators;
     mapping (address => Topic) public marketTopics;
 
+    // Array of addresses of topics to return to front end
+    address[] topicAddresses;
 
     // Struct create functions
     function createTrader() public {
@@ -59,7 +61,12 @@ contract PredictionMarket {
         Topic newTopic = new Topic(creatorId, name, description, options, bondValue, expiryDate);
         address payable topicAddress = address(uint160(address(newTopic))); // to cast from address to address payable
         marketTopics[topicAddress] = newTopic;
+        topicAddresses.push(topicAddress);
         emit TopicCreated(topicAddress);
+    }
+
+    function getAllTopics() public view returns (address[] memory) {
+        return topicAddresses;
     }
 
     // // TODO: To complete createTopic function when Topic contract is completed
