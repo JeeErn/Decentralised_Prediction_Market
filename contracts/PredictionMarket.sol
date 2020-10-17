@@ -10,6 +10,7 @@ contract PredictionMarket {
     }
 
     struct Arbitrator {
+        string displayName;
         int trustworthiness;
         bool isValid;
     }
@@ -19,6 +20,8 @@ contract PredictionMarket {
     mapping (address => Arbitrator) public arbitrators;
     mapping (address => Topic) public marketTopics;
 
+    // Array of addresses of topics to return to front end
+    address[] topicAddresses;
 
     // Struct create functions
     function createTrader() public {
@@ -30,20 +33,20 @@ contract PredictionMarket {
         traders[id] = Trader(100, 100, true);
     }
 
-    function createArbitrator() public {
+    function createArbitrator(string memory _displayName) public {
         address id = msg.sender;
 
         // require that address has not been assigned to a arbitrator
         require(!arbitrators[id].isValid);
 
         // create new arbitrator with the default values
-        arbitrators[id] = Arbitrator(100, true);
+        arbitrators[id] = Arbitrator(_displayName, 100, true);
     }
 
 
     // Topics
     function createTopic(
-        string memory name, string memory description, bytes32[] memory options, uint256 expiryDate
+        string memory name, string memory description, bytes32[] memory options, uint256 expiryDate, address payable[] memory selectedArbitrators
     ) public payable
         {
         address payable creatorId = msg.sender;
@@ -54,12 +57,30 @@ contract PredictionMarket {
         // Must have value above 0 ETH for payment of creation bond
         require(msg.value > 0 ether);
 
+        // selected arbitrators must have arbitrator account and creator must not select himself as an arbitrator
+        require(areValidArbitrators(creatorId, selectedArbitrators));
+
         uint bondValue = msg.value;
-        Topic newTopic = new Topic(creatorId, name, description, options, bondValue, expiryDate);
+        Topic newTopic = new Topic(creatorId, name, description, options, bondValue, expiryDate, selectedArbitrators);
         address payable topicAddress = address(uint160(address(newTopic))); // to cast from address to address payable
-        // topicAddress.transfer(bondValue);
         marketTopics[topicAddress] = newTopic;
+        topicAddresses.push(topicAddress);
         emit TopicCreated(topicAddress);
+    }
+
+    function getAllTopics() public view returns (address[] memory) {
+        return topicAddresses;
+    }
+
+    function areValidArbitrators(address payable creatorId, address payable[] memory selectedArbitrators) internal view returns (bool) {
+        uint numSelectedArbitrators = selectedArbitrators.length;
+        for (uint i = 0; i < numSelectedArbitrators; i++) {
+            address arbitrator = selectedArbitrators[i];
+            if (!arbitrators[arbitrator].isValid || creatorId == arbitrator) {
+                return false;
+            }
+        }
+        return true;
     }
 
     // // TODO: To complete createTopic function when Topic contract is completed
@@ -68,35 +89,45 @@ contract PredictionMarket {
     //     return new Topic()
     // }
 
+    // ===============================================================
     // For testing purposes
+    // ===============================================================
     event TopicCreated(address _topicAddress);
 
-    function getCreatorAddress(address payable topicAddress) public view returns (address payable) {
+    function getCreatorAddress(address topicAddress) public view returns (address payable) {
         return marketTopics[topicAddress].topicCreator();
     }
 
-    function getName(address payable topicAddress) public view returns (string memory) {
+    function getName(address topicAddress) public view returns (string memory) {
         return marketTopics[topicAddress].name();
     }
 
-    function getDescription(address payable topicAddress) public view returns (string memory) {
+    function getDescription(address topicAddress) public view returns (string memory) {
         return marketTopics[topicAddress].description();
     }
 
-    function getOptions(address payable topicAddress) public view returns (bytes32[] memory) {
+    function getOptions(address topicAddress) public view returns (bytes32[] memory) {
         return marketTopics[topicAddress].getOptions();
     }
 
-    function getMarketCap(address payable topicAddress) public view returns (uint) {
+    function getMarketCap(address topicAddress) public view returns (uint) {
         return marketTopics[topicAddress].marketCap();
     }
 
-    function getCreatorBond(address payable topicAddress) public view returns (uint) {
+    function getCreatorBond(address topicAddress) public view returns (uint) {
         return marketTopics[topicAddress].creatorBond();
     }
 
-    function getExpiryDate(address payable topicAddress) public view returns (uint256) {
+    function getExpiryDate(address topicAddress) public view returns (uint256) {
         return marketTopics[topicAddress].expiryDate();
+    }
+
+    function getSelectedArbitrators(address topicAddress) public view returns (address payable[] memory) {
+        return marketTopics[topicAddress].getArbitrators();
+    }
+
+    function getCurrentBalance() public view returns (uint) {
+        return address(this).balance;
     }
 
 }
