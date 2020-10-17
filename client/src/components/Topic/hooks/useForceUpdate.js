@@ -1,11 +1,10 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback } from 'react';
 
-export function useForceUpdate() {
+export default function useForceUpdate() {
   const [, setTick] = useState(0);
   const update = useCallback(() => {
-      console.log("update");
-    setTick(tick => tick + 1);
-  }, [])
+    setTick((tick) => tick + 1);
+  }, []);
 
   return update;
 }

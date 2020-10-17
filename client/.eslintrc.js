@@ -1,26 +1,22 @@
 module.exports = {
   env: {
     browser: true,
-    es6: true
+    es2021: true,
   },
   extends: [
-    "plugin:react-hooks/recommended",
-    // 'airbnb-base'
+    'plugin:react/recommended',
+    'airbnb',
   ],
-  globals: {
-    Atomics: 'readonly',
-    SharedArrayBuffer: 'readonly'
-  },
   parserOptions: {
     ecmaFeatures: {
-      jsx: true
+      jsx: true,
     },
-    ecmaVersion: 2018,
-    sourceType: 'module'
+    ecmaVersion: 12,
+    sourceType: 'module',
   },
   plugins: [
-    'react'
+    'react',
   ],
   rules: {
-  }
-}
+  },
+};
