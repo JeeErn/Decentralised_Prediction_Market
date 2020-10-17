@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
-// pragma solidity >=0.4.21 <0.7.0;
-pragma solidity ^0.7.0;
+pragma solidity >=0.4.21 <0.7.0;
+// pragma solidity ^0.7.0;
 
 contract Topic {
 
@@ -36,8 +36,20 @@ contract Topic {
         marketCap = 0;
         creatorBond = _bondValue;
         expiryDate = _expiryDate;
-    }
 
+        // init pending votes
+        for (uint i = 0; i < _options.length; i++) {
+          pendingVotes[i] = voteStruct(0, address(0));
+        }
+        // init pending votes
+        for (uint i = 0; i < _options.length; i++) {
+          pendingVotes[i] = voteStruct(0, address(0));
+        }
+        // init pending votes
+        for (uint i = 0; i < _options.length; i++) {
+          pendingVotes[i] = voteStruct(0, address(0));
+        }
+    }
 
   function voteOption(uint amount, uint option) public payable returns(bool){
     // 1. Transfer the money in
@@ -86,17 +98,15 @@ contract Topic {
     return pendingVotes[option].price;
   } 
 
-  function getAllPendingVotePrice() view public returns(uint){
-    // return pendingVotes[0].price,pendingVotes[1].price,pendingVotes[2].price,pendingVotes[3].price;
-    return pendingVotes[0].price;
-  } 
 
-  // For testing purposes, can remove if need be
-  function getTestName() external view returns(uint){
-    return 1234;
-  }
-  //TODO: get All Successful trades, return an array of array of addresses
-  // function getAllSuccessfulTrades()
+  function getAllPendingVotePrice() view public returns(bytes32[] memory){
+    uint len = pendingVotes.length;
+    bytes32[] memory bytesArray = new bytes32[](len);
+    for (uint i = 0; i < len; i++) {
+      bytesArray[i] = bytes32(pendingVotes[i].price);
+    }
+    return bytesArray;
+  } 
 
   function balanceOf() external view returns(uint) {
     return address(this).balance;

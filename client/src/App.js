@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import Topic from "./components/Topic";
 import PredictionMarketContract from './contracts/PredictionMarket.json'
 import TopicContract from './contracts/Topic.json'
@@ -14,13 +14,12 @@ function App (props) {
   const accounts = useGetAccounts({web3});
   const predictionMarketInstance = useGetContractInstance({web3, contract: PredictionMarketContract})
 
-  //TODO:  Here for testing purposes, the contract addresses should be retrieved from predictionMarketInstance.getTopics(). That should set topicInsance accordingly.
+  //TODO:  Here for testing purposes, the contract addresses should be retrieved from predictionMarketInstance.getTopics(). That should set topicInstance accordingly.
   const topicInstance = useGetContractInstance({web3, contract: TopicContract})
-  console.log(topicInstance);
  
   return (
     <>
-      <Topic topicInstance= {topicInstance} accountAddress={accounts ? accounts[0] : null}/>
+      <Topic web3={web3} topicInstance= {topicInstance} accountAddress={accounts ? accounts[0] : null}/>
     </>
   )
 }
