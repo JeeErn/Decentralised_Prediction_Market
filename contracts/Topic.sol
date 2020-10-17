@@ -39,21 +39,15 @@ contract Topic {
         creatorBond = _bondValue;
         expiryDate = _expiryDate;
         arbitrators = _arbitrators;
-    }
 
         // init pending votes
         for (uint i = 0; i < _options.length; i++) {
           pendingVotes[i] = voteStruct(0, address(0));
         }
-        // init pending votes
-        for (uint i = 0; i < _options.length; i++) {
-          pendingVotes[i] = voteStruct(0, address(0));
-        }
-        // init pending votes
-        for (uint i = 0; i < _options.length; i++) {
-          pendingVotes[i] = voteStruct(0, address(0));
-        }
     }
+
+     
+
 
   function voteOption(uint amount, uint option) public payable returns(bool){
     // 1. Transfer the money in
