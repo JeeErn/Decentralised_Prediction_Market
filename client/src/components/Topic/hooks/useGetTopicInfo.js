@@ -1,56 +1,57 @@
-import {useState, useEffect, useCallback} from 'react';
-function useGetTopicInfo({topicInstance, accountAddress, web3}) {
-    const [name, setName] = useState(null);
-    const [balance, setBalance] = useState(null);
-    const [optionNames, setOptionNames] = useState([]);
-    const [optionPendingPrices, setOptionPendingPrices] = useState([]);
+import { useState, useEffect, useCallback } from 'react';
 
-    useEffect( () => {
-        if (accountAddress && topicInstance) {
-            // Get balance
-            topicInstance.methods.balanceOf()
-            .call({from: accountAddress})
-            .then((bal) => {
-                    setBalance(web3.utils.fromWei(bal, "ether"));
-                }) 
-            
-            // Get name
-            topicInstance.methods.name()
-            .call({from: accountAddress})
-            .then(name => setName(name)); 
+function useGetTopicInfo({ topicInstance, accountAddress, web3 }) {
+  const [name, setName] = useState(null);
+  const [balance, setBalance] = useState(null);
+  const [optionNames, setOptionNames] = useState([]);
+  const [optionPendingPrices, setOptionPendingPrices] = useState([]);
 
-            // Get options
-            topicInstance.methods.getOptions()
-            .call({from: accountAddress})
-            .then(options => {
-                options = options.map(optionName => web3.utils.toAscii(optionName))
-                setOptionNames(options)})
+  useEffect(() => {
+    if (accountAddress && topicInstance) {
+      // Get balance
+      topicInstance.methods.balanceOf()
+        .call({ from: accountAddress })
+        .then((bal) => {
+          setBalance(web3.utils.fromWei(bal, 'ether'));
+        });
 
-            // Get pending prices
-            topicInstance.methods.getAllPendingVotePrice()
-            .call({from: accountAddress})
-            .then( prices => {
-                prices = prices.map(price => {
-                    return web3.utils.fromWei(parseInt(price, 16).toString(), "ether")})
-                setOptionPendingPrices(prices)}
-            );
-        }
-        
-    }, [topicInstance, accountAddress, web3]); 
+      // Get name
+      topicInstance.methods.name()
+        .call({ from: accountAddress })
+        .then((_name) => setName(_name));
 
-    const _parseOptionData = useCallback(() => {
-        let options = []; 
-        optionNames.forEach( (name, index) => {
-            options.push({
-                optionName : name, 
-                pendingVotePrice : optionPendingPrices[index]
-            })
-        })
-        return options;
-    }, [optionNames, optionPendingPrices])
-    
+      // Get options
+      topicInstance.methods.getOptions()
+        .call({ from: accountAddress })
+        .then((options) => {
+          let tempOptions = options;
+          tempOptions = options.map((optionName) => web3.utils.toAscii(optionName));
+          setOptionNames(tempOptions);
+        });
 
-    return {name, balance, options : _parseOptionData()}
+      // Get pending prices
+      topicInstance.methods.getAllPendingVotePrice()
+        .call({ from: accountAddress })
+        .then((prices) => {
+          let tempPrices = prices;
+          tempPrices = prices.map((price) => web3.utils.fromWei(parseInt(price, 16).toString(), 'ether'));
+          setOptionPendingPrices(tempPrices);
+        });
+    }
+  }, [topicInstance, accountAddress, web3]);
+
+  const parseOptionData = useCallback(() => {
+    const options = [];
+    optionNames.forEach((_name, index) => {
+      options.push({
+        optionName: _name,
+        pendingVotePrice: optionPendingPrices[index],
+      });
+    });
+    return options;
+  }, [optionNames, optionPendingPrices]);
+
+  return { name, balance, options: parseOptionData() };
 }
 
 export default useGetTopicInfo;
