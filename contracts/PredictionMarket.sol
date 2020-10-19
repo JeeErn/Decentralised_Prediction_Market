@@ -12,7 +12,7 @@ contract PredictionMarket {
 
     struct Arbitrator {
         string displayName;
-        int trustworthiness;
+        uint trustworthiness;
         bool isValid;
     }
 
@@ -25,7 +25,7 @@ contract PredictionMarket {
     address[] topicAddresses;
 
     // Array of addresses of arbitrators to return to front end
-    address[] arbitratorAddresses;
+    address payable[] arbitratorAddresses;
 
     // Struct create functions
     function createTrader() public {
@@ -46,10 +46,10 @@ contract PredictionMarket {
         // create new arbitrator with the default values
         arbitrators[id] = Arbitrator(_displayName, 50, true);
 
-        arbitratorAddresses.push(id);
+        arbitratorAddresses.push(address(uint160(id)));
     }
 
-    function getAllArbitrators() public view returns (address[] memory) {
+    function getAllArbitrators() public view returns (address payable[] memory) {
         return arbitratorAddresses;
     }
 
