@@ -3,7 +3,7 @@ pragma solidity >=0.4.21 <=0.7.0;
 import "./PredictionMarket.sol";
 
 contract Topic {
-  address parentContract;
+  // Public attirbutes
   address payable public topicCreator;
   string public name;
   string public description;
@@ -13,6 +13,9 @@ contract Topic {
   uint256 public expiryDate;
   address payable[] public arbitrators;
   address payable[5] public jury;
+
+// Private attributes
+  address parentContract;
   uint nonce;
 
   // Pending votes
@@ -39,8 +42,9 @@ contract Topic {
   // It is required for successful compilation
   constructor (
       address payable _creator, string memory _name, string memory _description, bytes32[] memory _options, 
-      uint _bondValue, uint256 _expiryDate, address payable[] memory _arbitrators
+      uint _bondValue, uint256 _expiryDate, address payable[] memory _arbitrators, address _predictionMarket
     ) public payable {
+        parentContract = _predictionMarket;
         topicCreator = _creator;
         name = _name;
         description = _description;

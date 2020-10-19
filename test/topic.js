@@ -3,12 +3,12 @@ const Topic = artifacts.require("./Topic.sol");
 contract("Topic", accounts => {
     let topicInstance = null; 
     before( async () => {
-        topicInstance = await Topic.new(accounts[0], "Test", "", [], 0, 0, [accounts[9]]);
+        topicInstance = await Topic.new(accounts[0], "Test", "", [], 0, 0, [accounts[9]], "0xc85E1Ba8F9D7cfdf27ff7604A8802FD589Ac7149");
     })
 
     it("Test get name", async () => {
         const name = await topicInstance.name(); 
-        assert(name === "Test", "Check name");
+        assert.strictEqual(name, "Test", "Check name");
     })
 
     it("Test vote", async () => {
@@ -44,6 +44,8 @@ contract("Topic", accounts => {
         const pendingVoteAft2 = await topicInstance.getPendingVotePrice(1);
         assert.strictEqual(pendingVoteAft2.toString(), web3.utils.toWei("0"), "Pending vote for option 2 should be reset");
 
-    })
+    });
+
+    it("")
 
 })

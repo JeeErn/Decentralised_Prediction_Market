@@ -72,7 +72,7 @@ contract PredictionMarket {
         require(areValidArbitrators(creatorId, selectedArbitrators));
 
         uint bondValue = msg.value;
-        Topic newTopic = new Topic(creatorId, name, description, options, bondValue, expiryDate, selectedArbitrators);
+        Topic newTopic = new Topic(creatorId, name, description, options, bondValue, expiryDate, selectedArbitrators, address(this));
         address payable topicAddress = address(uint160(address(newTopic))); // to cast from address to address payable
         marketTopics[topicAddress] = newTopic;
         topicAddresses.push(topicAddress);
