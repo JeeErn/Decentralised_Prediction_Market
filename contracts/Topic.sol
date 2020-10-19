@@ -35,11 +35,12 @@ contract Topic {
   enum Phase { Open, Verification, Jury, Resolved }
   Phase public contractPhase;
 
-
+  // FIXME: Ignore linter warning about visibility modifier being ignored. 
+  // It is required for successful compilation
   constructor (
       address payable _creator, string memory _name, string memory _description, bytes32[] memory _options, 
       uint _bondValue, uint256 _expiryDate, address payable[] memory _arbitrators
-    ) payable {
+    ) public payable {
         topicCreator = _creator;
         name = _name;
         description = _description;
