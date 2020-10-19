@@ -50,7 +50,7 @@ contract Topic {
         arbitrators = _arbitrators;
         jury = [address(0), address(0), address(0), address(0), address(0)];
 
-        nonce = 23; // Random number for the nonce
+        nonce = 23; // FIXME: Random number for the nonce
 
         // init pending votes
         for (uint i = 0; i < _options.length; i++) {
