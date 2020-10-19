@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.21 <=0.7.0;
-// pragma solidity ^0.7.0;
+import "./PredictionMarket.sol";
 
 contract Topic {
-
+  address parentContract;
   address payable public topicCreator;
   string public name;
   string public description;
@@ -12,6 +12,8 @@ contract Topic {
   uint public creatorBond;
   uint256 public expiryDate;
   address payable[] public arbitrators;
+  address payable[5] public jury;
+  uint nonce;
 
   // Pending votes
   voteStruct[4] pendingVotes;
@@ -29,10 +31,15 @@ contract Topic {
     address payable[4] shareOwners;
   }
 
+  // State of contract
+  enum Phase { Open, Verification, Jury, Resolved }
+  Phase public contractPhase;
+
+
   constructor (
       address payable _creator, string memory _name, string memory _description, bytes32[] memory _options, 
       uint _bondValue, uint256 _expiryDate, address payable[] memory _arbitrators
-    ) public payable {
+    ) payable {
         topicCreator = _creator;
         name = _name;
         description = _description;
@@ -41,11 +48,17 @@ contract Topic {
         creatorBond = _bondValue;
         expiryDate = _expiryDate;
         arbitrators = _arbitrators;
+        jury = [address(0), address(0), address(0), address(0), address(0)];
+
+        nonce = 23; // Random number for the nonce
 
         // init pending votes
         for (uint i = 0; i < _options.length; i++) {
           pendingVotes[i] = voteStruct(0, address(0));
         }
+
+        // set state to Open
+        contractPhase = Phase.Open;
     }
 
      
@@ -104,6 +117,66 @@ contract Topic {
       pendingVotes[option] = tempVote;
     }
   }
+
+  function resolveWithTie() public {
+    contractPhase = Phase.Jury;
+    selectJury();
+  }
+
+  function selectJury() public {
+    PredictionMarket marketInstance = PredictionMarket(parentContract);
+    address payable[] memory allArbitrators = marketInstance.getAllArbitrators();
+    address payable[] memory ballot = new address payable[](allArbitrators.length * 10); // Max length is when all arbitrators are at 100 score
+    uint ballotPointer = 0;
+
+    for (uint i = 0; i < allArbitrators.length; i++) {
+      address payable arbitrator = allArbitrators[i];
+      if (isASelectedArbitrator(arbitrator)) {
+        continue;
+      }
+      (,uint trustworthiness,) = marketInstance.arbitrators(arbitrator); // Access trustworthiness score of struct
+      uint chance = trustworthiness / uint(10);
+      for (uint j = 0; j < chance; j++) {
+        ballot[ballotPointer] = arbitrator;
+        ballotPointer++;
+      }
+    }
+
+    // Select random jury from the ballot
+    // Rechoose if address is already selected in the jury
+    uint juryPointer = 0;
+    while (jury[4] == address(0)) {
+      uint next = uint(keccak256(abi.encodePacked(block.timestamp, msg.sender, nonce))) % ballotPointer;
+      nonce++;
+      address payable potential = ballot[next];
+      if (!hasBeenSelectedAsJury(potential, juryPointer)) {
+        jury[juryPointer] = potential;
+        juryPointer++;
+      }
+    }
+  }
+
+  function hasBeenSelectedAsJury(address payable potential, uint pointer) internal view returns (bool) {
+    for (uint k = 0; k < pointer; k++) {
+      if (jury[k] == potential) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function isASelectedArbitrator(address payable arbitrator) internal view returns (bool) {
+    for (uint i = 0; i < arbitrators.length; i++) {
+      if (arbitrator == arbitrators[i]) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // ===================================================
+  // Getters
+  // ===================================================
 
   function getPendingVotePrice(uint option) view public returns(uint){
     return pendingVotes[option].price;
