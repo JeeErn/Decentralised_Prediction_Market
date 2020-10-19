@@ -8,16 +8,8 @@ accounts[0], accounts[1], accounts[4]
 Arbitrator accounts:
 accounts[2], accounts[3], accounts[4]
 */
-
+const stringUtils = require("./utils/stringUtil.js");
 const PredictionMarket = artifacts.require("./PredictionMarket.sol");
-
-const stringToBytes = (options) => {
-    return options.map(option => web3.utils.asciiToHex(option));
-}
-
-const bytesToString = (options) => {
-    return options.map(option => web3.utils.hexToUtf8(option));
-}
 
 contract("PredictionMarket", accounts => {
     let predictionMarketInstance = null; 
@@ -118,7 +110,7 @@ contract("PredictionMarket", accounts => {
         const name = "test";
         const description = "test description foo bar";
         const options = ["option 1", "option 2", "option 3", "option 4"];
-        const optionsBytes = stringToBytes(options)
+        const optionsBytes = stringUtils.stringToBytes(options)
         const expiryDate = (new Date()).getTime();
         const selectedArbitrators = [accounts[2], accounts[3]];
 
@@ -144,7 +136,7 @@ contract("PredictionMarket", accounts => {
         assert.strictEqual(creatorBond.toString(), "1", "creator bond is set to message value");
 
         const bytesOptions = await predictionMarketInstance.getOptions(topicAddress);
-        const topicOptions = bytesToString(bytesOptions);
+        const topicOptions = stringUtils.bytesToString(bytesOptions);
         for (i = 0; i < topicOptions.length; i++) {
             assert.strictEqual(topicOptions[i], options[i], "option " + i.toString() + " is set correctly");
         }
@@ -167,7 +159,7 @@ contract("PredictionMarket", accounts => {
         const name = "test";
         const description = "test description foo bar";
         const options = ["option 1", "option 2", "option 3", "option 4"];
-        const optionsBytes = stringToBytes(options)
+        const optionsBytes = stringUtils.stringToBytes(options)
         const expiryDate = (new Date()).getTime();
         const selectedArbitrators = [accounts[2], accounts[3]];
 
@@ -188,7 +180,7 @@ contract("PredictionMarket", accounts => {
         const name = "test";
         const description = "test description foo bar";
         const options = ["option 1", "option 2", "option 3", "option 4"];
-        const optionsBytes = stringToBytes(options)
+        const optionsBytes = stringUtils.stringToBytes(options)
         const expiryDate = (new Date()).getTime();
         const selectedArbitrators = [accounts[2], accounts[3]];
 
@@ -209,7 +201,7 @@ contract("PredictionMarket", accounts => {
         const name = "test";
         const description = "test description foo bar";
         const options = ["option 1", "option 2", "option 3", "option 4"];
-        const optionsBytes = stringToBytes(options)
+        const optionsBytes = stringUtils.stringToBytes(options)
         const expiryDate = (new Date()).getTime();
         const selectedArbitrators = [accounts[2], accounts[5]]; // accounts[2] and accounts[3] are arbitrators
 
@@ -230,7 +222,7 @@ contract("PredictionMarket", accounts => {
         const name = "test";
         const description = "test description foo bar";
         const options = ["option 1", "option 2", "option 3", "option 4"];
-        const optionsBytes = stringToBytes(options)
+        const optionsBytes = stringUtils.stringToBytes(options)
         const expiryDate = (new Date()).getTime();
         const selectedArbitrators = [accounts[2], accounts[3]]; // accounts[2] and accounts[3] are arbitrators
 
@@ -254,7 +246,7 @@ contract("PredictionMarket", accounts => {
         const name = "test";
         const description = "test description foo bar";
         const options = ["1111-1111-1111-1111-1111-1111-11", "1111-1111-1111-1111-1111-1111-11"];
-        const optionsBytes = stringToBytes(options)
+        const optionsBytes = stringUtils.stringToBytes(options)
         const expiryDate = (new Date()).getTime();
         const selectedArbitrators = [accounts[2], accounts[4]];
 
@@ -267,7 +259,7 @@ contract("PredictionMarket", accounts => {
         assert.isOk(allTopicAddresses.includes(topicAddress), "new topic address is in array of all topic addresses");
 
         const bytesOptions = await predictionMarketInstance.getOptions(topicAddress);
-        const topicOptions = bytesToString(bytesOptions);
+        const topicOptions = stringUtils.bytesToString(bytesOptions);
         for (i = 0; i < topicOptions.length; i++) {
             assert.strictEqual(topicOptions[i], options[i], "option " + i.toString() + " is set correctly");
         }
@@ -278,7 +270,7 @@ contract("PredictionMarket", accounts => {
         const name = "test";
         const description = "test description foo bar";
         const options = ["1111-1111-1111-1111-1111-1111-111", "1111-1111-1111-1111-1111-1111-11"];
-        const optionsBytes = stringToBytes(options)
+        const optionsBytes = stringUtils.stringToBytes(options)
         const expiryDate = (new Date()).getTime();
         const selectedArbitrators = [accounts[2], accounts[4]];
 
