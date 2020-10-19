@@ -150,7 +150,7 @@ contract Topic {
     // Select random jury from the ballot
     // Rechoose if address is already selected in the jury
     uint juryPointer = 0;
-    while (jury[4] == address(0)) {
+    while (juryPointer < 5) {
       uint next = uint(keccak256(abi.encodePacked(block.timestamp, msg.sender, nonce))) % ballotPointer;
       nonce++;
       address payable potential = ballot[next];
