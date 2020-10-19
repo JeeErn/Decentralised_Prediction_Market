@@ -1,6 +1,12 @@
 /*
 NOTE: int values in contract are converted to BN objects, so use toString() on the BN object, 
 and compare to the toString() of whatever number it is supposed to be compared with
+
+Trader accounts:
+accounts[0], accounts[1], accounts[4]
+
+Arbitrator accounts:
+accounts[2], accounts[3], accounts[4]
 */
 
 const PredictionMarket = artifacts.require("./PredictionMarket.sol");
@@ -53,7 +59,10 @@ contract("PredictionMarket", accounts => {
         const arbitrator = await predictionMarketInstance.arbitrators(accounts[2]);
         assert.isOk(arbitrator.isValid, "arbitrator is init to valid");
         assert.strictEqual(arbitrator.displayName, "test1", "arbitrator display name is set correctly");
-        assert.strictEqual(arbitrator.trustworthiness.toString(), "100", "arbitrator trustworthiness score is init to 100");
+        assert.strictEqual(arbitrator.trustworthiness.toString(), "50", "arbitrator trustworthiness score is init to 50");
+
+        const allArbitrators = await predictionMarketInstance.getAllArbitrators();
+        assert.isOk(allArbitrators.includes(accounts[2]), "address is stored in list of arbitrator address");
     });
 
     it("throws an exception when an existing arbitrator creates a new account", async () => {
@@ -63,7 +72,7 @@ contract("PredictionMarket", accounts => {
         // First creation is accepted
         assert.isOk(arbitrator.isValid, "arbitrator is init to valid");
         assert.strictEqual(arbitrator.displayName, "test2", "arbitrator display name is set correctly");
-        assert.strictEqual(arbitrator.trustworthiness.toString(), "100", "arbitrator trustworthiness score is init to 100");
+        assert.strictEqual(arbitrator.trustworthiness.toString(), "50", "arbitrator trustworthiness score is init to 50");
 
         // Try to create again
         try {
@@ -76,7 +85,24 @@ contract("PredictionMarket", accounts => {
         };
     }); 
 
-    //TODO: Check if arbitrator can hold trading account and vice versa and create appropriate tests for that
+    it("allows user to create both arbitrator and trader accounts using same address", async () => {
+        // Create trader account
+        await predictionMarketInstance.createTrader({from: accounts[4]});
+        const trader = await predictionMarketInstance.traders(accounts[4]);
+        assert.isOk(trader.isValid, "trader is init to valid");
+        assert.strictEqual(trader.winScore.toString(), "100", "trader win score is init to 100");
+        assert.strictEqual(trader.loseScore.toString(), "100", "trader lose score is init to 100");
+
+        // Create arbitrator account
+        await predictionMarketInstance.createArbitrator("test1", {from: accounts[4]});
+        const arbitrator = await predictionMarketInstance.arbitrators(accounts[4]);
+        assert.isOk(arbitrator.isValid, "arbitrator is init to valid");
+        assert.strictEqual(arbitrator.displayName, "test1", "arbitrator display name is set correctly");
+        assert.strictEqual(arbitrator.trustworthiness.toString(), "50", "arbitrator trustworthiness score is init to 50");
+
+        const allArbitrators = await predictionMarketInstance.getAllArbitrators();
+        assert.isOk(allArbitrators.includes(accounts[4]), "address is stored in list of arbitrator address");
+    });
 
     it("allows user to create a new topic", async () => {
         // set up variables
@@ -212,4 +238,50 @@ contract("PredictionMarket", accounts => {
             assert.strictEqual(allTopicAddresses.length, 1, "only first topic created still exists");
         }
     });
+
+    it("allows user to create topic with options up to 32 char long", async () => {
+        // set up variables
+        const name = "test";
+        const description = "test description foo bar";
+        const options = ["1111-1111-1111-1111-1111-1111-11", "1111-1111-1111-1111-1111-1111-11"];
+        const optionsBytes = stringToBytes(options)
+        const expiryDate = (new Date()).getTime();
+        const selectedArbitrators = [accounts[2], accounts[4]];
+
+        await predictionMarketInstance.createTopic(name, description, optionsBytes, expiryDate, selectedArbitrators, { from: accounts[1], value: 1.0 });
+        events = await predictionMarketInstance.getPastEvents("TopicCreated");
+        assert.isOk(events.length > 0, "events are not null");
+        const topicAddress = events[0].returnValues._topicAddress;
+
+        const allTopicAddresses = await predictionMarketInstance.getAllTopics();
+        assert.isOk(allTopicAddresses.includes(topicAddress), "new topic address is in array of all topic addresses");
+
+        const bytesOptions = await predictionMarketInstance.getOptions(topicAddress);
+        const topicOptions = bytesToString(bytesOptions);
+        for (i = 0; i < topicOptions.length; i++) {
+            assert.strictEqual(topicOptions[i], options[i], "option " + i.toString() + " is set correctly");
+        }
+    });
+
+    // it("does not allow user to create topic with options more than 32 char long", async () => {
+    //     // set up variables
+    //     const name = "test";
+    //     const description = "test description foo bar";
+    //     const options = ["1111-1111-1111-1111-1111-1111-111", "1111-1111-1111-1111-1111-1111-11"];
+    //     const optionsBytes = stringToBytes(options)
+    //     const expiryDate = (new Date()).getTime();
+    //     const selectedArbitrators = [accounts[2], accounts[4]];
+
+    //     try {
+    //         await predictionMarketInstance.createTopic(name, description, optionsBytes, expiryDate, selectedArbitrators, { from: accounts[1], value: 1.0 });
+    //     } catch (error) {
+    //         console.log(error);
+    //         // assert.isOk(error.message.indexOf("revert") >= 0, "error message must contain revert");
+    //         // events = await predictionMarketInstance.getPastEvents("TopicCreated");
+    //         // assert.strictEqual(events.length, 0, "new event is not created");
+    //     } finally {
+    //         const allTopicAddresses = await predictionMarketInstance.getAllTopics();
+    //         assert.strictEqual(allTopicAddresses.length, 2, "only previously created topic still exist");
+    //     };
+    // });
 })

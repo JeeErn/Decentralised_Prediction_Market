@@ -1,4 +1,5 @@
-pragma solidity >=0.4.21 <0.7.0;
+// SPDX-License-Identifier: MIT
+pragma solidity >=0.4.21 <=0.7.0;
 import "./Topic.sol";
 
 contract PredictionMarket {
@@ -23,6 +24,9 @@ contract PredictionMarket {
     // Array of addresses of topics to return to front end
     address[] topicAddresses;
 
+    // Array of addresses of arbitrators to return to front end
+    address[] arbitratorAddresses;
+
     // Struct create functions
     function createTrader() public {
         address id = msg.sender;
@@ -40,7 +44,13 @@ contract PredictionMarket {
         require(!arbitrators[id].isValid);
 
         // create new arbitrator with the default values
-        arbitrators[id] = Arbitrator(_displayName, 100, true);
+        arbitrators[id] = Arbitrator(_displayName, 50, true);
+
+        arbitratorAddresses.push(id);
+    }
+
+    function getAllArbitrators() public view returns (address[] memory) {
+        return arbitratorAddresses;
     }
 
 

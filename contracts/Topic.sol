@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.4.21 <0.7.0;
+pragma solidity >=0.4.21 <=0.7.0;
 // pragma solidity ^0.7.0;
 
 contract Topic {
@@ -17,14 +17,14 @@ contract Topic {
   voteStruct[4] pendingVotes;
   struct voteStruct {
     uint price; 
-    address voter;
+    address payable voter;
   }
 
 
   // Successful trades
   trade[] confirmedTrades;
   struct trade {
-    address[4] shareOwners;
+    address payable[4] shareOwners;
   }
 
   constructor (
@@ -59,7 +59,7 @@ contract Topic {
 
     // Try to resolve the vote
     uint balance = 1 ether; 
-    address[4] memory tempTrade;
+    address payable[4] memory tempTrade;
     for(uint i=0; i< 4; i++){
       if(i != option){
         balance = balance - pendingVotes[i].price; 
@@ -68,7 +68,7 @@ contract Topic {
     }
     
     // Vote can go through
-    if(balance < amount){
+    if(balance <= amount){
       // Confirm the trade
       tempTrade[option] = msg.sender;
       trade memory tradeConfirmed = trade(tempTrade);
