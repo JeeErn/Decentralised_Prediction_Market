@@ -1,14 +1,23 @@
 const Topic = artifacts.require("./Topic.sol");
 
+const zeroAddress = "0x0000000000000000000000000000000000000000";
+
 contract("Topic", accounts => {
     let topicInstance = null; 
     before( async () => {
         topicInstance = await Topic.new(accounts[0], "Test", "", [], 0, 0, [accounts[9]], "0xc85E1Ba8F9D7cfdf27ff7604A8802FD589Ac7149");
     })
 
-    it("Test get name", async () => {
-        const name = await topicInstance.name(); 
-        assert.strictEqual(name, "Test", "Check name");
+    it("should be created with the correct initial values", async () => {
+        assert.strictEqual(await topicInstance.name(), "Test", "Name is correct");
+
+        const contractPhase = await topicInstance.contractPhase();
+        assert.strictEqual(contractPhase.toString(), "0", "state is correct");
+
+        const jury = await topicInstance.getJury()
+        jury.forEach(juror => {
+            assert.strictEqual(juror, zeroAddress, "juror is init to address(0)");
+        });
     })
 
     it("Test vote", async () => {
