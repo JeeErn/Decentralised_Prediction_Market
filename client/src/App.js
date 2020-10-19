@@ -9,6 +9,7 @@ import './App.css';
 // Hooks
 import useGetAccounts from './hooks/useGetAccounts';
 import useGetContractInstance from './hooks/useGetContractInstance';
+import CreateTopic from './components/CreateTopic';
 
 function App() {
   const web3 = useGetWeb3();
@@ -21,6 +22,7 @@ function App() {
 
   return (
     <>
+      <CreateTopic />
       <Topic web3={web3} topicInstance={topicInstance} accountAddress={accounts ? accounts[0] : null} />
     </>
   );

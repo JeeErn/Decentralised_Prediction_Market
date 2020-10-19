@@ -31,7 +31,8 @@ function TopicVotingBox({
         .then(() => {
           alert('Congratuations! You have just made a bet!');
           window.location.reload(false);
-        });
+        })
+        .catch((err) => { if (err.code === -32603) { alert('Your betting price should be more than the pending price!'); } });
     },
     [topicInstance, sliderValue, web3, accountAddress, selectedOption],
   );

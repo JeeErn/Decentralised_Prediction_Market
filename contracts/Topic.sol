@@ -55,12 +55,10 @@ contract Topic {
     voteStruct memory vote = voteStruct(amount, msg.sender);
 
     // Reject the vote if it is lower than the last available vote
-    if(pendingVotes[option].price >=  amount){
-      return false;
-    }
+    require(pendingVotes[option].price <  amount);
 
     // Try to resolve the vote
-    uint balance = 1000000000000000000; 
+    uint balance = 1 ether; 
     address[4] memory tempTrade;
     for(uint i=0; i< 4; i++){
       if(i != option){
