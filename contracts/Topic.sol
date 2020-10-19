@@ -217,4 +217,8 @@ contract Topic {
   function getArbitrators() public view returns (address payable[] memory) {
     return arbitrators;
   }
+
+  function getJury() public view returns (address payable[5] memory) {
+    return jury;
+  }
 }
