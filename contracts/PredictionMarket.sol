@@ -62,7 +62,7 @@ contract PredictionMarket {
         address payable creatorId = msg.sender;
 
         // Creator must have a trader account
-        // Commented out for testing purposes, uncomment when createTrader is implemented
+        // TODO: Commented out for testing purposes, uncomment when createTrader is implemented
         // require(traders[creatorId].isValid);
 
         // Must have value above 0 ETH for payment of creation bond
@@ -94,11 +94,6 @@ contract PredictionMarket {
         return true;
     }
 
-    // // TODO: To complete createTopic function when Topic contract is completed
-    // function createTopic(string _name, string _description, string[] _options, datetime _resolution, address _topicCreator, address[] _arbitrators) public {
-    //     // create new topic
-    //     return new Topic()
-    // }
 
     // ===============================================================
     // For testing purposes

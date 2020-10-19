@@ -25,9 +25,9 @@ function App() {
 
   return (
     <>
-      <CreateTopic predictionMarketInstance={predictionMarketInstance} accountAddress={accounts ? accounts[0] : null} />
+      {predictionMarketInstance && <CreateTopic predictionMarketInstance={predictionMarketInstance} accountAddress={accounts ? accounts[0] : null} />}
       {
-        topicInstances.map((topicInstance) => <Topic web3={web3} topicInstance={topicInstance} accountAddress={accounts ? accounts[0] : null} />)
+        topicInstances && topicInstances.map((topicInstance) => <Topic web3={web3} topicInstance={topicInstance} accountAddress={accounts ? accounts[0] : null} />)
       }
     </>
   );

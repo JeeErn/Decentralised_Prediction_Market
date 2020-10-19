@@ -14,6 +14,7 @@ import {
 } from '@material-ui/core';
 import React, { useCallback, useState } from 'react';
 import Web3 from 'web3';
+import useGetArbitrators from './hooks/useGetArbitrators';
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -43,6 +44,9 @@ function CreateTopic({ predictionMarketInstance, accountAddress }) {
   const [creatorBond, setCreatorBond] = useState(0.1);
   const [open, setOpen] = useState(false);
 
+  const arbitrators = useGetArbitrators({ predictionMarketInstance });
+
+  console.log(arbitrators);
   const handleCreateTopic = useCallback(() => {
     const options32Bytes = options.map((option) => Web3.utils.fromAscii(option));
     predictionMarketInstance.methods

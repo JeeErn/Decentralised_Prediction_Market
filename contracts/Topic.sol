@@ -105,10 +105,6 @@ contract Topic {
     }
   }
 
-  function getPendingVotePrice(uint option) view public returns(uint){
-    return pendingVotes[option].price;
-  } 
-
 
   function getAllPendingVotePrice() view public returns(bytes32[] memory){
     uint len = pendingVotes.length;
