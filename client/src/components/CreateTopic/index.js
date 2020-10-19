@@ -119,7 +119,7 @@ function CreateTopic({ predictionMarketInstance, accountAddress }) {
                   labelId="demo-simple-select-helper-label"
                   id="demo-simple-select-helper"
                 >
-                  <MenuItem value="">TODO: Select from list of arbitrators</MenuItem>
+                  {arbitrators.map((arb) => <MenuItem value={arb}>{arb}</MenuItem>)}
                 </Select>
               </FormControl>
             </Grid>
