@@ -20,6 +20,8 @@ contract Topic {
     address payable voter;
   }
 
+  // Last Traded Prices
+  uint[4] lastTradedPrices;
 
   // Successful trades
   trade[] confirmedTrades;
@@ -47,19 +49,19 @@ contract Topic {
     }
 
      
-
-
   function voteOption(uint amount, uint option) public payable returns(bool){
-    // 1. Transfer the money in
-    // 2. If can be resolved now, resolve it and transfer any remaining money
-    voteStruct memory vote = voteStruct(amount, msg.sender);
-
     // Reject the vote if it is lower than the last available vote
     require(pendingVotes[option].price <  amount);
 
-    // Try to resolve the vote
+    // If the vote is higher than the last available price, send money back to the previous voter
+    pendingVotes[option].voter.transfer(pendingVotes[option].price);
+
+    // Balance to decide if the vote goes through
     uint balance = 1 ether; 
+
+    // Entry to insert into the confirmed trades if vote goes through
     address payable[4] memory tempTrade;
+
     for(uint i=0; i< 4; i++){
       if(i != option){
         balance = balance - pendingVotes[i].price; 
@@ -67,24 +69,37 @@ contract Topic {
       }
     }
     
-    // Vote can go through
+    // If vote can go through
     if(balance <= amount){
-      // Confirm the trade
+      
+      // 1) Confirm the trade
       tempTrade[option] = msg.sender;
       trade memory tradeConfirmed = trade(tempTrade);
       confirmedTrades.push(tradeConfirmed);
+      
+      // 2) Update the lastTradedPrices
+      for(uint i=0; i< 4; i++){
+        if(i == option){
+          lastTradedPrices[i] = balance;
+        }
+        else{
+          lastTradedPrices[i]= pendingVotes[i].price;
+        }
+      }
+      
 
-      // Send the remaining money back to the sender
+      // 3) Send the remaining money back to the sender
       msg.sender.transfer(amount - balance);
-      // Reset the pending votes instance
+      // 4) Reset the pending votes instance
       for(uint i =0; i< 4; i++){
         pendingVotes[i].price =0; 
       }
       return true;
     }
 
-    // if vote cannot go through, update the pending votes and keep the money
+    // If vote cannot go through
     else {
+      // Update the pending votes
       voteStruct memory tempVote = voteStruct(amount, msg.sender); 
       pendingVotes[option] = tempVote;
     }
@@ -103,6 +118,15 @@ contract Topic {
     }
     return bytesArray;
   } 
+
+  function getLastTradedPrices() view public returns(bytes32[] memory){
+    uint len = lastTradedPrices.length;
+    bytes32[] memory bytesArray = new bytes32[](len);
+    for (uint i = 0; i < len; i++) {
+      bytesArray[i] = bytes32(lastTradedPrices[i]);
+    }
+    return bytesArray;
+  }
 
   function balanceOf() external view returns(uint) {
     return address(this).balance;

@@ -62,7 +62,8 @@ contract PredictionMarket {
         address payable creatorId = msg.sender;
 
         // Creator must have a trader account
-        require(traders[creatorId].isValid);
+        // Commented out for testing purposes, uncomment when createTrader is implemented
+        // require(traders[creatorId].isValid);
 
         // Must have value above 0 ETH for payment of creation bond
         require(msg.value > 0 ether);

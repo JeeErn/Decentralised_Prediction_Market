@@ -20,9 +20,7 @@ function TopicProperty({ title, options, propKey }) {
     <Grid item container xs className={classes.root}>
       <Grid item xs={12}>
         <Typography center variant="h6">
-          {' '}
           {title}
-          {' '}
         </Typography>
       </Grid>
       <Grid item xs={12} container>

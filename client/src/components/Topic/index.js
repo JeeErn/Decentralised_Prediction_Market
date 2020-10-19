@@ -37,17 +37,18 @@ function Topic({ web3, topicInstance, accountAddress }) {
   return (
     <Paper className={classes.root}>
       <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <Typography className={classes.header} variant="h4">
-            {' '}
-            {name}
-            {' '}
-          </Typography>
-        </Grid>
-        <Grid container item xs={9} spacing={6}>
+        <Grid container item xs={9} spacing={3}>
+          <Grid item xs={12}>
+            <Typography className={classes.header} variant="h5">
+              {' '}
+              {name}
+              {' '}
+            </Typography>
+          </Grid>
+
           <Grid container item xs={12} spacing={10}>
             <TopicProperty title="Weighted Score" options={defaultOptions} propKey="weightedScore" />
-            <TopicProperty title="Last Traded Price" options={defaultOptions} propKey="lastTradedPrice" />
+            <TopicProperty title="Last Traded Price" options={options} propKey="lastTradedPrices" />
             <TopicProperty title="Pending Price" options={options} propKey="pendingVotePrice" />
           </Grid>
           <Grid container item xs={12}>

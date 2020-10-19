@@ -5,6 +5,7 @@ function useGetTopicInfo({ topicInstance, accountAddress, web3 }) {
   const [balance, setBalance] = useState(null);
   const [optionNames, setOptionNames] = useState([]);
   const [optionPendingPrices, setOptionPendingPrices] = useState([]);
+  const [lastTradedPrices, setLastTradedPrices] = useState([]);
 
   useEffect(() => {
     if (accountAddress && topicInstance) {
@@ -37,6 +38,15 @@ function useGetTopicInfo({ topicInstance, accountAddress, web3 }) {
           tempPrices = prices.map((price) => web3.utils.fromWei(parseInt(price, 16).toString(), 'ether'));
           setOptionPendingPrices(tempPrices);
         });
+
+      // Get Last Traded Prices
+      topicInstance.methods.getLastTradedPrices()
+        .call({ from: accountAddress })
+        .then((prices) => {
+          let tempPrices = prices;
+          tempPrices = prices.map((price) => web3.utils.fromWei(parseInt(price, 16).toString(), 'ether'));
+          setLastTradedPrices(tempPrices);
+        });
     }
   }, [topicInstance, accountAddress, web3]);
 
@@ -46,10 +56,11 @@ function useGetTopicInfo({ topicInstance, accountAddress, web3 }) {
       options.push({
         optionName: _name,
         pendingVotePrice: optionPendingPrices[index],
+        lastTradedPrices: lastTradedPrices[index],
       });
     });
     return options;
-  }, [optionNames, optionPendingPrices]);
+  }, [optionNames, optionPendingPrices, lastTradedPrices]);
 
   return { name, balance, options: parseOptionData() };
 }
