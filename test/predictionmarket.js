@@ -53,10 +53,12 @@ contract("PredictionMarket", accounts => {
     // Create arbitrator tests
     // ================================
     it("allows a entity to create a arbitrator account with default values", async () => {
-        await predictionMarketInstance.createArbitrator("test1", {from: accounts[2]});
+        await predictionMarketInstance.createArbitrator(stringUtils.stringToBytes("test1"), {from: accounts[2]});
         const arbitrator = await predictionMarketInstance.arbitrators(accounts[2]);
         assert.isOk(arbitrator.isValid, "arbitrator is init to valid");
-        assert.strictEqual(arbitrator.displayName, "test1", "arbitrator display name is set correctly");
+
+        const displayName = stringUtils.bytesToString(arbitrator.displayName);
+        assert.strictEqual(displayName, "test1", "arbitrator display name is set correctly");
         assert.strictEqual(arbitrator.trustworthiness.toString(), "50", "arbitrator trustworthiness score is init to 50");
 
         const allArbitrators = await predictionMarketInstance.getAllArbitrators();
@@ -64,17 +66,18 @@ contract("PredictionMarket", accounts => {
     });
 
     it("throws an exception when an existing arbitrator creates a new account", async () => {
-        await predictionMarketInstance.createArbitrator("test2", { from: accounts[3] });
+        await predictionMarketInstance.createArbitrator(stringUtils.stringToBytes("test2"), { from: accounts[3] });
         const arbitrator = await predictionMarketInstance.arbitrators(accounts[3]);
 
         // First creation is accepted
         assert.isOk(arbitrator.isValid, "arbitrator is init to valid");
-        assert.strictEqual(arbitrator.displayName, "test2", "arbitrator display name is set correctly");
+        const displayName = stringUtils.bytesToString(arbitrator.displayName);
+        assert.strictEqual(displayName, "test2", "arbitrator display name is set correctly");
         assert.strictEqual(arbitrator.trustworthiness.toString(), "50", "arbitrator trustworthiness score is init to 50");
 
         // Try to create again
         try {
-            await predictionMarketInstance.createArbitrator("test3", { from: accounts[3] });
+            await predictionMarketInstance.createArbitrator(stringUtils.stringToBytes("test3"), { from: accounts[3] });
         } catch (error) {
             assert.isOk(error.message.indexOf("revert") >= 0, "error message must contain revert");
         } finally {
@@ -92,14 +95,25 @@ contract("PredictionMarket", accounts => {
         assert.strictEqual(trader.loseScore.toString(), "100", "trader lose score is init to 100");
 
         // Create arbitrator account
-        await predictionMarketInstance.createArbitrator("test1", {from: accounts[4]});
+        await predictionMarketInstance.createArbitrator(stringUtils.stringToBytes("test1"), {from: accounts[4]});
         const arbitrator = await predictionMarketInstance.arbitrators(accounts[4]);
         assert.isOk(arbitrator.isValid, "arbitrator is init to valid");
-        assert.strictEqual(arbitrator.displayName, "test1", "arbitrator display name is set correctly");
+
+        const displayName = stringUtils.bytesToString(arbitrator.displayName);
+        assert.strictEqual(displayName, "test1", "arbitrator display name is set correctly");
         assert.strictEqual(arbitrator.trustworthiness.toString(), "50", "arbitrator trustworthiness score is init to 50");
 
         const allArbitrators = await predictionMarketInstance.getAllArbitrators();
         assert.isOk(allArbitrators.includes(accounts[4]), "address is stored in list of arbitrator address");
+    });
+
+    it("allows user to view all arbitrator names", async () => {
+        const createdArbitratorNames = ["test1", "test2"]; // FIXME: Update if more arbitrators are created before this test!!!
+        const allArbitratorNamesBytes = await predictionMarketInstance.getAllArbitratorNames();
+        const allArbitratorNames = stringUtils.bytesToString(allArbitratorNamesBytes);
+        allArbitratorNames.forEach(name => {
+            assert.isOk(createdArbitratorNames.includes(name), name + "is successfully retrieved");
+        });
     });
 
     // ================================
