@@ -12,11 +12,15 @@ contract Topic {
   uint public creatorBond;
   uint256 public expiryDate;
   address payable[] public arbitrators;
-  address payable[5] public jury;
+  address payable[] public jury;
 
-// Private attributes
+  // Private attributes
   address parentContract;
-  uint nonce;
+  uint16 nonce;
+
+  // Mapping for easier checking of address having been assigned a role
+  mapping(address => bool) arbitratorAssigned;
+  mapping(address => bool) juryAssigned;
 
   // Pending votes
   voteStruct[4] pendingVotes;
@@ -35,8 +39,9 @@ contract Topic {
   }
 
   // State of contract
+  // 0 => Open, 1 => Arbitrator Voting, 2 => Jury Voting, 3 => Resolved / closed
   enum Phase { Open, Verification, Jury, Resolved }
-  Phase public contractPhase;
+  Phase public contractPhase = Phase.Open;
 
   // FIXME: Ignore linter warning about visibility modifier being ignored. 
   // It is required for successful compilation
@@ -53,7 +58,6 @@ contract Topic {
         creatorBond = _bondValue;
         expiryDate = _expiryDate;
         arbitrators = _arbitrators;
-        jury = [address(0), address(0), address(0), address(0), address(0)];
 
         nonce = 23; // FIXME: Random number for the nonce
 
@@ -62,8 +66,9 @@ contract Topic {
           pendingVotes[i] = voteStruct(0, address(0));
         }
 
-        // set state to Open
-        contractPhase = Phase.Open;
+        for (uint j = 0; j < _arbitrators.length; j++) {
+          arbitratorAssigned[_arbitrators[j]] = true;
+        }
     }
 
      
@@ -136,11 +141,11 @@ contract Topic {
 
     for (uint i = 0; i < allArbitrators.length; i++) {
       address payable arbitrator = allArbitrators[i];
-      if (isASelectedArbitrator(arbitrator)) {
+      if (arbitratorAssigned[arbitrator]) {
         continue;
       }
-      (,uint trustworthiness,) = marketInstance.arbitrators(arbitrator); // Access trustworthiness score of struct
-      uint chance = trustworthiness / uint(10);
+      (,uint8 trustworthiness,) = marketInstance.arbitrators(arbitrator); // Access trustworthiness score of struct
+      uint8 chance = trustworthiness / uint8(10);
       for (uint j = 0; j < chance; j++) {
         ballot[ballotPointer] = arbitrator;
         ballotPointer++;
@@ -149,34 +154,19 @@ contract Topic {
 
     // Select random jury from the ballot
     // Rechoose if address is already selected in the jury
+    address payable[] memory juryMemory = new address payable[](5);
     uint juryPointer = 0;
     while (juryPointer < 5) {
       uint next = uint(keccak256(abi.encodePacked(block.timestamp, msg.sender, nonce))) % ballotPointer;
       nonce++;
       address payable potential = ballot[next];
-      if (!hasBeenSelectedAsJury(potential, juryPointer)) {
-        jury[juryPointer] = potential;
+      if (!juryAssigned[potential]) {
+        juryAssigned[potential] = true;
+        juryMemory[juryPointer] = potential;
         juryPointer++;
       }
     }
-  }
-
-  function hasBeenSelectedAsJury(address payable potential, uint pointer) internal view returns (bool) {
-    for (uint k = 0; k < pointer; k++) {
-      if (jury[k] == potential) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  function isASelectedArbitrator(address payable arbitrator) internal view returns (bool) {
-    for (uint i = 0; i < arbitrators.length; i++) {
-      if (arbitrator == arbitrators[i]) {
-        return true;
-      }
-    }
-    return false;
+    jury = juryMemory;
   }
 
   // ===================================================
@@ -213,7 +203,7 @@ contract Topic {
     return arbitrators;
   }
 
-  function getJury() public view returns (address payable[5] memory) {
+  function getJury() public view returns (address payable[] memory) {
     return jury;
   }
 }
