@@ -11,8 +11,8 @@ contract PredictionMarket {
     }
 
     struct Arbitrator {
-        string displayName;
-        uint trustworthiness;
+        bytes32 displayName;
+        uint8 trustworthiness;
         bool isValid;
     }
 
@@ -37,7 +37,7 @@ contract PredictionMarket {
         traders[id] = Trader(100, 100, true);
     }
 
-    function createArbitrator(string memory _displayName) public {
+    function createArbitrator(bytes32 _displayName) public {
         address id = msg.sender;
 
         // require that address has not been assigned to a arbitrator
@@ -51,6 +51,18 @@ contract PredictionMarket {
 
     function getAllArbitrators() public view returns (address payable[] memory) {
         return arbitratorAddresses;
+    }
+
+    function getAllArbitratorNames() public view returns (bytes32[] memory) {
+        uint len = arbitratorAddresses.length;
+        bytes32[] memory names = new bytes32[](len);
+
+        for (uint i = 0; i < len; i++) {
+            address arbitratorAddress = arbitratorAddresses[i];
+            Arbitrator memory arbitrator = arbitrators[arbitratorAddress];
+            names[i] = arbitrator.displayName;
+        }
+        return names;
     }
 
 
