@@ -60,8 +60,9 @@ contract("Topic", accounts => {
     it("should be able to execute resolve with tie and select jury correctly", async () => {
         const predictionMarketInstance = await PredictionMarket.deployed();
         // Make everyone an arbitrator
+        const testName = stringUtils.stringToBytes("test");
         for (let i = 0; i < 10; i++) {
-            await predictionMarketInstance.createArbitrator("test", { from: accounts[i] });
+            await predictionMarketInstance.createArbitrator(testName, { from: accounts[i] });
         }
 
         // Make account[1] a trader
@@ -85,11 +86,10 @@ contract("Topic", accounts => {
         // Call resolve with tie
         await newTopicInstance.resolveWithTie();
 
-        // const contractPhase = await topicInstance.contractPhase();
-        // assert.strictEqual(contractPhase.toString(), "2", "state is Jury");
+        const contractPhase = await topicInstance.contractPhase();
+        assert.strictEqual(contractPhase.toString(), "2", "state is Jury");
 
         const jury = await topicInstance.getJury();
-        console.log(jury);
         selectedArbitrators.forEach(arbitrator => {
             assert.isFalse(jury.includes(arbitrator), "selected arbitrator is not in jury");
         });
