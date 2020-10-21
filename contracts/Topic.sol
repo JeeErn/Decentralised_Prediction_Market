@@ -32,6 +32,10 @@ contract Topic {
   // Last Traded Prices
   uint[4] lastTradedPrices;
 
+  // weighted votes
+  uint[4] winScores;
+  uint[4] loseScores;
+
   // Successful trades
   trade[] confirmedTrades;
   struct trade {
@@ -71,8 +75,19 @@ contract Topic {
         }
     }
 
+// TODO: TEST CASES
+  function updateWeightedVotes(address predictionMarketAddress) private {
+    PredictionMarket pm = PredictionMarket(predictionMarketAddress);
+    trade memory lastTrade = confirmedTrades[confirmedTrades.length - 1];
+    for(uint i=0; i<4; i++){
+      address voterAddress = lastTrade.shareOwners[i]; 
+      uint[2] memory winLose = pm.getVotersReputation(voterAddress); 
+      winScores[i] = winScores[i] + winLose[0];
+      loseScores[i] = loseScores[i] + winLose[1];
+    }
+  }
      
-  function voteOption(uint amount, uint option) public payable returns(bool){
+  function voteOption(uint amount, uint option, address predictionMarketAddress) public payable returns(bool){
     // Reject the vote if it is lower than the last available vote
     require(pendingVotes[option].price <  amount);
 
@@ -95,7 +110,7 @@ contract Topic {
     // If vote can go through
     if(balance <= amount){
       
-      // 1) Confirm the trade
+      // 1) Confirm the trade by putting it into trade confirmed
       tempTrade[option] = msg.sender;
       trade memory tradeConfirmed = trade(tempTrade);
       confirmedTrades.push(tradeConfirmed);
@@ -113,7 +128,11 @@ contract Topic {
 
       // 3) Send the remaining money back to the sender
       msg.sender.transfer(amount - balance);
-      // 4) Reset the pending votes instance
+
+      // 4) Update the weighted votes according to the last trade
+      updateWeightedVotes(predictionMarketAddress);
+
+      // 5) Reset the pending votes instance
       for(uint i =0; i< 4; i++){
         pendingVotes[i].price =0; 
       }
@@ -187,6 +206,26 @@ contract Topic {
     bytes32[] memory bytesArray = new bytes32[](len);
     for (uint i = 0; i < len; i++) {
       bytesArray[i] = bytes32(lastTradedPrices[i]);
+    }
+    return bytesArray;
+  }
+
+// Function will return an array of 8 elements in total: [win0, lose0, win1, lose1...]
+  function getLoseScores() view public returns(bytes32[] memory){
+    uint len = loseScores.length;
+    bytes32[] memory bytesArray = new bytes32[](len);
+    for (uint i = 0; i < len; i++) {
+      bytesArray[i] = bytes32(loseScores[i]);
+    }
+    return bytesArray;
+  }
+
+  // Function will return an array of 8 elements in total: [win0, lose0, win1, lose1...]
+  function getWinScores() view public returns(bytes32[] memory){
+    uint len = loseScores.length;
+    bytes32[] memory bytesArray = new bytes32[](len);
+    for (uint i = 0; i < len; i++) {
+      bytesArray[i] = bytes32(winScores[i]);
     }
     return bytesArray;
   }

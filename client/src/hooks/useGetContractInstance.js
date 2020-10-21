@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 
 function useGetContractInstance({ web3, contract }) {
-  const [instances, setInstances] = useState(null);
-
+  const [predictionMarketInstance, setPredictionMarketInstance] = useState(null);
+  const [predictionMarketAddress, setPredictionMarketAddress] = useState(null);
   useEffect(() => {
     if (web3) {
       web3.eth.net.getId().then((netId) => {
@@ -12,11 +12,12 @@ function useGetContractInstance({ web3, contract }) {
           deployedNetwork && deployedNetwork.address,
         );
 
-        setInstances(inst);
+        setPredictionMarketInstance(inst);
+        setPredictionMarketAddress(deployedNetwork.address);
       });
     }
   }, [web3, contract]);
-  return instances;
+  return { predictionMarketInstance, predictionMarketAddress };
 }
 
 export default useGetContractInstance;
