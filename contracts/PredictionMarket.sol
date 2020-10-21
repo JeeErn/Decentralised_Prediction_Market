@@ -65,6 +65,20 @@ contract PredictionMarket {
         return names;
     }
 
+    // AUTHENTICATION
+    function checkIdentity() public view returns (bytes32) {
+        // Check if user is a trader
+        if(traders[msg.sender].isValid){
+            return bytes32("Trader");
+        }
+        // Check if user is an arbitrator
+        if(arbitrators[msg.sender].isValid){
+            return bytes32("Arbitrator");
+        }
+        // If all the above fails, return invalid
+        return bytes32("Invalid");
+    }
+
 
     // Topics
     function createTopic(

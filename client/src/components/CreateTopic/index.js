@@ -46,7 +46,6 @@ function CreateTopic({ predictionMarketInstance, accountAddress }) {
 
   const arbitrators = useGetArbitrators({ predictionMarketInstance });
 
-  console.log(arbitrators);
   const handleCreateTopic = useCallback(() => {
     const options32Bytes = options.map((option) => Web3.utils.fromAscii(option));
     predictionMarketInstance.methods
