@@ -26,7 +26,6 @@ function App() {
   const topicAddressesList = useGetTopicAddressesList({ predictionMarketInstance });
   const topicInstances = useGetTopicInstances({ web3, contract: TopicContract, contractAddresses: topicAddressesList });
 
-  console.log(accounts);
   return (
     <>
       {(userType === 'Invalid') && <Login predictionMarketInstance={predictionMarketInstance} accountAddress={accounts?.[0]} />}

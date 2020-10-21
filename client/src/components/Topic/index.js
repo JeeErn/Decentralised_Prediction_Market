@@ -49,7 +49,7 @@ function Topic({
           </Grid>
 
           <Grid container item xs={12} spacing={10}>
-            <TopicProperty title="Weighted Score" options={defaultOptions} propKey="weightedScore" />
+            <TopicProperty title="Weighted Score" options={options} propKey="weightedScore" />
             <TopicProperty title="Last Traded Price" options={options} propKey="lastTradedPrices" />
             <TopicProperty title="Pending Price" options={options} propKey="pendingVotePrice" />
           </Grid>

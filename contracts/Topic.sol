@@ -33,10 +33,8 @@ contract Topic {
   uint[4] lastTradedPrices;
 
   // weighted votes
-  weightedVotesStruct[4] weightedVotes;
-  struct weightedVotesStruct {
-    uint[2] winLoseScore;
-  }
+  uint[4] winScores;
+  uint[4] loseScores;
 
   // Successful trades
   trade[] confirmedTrades;
@@ -80,14 +78,12 @@ contract Topic {
 // TODO: TEST CASES
   function updateWeightedVotes(address predictionMarketAddress) private {
     PredictionMarket pm = PredictionMarket(predictionMarketAddress);
-    // 1) Get all the reputation scores of the addresses in the pending votes
+    trade memory lastTrade = confirmedTrades[confirmedTrades.length - 1];
     for(uint i=0; i<4; i++){
-      address voterAddress = pendingVotes[i].voter; 
-      //2) get reputation score and update the respective weigthed score
+      address voterAddress = lastTrade.shareOwners[i]; 
       uint[2] memory winLose = pm.getVotersReputation(voterAddress); 
-      winLose[0] = weightedVotes[i].winLoseScore[0] + winLose[0]; 
-      winLose[1] = weightedVotes[i].winLoseScore[1] + winLose[1]; 
-      weightedVotes[i] = weightedVotesStruct(winLose); 
+      winScores[i] = winScores[i] + winLose[0];
+      loseScores[i] = loseScores[i] + winLose[1];
     }
   }
      
@@ -114,7 +110,7 @@ contract Topic {
     // If vote can go through
     if(balance <= amount){
       
-      // 1) Confirm the trade
+      // 1) Confirm the trade by putting it into trade confirmed
       tempTrade[option] = msg.sender;
       trade memory tradeConfirmed = trade(tempTrade);
       confirmedTrades.push(tradeConfirmed);
@@ -133,10 +129,10 @@ contract Topic {
       // 3) Send the remaining money back to the sender
       msg.sender.transfer(amount - balance);
 
-      // Update the weighted votes according to the current pending votes
+      // 4) Update the weighted votes according to the last trade
       updateWeightedVotes(predictionMarketAddress);
 
-      // 4) Reset the pending votes instance
+      // 5) Reset the pending votes instance
       for(uint i =0; i< 4; i++){
         pendingVotes[i].price =0; 
       }
@@ -215,12 +211,21 @@ contract Topic {
   }
 
 // Function will return an array of 8 elements in total: [win0, lose0, win1, lose1...]
-  function getWeightedVotes() view public returns(bytes32[] memory){
-    uint len = weightedVotes.length;
-    bytes32[] memory bytesArray = new bytes32[](len * 2);
-    for (uint i = 0; i < len; i+2) {
-      bytesArray[i] = bytes32(weightedVotes[i].winLoseScore[0]);
-      bytesArray[i+1] = bytes32(weightedVotes[i].winLoseScore[1]);
+  function getLoseScores() view public returns(bytes32[] memory){
+    uint len = loseScores.length;
+    bytes32[] memory bytesArray = new bytes32[](len);
+    for (uint i = 0; i < len; i++) {
+      bytesArray[i] = bytes32(loseScores[i]);
+    }
+    return bytesArray;
+  }
+
+  // Function will return an array of 8 elements in total: [win0, lose0, win1, lose1...]
+  function getWinScores() view public returns(bytes32[] memory){
+    uint len = loseScores.length;
+    bytes32[] memory bytesArray = new bytes32[](len);
+    for (uint i = 0; i < len; i++) {
+      bytesArray[i] = bytes32(winScores[i]);
     }
     return bytesArray;
   }

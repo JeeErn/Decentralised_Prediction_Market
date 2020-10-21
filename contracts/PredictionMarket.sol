@@ -67,7 +67,7 @@ contract PredictionMarket {
 
     //VOTER'S REPUTATION 
     function getVotersReputation(address id) public view returns (uint[2] memory){
-        return [traders[id].winScore, (traders[id].winScore + traders[id].loseScore)];
+        return [traders[id].winScore, traders[id].loseScore];
     }
 
     // AUTHENTICATION
