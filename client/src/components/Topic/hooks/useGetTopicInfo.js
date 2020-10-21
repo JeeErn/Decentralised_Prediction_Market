@@ -47,6 +47,13 @@ function useGetTopicInfo({ topicInstance, accountAddress, web3 }) {
           tempPrices = prices.map((price) => web3.utils.fromWei(parseInt(price, 16).toString(), 'ether'));
           setLastTradedPrices(tempPrices);
         });
+
+      // Get Weighted Votes
+      topicInstance.methods.getWeightedVotes()
+        .call({ from: accountAddress })
+        .then((weightedVotes) => {
+          console.log(weightedVotes);
+        });
     }
   }, [topicInstance, accountAddress, web3]);
 

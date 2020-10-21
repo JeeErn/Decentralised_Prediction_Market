@@ -32,6 +32,12 @@ contract Topic {
   // Last Traded Prices
   uint[4] lastTradedPrices;
 
+  // weighted votes
+  weightedVotesStruct[4] weightedVotes;
+  struct weightedVotesStruct {
+    uint[2] winLoseScore;
+  }
+
   // Successful trades
   trade[] confirmedTrades;
   struct trade {
@@ -71,8 +77,21 @@ contract Topic {
         }
     }
 
+// TODO: TEST CASES
+  function updateWeightedVotes(address predictionMarketAddress) private {
+    PredictionMarket pm = PredictionMarket(predictionMarketAddress);
+    // 1) Get all the reputation scores of the addresses in the pending votes
+    for(uint i=0; i<4; i++){
+      address voterAddress = pendingVotes[i].voter; 
+      //2) get reputation score and update the respective weigthed score
+      uint[2] memory winLose = pm.getVotersReputation(voterAddress); 
+      winLose[0] = weightedVotes[i].winLoseScore[0] + winLose[0]; 
+      winLose[1] = weightedVotes[i].winLoseScore[1] + winLose[1]; 
+      weightedVotes[i] = weightedVotesStruct(winLose); 
+    }
+  }
      
-  function voteOption(uint amount, uint option) public payable returns(bool){
+  function voteOption(uint amount, uint option, address predictionMarketAddress) public payable returns(bool){
     // Reject the vote if it is lower than the last available vote
     require(pendingVotes[option].price <  amount);
 
@@ -113,6 +132,10 @@ contract Topic {
 
       // 3) Send the remaining money back to the sender
       msg.sender.transfer(amount - balance);
+
+      // Update the weighted votes according to the current pending votes
+      updateWeightedVotes(predictionMarketAddress);
+
       // 4) Reset the pending votes instance
       for(uint i =0; i< 4; i++){
         pendingVotes[i].price =0; 
@@ -187,6 +210,17 @@ contract Topic {
     bytes32[] memory bytesArray = new bytes32[](len);
     for (uint i = 0; i < len; i++) {
       bytesArray[i] = bytes32(lastTradedPrices[i]);
+    }
+    return bytesArray;
+  }
+
+// Function will return an array of 8 elements in total: [win0, lose0, win1, lose1...]
+  function getWeightedVotes() view public returns(bytes32[] memory){
+    uint len = weightedVotes.length;
+    bytes32[] memory bytesArray = new bytes32[](len * 2);
+    for (uint i = 0; i < len; i+2) {
+      bytesArray[i] = bytes32(weightedVotes[i].winLoseScore[0]);
+      bytesArray[i+1] = bytes32(weightedVotes[i].winLoseScore[1]);
     }
     return bytesArray;
   }

@@ -17,7 +17,7 @@ const useStyles = makeStyles(() => ({
 }));
 
 function TopicVotingBox({
-  options, topicInstance, web3, accountAddress,
+  options, topicInstance, web3, accountAddress, predictionMarketAddress,
 }) {
   const classes = useStyles();
   const [sliderValue, setSliderValue] = useState(0.5);
@@ -26,7 +26,7 @@ function TopicVotingBox({
     () => {
       // // Make the bet
       topicInstance.methods
-        .voteOption(web3.utils.toWei(sliderValue.toString()), selectedOption.toString())
+        .voteOption(web3.utils.toWei(sliderValue.toString()), selectedOption.toString(), predictionMarketAddress)
         .send({ from: accountAddress, value: web3.utils.toWei(sliderValue.toString()) })
         .then(() => {
           alert('Congratuations! You have just made a bet!');
