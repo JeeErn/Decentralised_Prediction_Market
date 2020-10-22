@@ -82,8 +82,8 @@ contract Topic {
     for(uint i=0; i<4; i++){
       address voterAddress = lastTrade.shareOwners[i]; 
       uint[2] memory winLose = pm.getVotersReputation(voterAddress); 
-      winScores[i] = winScores[i] + winLose[0];
-      loseScores[i] = loseScores[i] + winLose[1];
+      winScores[i] = winScores[i] + (winLose[0] * lastTradedPrices[i]);
+      loseScores[i] = loseScores[i] + (winLose[1] * (1 - lastTradedPrices[i]));
     }
   }
      

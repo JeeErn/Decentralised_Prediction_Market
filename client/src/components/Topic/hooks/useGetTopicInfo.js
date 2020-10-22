@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable no-underscore-dangle */
 import { useState, useEffect, useCallback } from 'react';
 
@@ -15,7 +16,7 @@ const parseWeightedScores = (winScores, loseScores) => {
       total += score;
     }
   });
-  weightedScores = weightedScores.map((score) => (!isNaN(score) ? (score / total) : 0));
+  weightedScores = weightedScores.map((score) => (!isNaN(score) ? Math.round((score / total) * 100) : 0));
 
   return weightedScores;
 };
