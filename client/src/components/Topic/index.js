@@ -30,12 +30,6 @@ function Topic({
   const classes = useStyles();
   const { name, balance, options } = useGetTopicInfo({ topicInstance, accountAddress, web3 });
 
-  const defaultOptions = [
-    { optionName: 'yes', lastTradedPrice: 0.2, weightedScore: 50 },
-    { optionName: 'no', lastTradedPrice: 0.3, weightedScore: 20 },
-    { optionName: 'maybe', lastTradedPrice: 0.5, weightedScore: 30 },
-  ];
-
   return (
     <Paper className={classes.root}>
       <Grid container spacing={2}>

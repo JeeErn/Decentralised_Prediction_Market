@@ -82,12 +82,14 @@ contract Topic {
     for(uint i=0; i<4; i++){
       address voterAddress = lastTrade.shareOwners[i]; 
       uint[2] memory winLose = pm.getVotersReputation(voterAddress); 
-      winScores[i] = winScores[i] + winLose[0];
-      loseScores[i] = loseScores[i] + winLose[1];
+      winScores[i] = winScores[i] + (winLose[0] * lastTradedPrices[i]);
+      loseScores[i] = loseScores[i] + (winLose[1] * (1 - lastTradedPrices[i]));
     }
   }
      
-  function voteOption(uint amount, uint option, address predictionMarketAddress) public payable returns(bool){
+  function voteOption(uint option, address predictionMarketAddress) public payable returns(bool){
+    uint amount = msg.value;
+    require(msg.value < 1 ether);
     // Reject the vote if it is lower than the last available vote
     require(pendingVotes[option].price <  amount);
 

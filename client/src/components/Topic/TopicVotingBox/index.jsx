@@ -26,7 +26,7 @@ function TopicVotingBox({
     () => {
       // // Make the bet
       topicInstance.methods
-        .voteOption(web3.utils.toWei(sliderValue.toString()), selectedOption.toString(), predictionMarketAddress)
+        .voteOption(selectedOption.toString(), predictionMarketAddress)
         .send({ from: accountAddress, value: web3.utils.toWei(sliderValue.toString()) })
         .then(() => {
           alert('Congratuations! You have just made a bet!');
@@ -34,7 +34,7 @@ function TopicVotingBox({
         })
         .catch((err) => { if (err.code === -32603) { alert('Your betting price should be more than the pending price!'); } });
     },
-    [topicInstance, sliderValue, web3, accountAddress, selectedOption],
+    [topicInstance, sliderValue, web3, accountAddress, selectedOption, predictionMarketAddress],
   );
   return (
     <Paper>
