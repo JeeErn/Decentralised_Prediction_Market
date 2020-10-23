@@ -87,7 +87,9 @@ contract Topic {
     }
   }
      
-  function voteOption(uint amount, uint option, address predictionMarketAddress) public payable returns(bool){
+  function voteOption(uint option, address predictionMarketAddress) public payable returns(bool){
+    uint amount = msg.value;
+    require(msg.value < 1 ether);
     // Reject the vote if it is lower than the last available vote
     require(pendingVotes[option].price <  amount);
 
