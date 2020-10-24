@@ -34,7 +34,7 @@ function App() {
 
       {(userType === 'Trader') && predictionMarketInstance && <CreateTopic predictionMarketInstance={predictionMarketInstance} accountAddress={accounts?.[0]} />}
       {
-        (userType !== 'Invalid') && topicInstances && topicInstances.map((topicInstance) => <Topic web3={web3} topicInstance={topicInstance} accountAddress={accounts?.[0]} predictionMarketAddress={predictionMarketAddress} />)
+        (userType !== 'Invalid') && topicInstances && topicInstances.map((topicInstance) => <Topic web3={web3} topicInstance={topicInstance} accountAddress={accounts?.[0]} />)
       }
     </>
   );

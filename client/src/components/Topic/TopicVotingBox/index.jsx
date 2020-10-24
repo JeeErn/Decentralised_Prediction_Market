@@ -18,7 +18,7 @@ const useStyles = makeStyles(() => ({
 }));
 
 function TopicVotingBox({
-  options, topicInstance, web3, accountAddress, predictionMarketAddress,
+  options, topicInstance, web3, accountAddress,
 }) {
   const classes = useStyles();
   const [sliderValue, setSliderValue] = useState(0.5);
@@ -28,7 +28,7 @@ function TopicVotingBox({
     () => {
       // // Make the bet
       topicInstance.methods
-        .voteOption(selectedOption.toString(), predictionMarketAddress)
+        .voteOption(selectedOption.toString())
         .send({ from: accountAddress, value: web3.utils.toWei(sliderValue.toString()) })
         .then(() => {
           alert('Congratuations! You have just made a bet!');
@@ -36,7 +36,7 @@ function TopicVotingBox({
         })
         .catch((err) => { if (err.code === -32603) { alert('Your betting price should be more than the pending price!'); } });
     },
-    [topicInstance, sliderValue, web3, accountAddress, selectedOption, predictionMarketAddress],
+    [topicInstance, sliderValue, web3, accountAddress, selectedOption],
   );
   return (
     <Paper>

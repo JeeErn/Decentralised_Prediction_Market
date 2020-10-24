@@ -25,7 +25,7 @@ const useStyles = makeStyles(() => ({
 
 // View component for topic
 function Topic({
-  web3, topicInstance, accountAddress, predictionMarketAddress,
+  web3, topicInstance, accountAddress,
 }) {
   const classes = useStyles();
   const { name, balance, options } = useGetTopicInfo({ topicInstance, accountAddress, web3 });
@@ -60,7 +60,7 @@ function Topic({
 
         </Grid>
         <Grid item xs={3}>
-          {options && <TopicVotingBox options={options} web3={web3} topicInstance={topicInstance} accountAddress={accountAddress} predictionMarketAddress={predictionMarketAddress} />}
+          {options && <TopicVotingBox options={options} web3={web3} topicInstance={topicInstance} accountAddress={accountAddress} />}
         </Grid>
 
       </Grid>
