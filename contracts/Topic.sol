@@ -87,7 +87,7 @@ contract Topic {
     }
   }
      
-  function voteOption(uint option, address predictionMarketAddress) public payable returns(bool){
+  function voteOption(uint option) public payable returns(bool){
     require(!arbitratorAssigned[msg.sender]);
 
     uint amount = msg.value;
@@ -134,7 +134,7 @@ contract Topic {
       msg.sender.transfer(amount - balance);
 
       // 4) Update the weighted votes according to the last trade
-      updateWeightedVotes(predictionMarketAddress);
+      updateWeightedVotes(parentContract);
 
       // 5) Reset the pending votes instance
       for(uint i =0; i< 4; i++){
