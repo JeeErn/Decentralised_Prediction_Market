@@ -6,7 +6,7 @@ import {
   makeStyles, Paper, Grid, Typography, Button, Slider,
 } from '@material-ui/core';
 import TopicOptions from './TopicOptions.jsx';
-import useShouldRenderVoteButton from './hooks/useRenderVoteButton';
+import useShouldRenderVoteButton from '../hooks/useRenderVoteButton';
 
 const useStyles = makeStyles(() => ({
   root: {
