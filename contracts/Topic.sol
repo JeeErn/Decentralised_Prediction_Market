@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.21 <=0.7.0;
 import "./PredictionMarket.sol";
+// import "github.com/OpenZeppelin/zeppelin-solidity/contracts/math/SafeMath.sol";
 
 contract Topic {
   // Public attirbutes
@@ -37,6 +38,15 @@ contract Topic {
   struct trade {
     address payable[4] shareOwners;
   }
+
+  struct ArbitratorVote {
+        bool hasVoted;
+        bytes32 votedOption;
+  }
+
+  mapping (address => ArbitratorVote) public arbVotes;
+  mapping (bytes32 => address[]) public arbitratorsVotes;
+  mapping (bytes32 => uint) public countofArbVotes;
 
   // State of contract
   // 0 => Open, 1 => Arbitrator Voting, 2 => Jury Voting, 3 => Resolved / closed
@@ -128,6 +138,80 @@ contract Topic {
     }
   }
 
+  function addArbitratorVote(bytes32 _option) public {
+    require(arbVotes[msg.sender].hasVoted == false); //no double voting
+    require(checkIfSelectedArbitrator());
+    arbVotes[msg.sender] = ArbitratorVote(true, _option);
+    arbitratorsVotes[_option].push(msg.sender);
+    countofArbVotes[_option]++;
+  }
+
+  function checkIfSelectedArbitrator() public view returns (bool) {
+    for (uint i = 0; i < arbitrators.length; i++){
+      if(arbitrators[i] == msg.sender) return true;
+    }
+    return false;
+  }
+
+  /*
+  resolve() will be called after all selected arbitrators have voted for the truth
+  TODO: figure out how to make last arbitrator call resolve function and are we going to charge gas fees to last arbitrator? 
+  */
+  function resolve() public {
+    // if(contractPhase == Phase.Jury){ 
+    //   resolveWithTie();
+    // }
+    
+    (bool hasTie, uint winIndex) = getArbitratorVerdict();
+    if (!hasTie) {
+      resolveWithoutTie(winIndex);
+    } else {
+      //resolveWithTie();
+      //get jury verdict, ie. count their votes --> TODO: write function for this, similar to getArbitratorVerdict()
+      //resolveWithoutTie(); 
+    }
+  }
+
+  function getArbitratorVerdict() public view returns (bool,uint){
+    uint largest = 0;
+    uint winningOption;
+    bool hasTie = false;
+    for (uint i =0; i < options.length; i++){
+      uint temp = countofArbVotes[options[i]];
+      if (temp > largest){
+        largest = temp;
+        hasTie = false;
+        winningOption = i;
+      } else if (temp == largest){
+        hasTie = true;
+      }
+    }
+    return (hasTie, winningOption);
+  }
+
+  function resolveWithoutTie(uint winIndex) public payable returns(uint) {
+    PredictionMarket marketInstance = PredictionMarket(parentContract);
+    uint temp = 0;
+    for(uint i = 0; i<confirmedTrades.length; i++){
+      for(uint j = 0; j<confirmedTrades[i].shareOwners.length; j++){
+        if (confirmedTrades[i].shareOwners[j] != address(uint160(0x0))){
+          temp = temp + 10;
+          if(j == winIndex){
+            // marketInstance.updateWinScore(address(uint160(confirmedTrades[i].shareOwners[j])));
+          payoutToWinners(confirmedTrades[i].shareOwners[j]); 
+          } else {
+            // marketInstance.updateLoseScore(confirmedTrades[i].shareOwners[j]);
+          }
+        }
+      }
+    }
+    return temp;
+  }
+
+  function payoutToWinners(address payable winner) public payable {
+    winner.transfer(0.98 ether);
+  }
+ 
   function resolveWithTie() public {
     contractPhase = Phase.Jury;
     selectJury();

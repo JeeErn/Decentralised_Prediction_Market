@@ -298,4 +298,25 @@ contract("PredictionMarket", accounts => {
             assert.strictEqual(allTopicAddresses.length, 2, "only previously created topic still exist");
         };
     });
+
+    context("with resolution", async () => {
+        it("should be able to increase winner winScore", async () => {
+            const winScore = await predictionMarketInstance.getWinScore(accounts[0]);
+            await predictionMarketInstance.updateWinScore(accounts[0]);
+            const newWinScore = await predictionMarketInstance.getWinScore(accounts[0]);
+            console.log(Number(winScore));
+            console.log(Number(newWinScore));
+            assert.strictEqual(Number(newWinScore), Number(winScore)+1);
+        });
+
+        it("should be able to increase loser loseScore", async () => {
+            const loser = await predictionMarketInstance.traders(accounts[1]);
+            const loseScore = await predictionMarketInstance.getWinScore(accounts[1]);
+            await predictionMarketInstance.updateLoseScore(accounts[1]);
+            const newLoseScore = await predictionMarketInstance.getLoseScore(accounts[1]);
+            console.log(Number(loseScore));
+            console.log(Number(newLoseScore));
+            assert.strictEqual(Number(newLoseScore), Number(loseScore)+1);
+        });
+    });
 })

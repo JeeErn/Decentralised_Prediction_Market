@@ -120,6 +120,24 @@ contract PredictionMarket {
         return true;
     }
 
+    function updateWinScore(address winnerAddress) public {
+        traders[winnerAddress].winScore += 1;
+    }
+
+    function getWinScore(address winnerAddress) public view returns (uint){
+        Trader storage winner = traders[winnerAddress];
+        return winner.winScore;
+    }
+
+    function updateLoseScore(address loserAddress) public {
+        traders[loserAddress].loseScore += 1;
+    }
+
+    function getLoseScore(address loserAddress) public view returns (uint){
+        Trader storage loser = traders[loserAddress];
+        return loser.loseScore;
+    }
+
 
     // ===============================================================
     // For testing purposes

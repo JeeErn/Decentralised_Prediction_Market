@@ -1,3 +1,4 @@
+const { resolve4 } = require("dns");
 const stringUtils = require("./utils/stringUtil.js");
 const Topic = artifacts.require("./Topic.sol");
 const PredictionMarket = artifacts.require("./PredictionMarket.sol");
@@ -6,8 +7,12 @@ const zeroAddress = "0x0000000000000000000000000000000000000000";
 
 contract("Topic", accounts => {
     let topicInstance = null; 
+    let resolveTopicInstance = null;
     before( async () => {
-        topicInstance = await Topic.new(accounts[0], "Test", "", [], 0, 0, [accounts[9]], "0xc85E1Ba8F9D7cfdf27ff7604A8802FD589Ac7149");
+        const options = stringUtils.stringToBytes(["option 1", "option 2", "option 3", "option 4"]);
+        topicInstance = await Topic.new(accounts[0], "Test", "", [], 0, 0, [accounts[9],accounts[8]], "0xc85E1Ba8F9D7cfdf27ff7604A8802FD589Ac7149");
+        resolveTopicInstance = await Topic.new(accounts[0], "TestResolve", "My bets will make me a billionaire", options, 0, 0, [accounts[9],accounts[8],accounts[7]],"0xc85E1Ba8F9D7cfdf27ff7604A8802FD589Ac7149");
+        payoutTopicInstance = await Topic.new(accounts[0], "TestPayOut", "My bets will make me a billionaire", options, 0, 0, [accounts[9],accounts[8],accounts[7]],"0xc85E1Ba8F9D7cfdf27ff7604A8802FD589Ac7149");
     })
 
     it("should be created with the correct initial values", async () => {
@@ -54,8 +59,105 @@ contract("Topic", accounts => {
 
         const pendingVoteAft2 = await topicInstance.getPendingVotePrice(1);
         assert.strictEqual(pendingVoteAft2.toString(), web3.utils.toWei("0"), "Pending vote for option 2 should be reset");
+        console.log(topicInstance.confirmedTrades);
 
     });
+
+    context("with the addArbitratorVote and getArbitratorVerdict", async () => {
+        const options = stringUtils.stringToBytes(["option 1", "option 2", "option 3", "option 4"]);
+        it("should be able to add arbitrator's vote", async () => {
+            await resolveTopicInstance.addArbitratorVote(options[0], {from: accounts[9]});
+            await resolveTopicInstance.addArbitratorVote(options[3], {from: accounts[8]});
+            const arbitratorVoteStatus = await resolveTopicInstance.arbVotes(accounts[9]);
+            const numVotesForOptionZero = await resolveTopicInstance.countofArbVotes(options[0]);
+            const arbVoted = await resolveTopicInstance.arbitratorsVotes(options[0],0);
+            console.log(arbitratorVoteStatus);
+            console.log(Number(numVotesForOptionZero));
+            assert.strictEqual(accounts[9],arbVoted);
+            //TODO: assert.equal(result)
+        });
+
+        it("should be able to allow authorized arbitrator to vote", async () => {
+            const isSelected = await resolveTopicInstance.checkIfSelectedArbitrator({from: accounts[9]});
+            const isNotSelected = await resolveTopicInstance.checkIfSelectedArbitrator({from: accounts[3]});
+            assert.isTrue(isSelected);
+            assert.isFalse(isNotSelected);
+        });
+
+        it("should be able to get True hasTie condition", async () => {
+            const a = await resolveTopicInstance.countofArbVotes(options[0]);
+            const b = await resolveTopicInstance.countofArbVotes(options[3]);
+            const result = await resolveTopicInstance.getArbitratorVerdict({from: accounts[9]});
+            const listOptions = await resolveTopicInstance.getOptions({from: accounts[9]});
+            // console.log(options[0]);
+            // console.log(b);
+            assert.isTrue(result[0]);
+            // console.log(result[1]);
+            // console.log(listOptions);
+        });
+
+        it("should be able to get False hasTie condition and winning option", async () => {
+            await resolveTopicInstance.addArbitratorVote(options[3], {from: accounts[7]});
+            const result = await resolveTopicInstance.getArbitratorVerdict({from: accounts[7]});
+            assert.isFalse(result[0]);
+            assert.strictEqual(3,Number(result[1]));
+        });
+    });
+
+    context("with resolution without tie", async () => {
+        it("should be able to increase winScore and loseScore and payoutToWinners", async () => {
+            // const resolvePredMarkInstance = await PredictionMarket.deployed();
+            const traderZeroVoteZeroSuccess = await resolveTopicInstance.voteOption(web3.utils.toWei("0.1"), 0, {
+                from: accounts[0], 
+                value: web3.utils.toWei("0.1"),
+            });
+    
+            const traderOneVoteTwoSuccess = await resolveTopicInstance.voteOption(web3.utils.toWei("0.99"), 2, {
+                from: accounts[1], 
+                value: web3.utils.toWei("0.99"),
+            });
+            assert.isOk(traderZeroVoteZeroSuccess);
+            assert.isOk(traderOneVoteTwoSuccess);
+            
+            // const topicBalance = await resolveTopicInstance.balanceOf();
+            // const before = await web3.eth.getBalance(accounts[0]);
+
+            // const resolve = await resolveTopicInstance.resolveWithoutTie(0, { from : accounts[0]});
+            
+            // const topicBalanceAfter = await resolveTopicInstance.balanceOf();
+            // const after = await web3.eth.getBalance(accounts[0]);
+            
+            // assert.strictEqual((topicBalance-topicBalanceAfter).toString(),web3.utils.toWei("0.98"));
+            // assert.isTrue(after-before < web3.utils.toWei("0.98"));
+        
+
+        });
+    });
+
+    it("should be able transfer to winner", async () => {
+        // const resolvePredMarkInstance = await PredictionMarket.deployed();
+        const traderZeroVoteZeroSuccess = await payoutTopicInstance.voteOption(web3.utils.toWei("0.1"), 0, {
+            from: accounts[0], 
+            value: web3.utils.toWei("0.1"),
+        });
+
+        const traderOneVoteTwoSuccess = await payoutTopicInstance.voteOption(web3.utils.toWei("0.99"), 2, {
+            from: accounts[1], 
+            value: web3.utils.toWei("0.99"),
+        });
+        assert.isOk(traderZeroVoteZeroSuccess);
+        assert.isOk(traderOneVoteTwoSuccess);
+        
+        const topicBalance = await payoutTopicInstance.balanceOf();
+        const before = await web3.eth.getBalance(accounts[0]);
+        await payoutTopicInstance.payoutToWinners(accounts[0]);
+        const after = await web3.eth.getBalance(accounts[0]);
+        const topicBalanceAfter = await payoutTopicInstance.balanceOf();
+        
+        assert.strictEqual((topicBalance-topicBalanceAfter).toString(),web3.utils.toWei("0.98"));
+        assert.isTrue(after-before < web3.utils.toWei("0.98"));
+    });
+
 
     it("should be able to execute resolve with tie and select jury correctly", async () => {
         const predictionMarketInstance = await PredictionMarket.deployed();
