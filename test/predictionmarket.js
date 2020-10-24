@@ -167,8 +167,7 @@ contract("PredictionMarket", accounts => {
         assert.strictEqual(currentContractBalance.toString(), "1", "creator bond is transferred to contract's balance");
     });
 
-    //TODO: Change back to "it" when the require in the contract is uncommented
-    xit("does not allow user with no trading account to create a new topic", async () => {
+    it("does not allow user with no trading account to create a new topic", async () => {
         // set up variables
         const name = "test";
         const description = "test description foo bar";
