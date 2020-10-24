@@ -104,20 +104,20 @@ contract("Topic", accounts => {
          }
     });
 
-    // TODO: Fix state transitions and change "xit" to "it"
-    xit("should be able to execute resolve with tie and select jury correctly", async () => {
+    it("should be able to execute resolve with tie and select jury correctly", async () => {
         const predictionMarketInstance = await PredictionMarket.deployed();
         // Make everyone an arbitrator
         const testName = stringUtils.stringToBytes("test");
         for (let i = 0; i < 10; i++) {
+            if ((await predictionMarketInstance.arbitrators(accounts[i])).isValid) {
+                continue;
+            }
             await predictionMarketInstance.createArbitrator(testName, { from: accounts[i] });
         }
 
-        // Make account[1] a trader
-        await predictionMarketInstance.createTrader({ from: accounts[1] });
-
         // Create the new topic through the prediction market
         // accounts[8] and accounts[9] are selected arbitrators
+        // accounts[1] is already a trader
         const name = "test";
         const description = "test description foo bar";
         const options = ["option 1"];
@@ -134,10 +134,10 @@ contract("Topic", accounts => {
         // Call resolve with tie
         await newTopicInstance.resolveWithTie();
 
-        const contractPhase = await topicInstance.contractPhase();
+        const contractPhase = await newTopicInstance.contractPhase();
         assert.strictEqual(contractPhase.toString(), "2", "state is Jury");
 
-        const jury = await topicInstance.getJury();
+        const jury = await newTopicInstance.getJury();
         selectedArbitrators.forEach(arbitrator => {
             assert.isFalse(jury.includes(arbitrator), "selected arbitrator is not in jury");
         });
@@ -145,6 +145,54 @@ contract("Topic", accounts => {
         jury.forEach(juror => {
             assert.strictEqual(jury.filter(address => address === juror).length, 1, "address is only selected once per juror");
         });
+    });
+
+    it("should select all remaining arbitrators if 5 or less are available for jury", async () => {
+        const predictionMarketInstance = await PredictionMarket.deployed();
+        // Make everyone an arbitrator
+        const testName = stringUtils.stringToBytes("test");
+        for (let i = 0; i < 10; i++) {
+            if ((await predictionMarketInstance.arbitrators(accounts[i])).isValid) {
+                continue;
+            }
+            await predictionMarketInstance.createArbitrator(testName, { from: accounts[i] });
+        }
+
+        // Create the new topic through the prediction market
+        // accounts[4 - 9] are selected arbitrators. NOTE: Should not have more than 5 selected arbitrators but for the sake of testing more than 5 are included
+        // accounts[1] is already a trader
+        const name = "test";
+        const description = "test description foo bar";
+        const options = ["option 1"];
+        const optionsBytes = stringUtils.stringToBytes(options)
+        const expiryDate = (new Date()).getTime();
+        const selectedArbitrators = [accounts[4], accounts[5], accounts[6], accounts[7], accounts[8], accounts[9]];
+        await predictionMarketInstance.createTopic(name, description, optionsBytes, expiryDate, selectedArbitrators, { from: accounts[1], value: 1.0 });
+        events = await predictionMarketInstance.getPastEvents("TopicCreated");
+        const topicAddress = events[0].returnValues._topicAddress;
+
+        // Retrieve instance of newly created topic
+        let newTopicInstance = await Topic.at(topicAddress);
+
+        // Call resolve with tie
+        await newTopicInstance.resolveWithTie();
+
+        const contractPhase = await newTopicInstance.contractPhase();
+        assert.strictEqual(contractPhase.toString(), "2", "state is Jury");
+
+        const jury = await newTopicInstance.getJury();
+        selectedArbitrators.forEach(arbitrator => {
+            assert.isFalse(jury.includes(arbitrator), "selected arbitrator is not in jury");
+        });
+
+        jury.forEach(juror => {
+            assert.strictEqual(jury.filter(address => address === juror).length, 1, "address is only selected once per juror");
+        });
+
+        assert.isFalse(jury.includes(accounts[1]), "topic creator is not selected in jury");
+
+        // Only accounts[0], accounts[2] and accounts[3] are left available for jury
+        assert.strictEqual(jury.filter(address => address != zeroAddress).length, 3, "all remaining arbitrators are selected as jury");
     });
 
 })
