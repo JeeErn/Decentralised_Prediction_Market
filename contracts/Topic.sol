@@ -97,7 +97,9 @@ contract Topic {
     }
   }
      
-  function voteOption(uint option, address predictionMarketAddress) public payable returns(bool){
+  function voteOption(uint option) public payable returns(bool){
+    require(!arbitratorAssigned[msg.sender]);
+
     uint amount = msg.value;
     require(msg.value < 1 ether);
     // Reject the vote if it is lower than the last available vote
@@ -142,7 +144,7 @@ contract Topic {
       msg.sender.transfer(amount - balance);
 
       // 4) Update the weighted votes according to the last trade
-      updateWeightedVotes(predictionMarketAddress);
+      updateWeightedVotes(parentContract);
 
       // 5) Reset the pending votes instance
       for(uint i =0; i< 4; i++){
@@ -241,12 +243,35 @@ contract Topic {
   function selectJury() public {
     PredictionMarket marketInstance = PredictionMarket(parentContract);
     address payable[] memory allArbitrators = marketInstance.getAllArbitrators();
+
+    // If there are less than 5 remaining arbitrators, select all of them as jury
+    // Topic creator is excluded from selection as well
+    if (allArbitrators.length - arbitrators.length <= 5) {
+      uint diff = allArbitrators.length - arbitrators.length;
+      address payable[] memory remainingArbitrators = new address payable[](diff);
+      uint ptr = 0;
+      for (uint k = 0; k < allArbitrators.length; k++) {
+        address payable arb = allArbitrators[k];
+        if (arbitratorAssigned[arb] || arb == topicCreator) {
+          continue;
+        }
+        juryAssigned[arb] = true;
+        remainingArbitrators[ptr] = arb;
+        ptr++;
+      }
+      // If less than diff arbitrators are selected (i.e. one of the remaining is the topic creator)
+      // last address will be address(0)
+      jury = remainingArbitrators;
+      return;
+    }
+
+    // Else, create ballot where number of chances is proportional to the arbitrator's trustworthiness
     address payable[] memory ballot = new address payable[](allArbitrators.length * 10); // Max length is when all arbitrators are at 100 score
     uint ballotPointer = 0;
 
     for (uint i = 0; i < allArbitrators.length; i++) {
       address payable arbitrator = allArbitrators[i];
-      if (arbitratorAssigned[arbitrator]) {
+      if (arbitratorAssigned[arbitrator] || arbitrator == topicCreator) {
         continue;
       }
       (,uint8 trustworthiness,) = marketInstance.arbitrators(arbitrator); // Access trustworthiness score of struct

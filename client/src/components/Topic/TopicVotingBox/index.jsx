@@ -6,6 +6,7 @@ import {
   makeStyles, Paper, Grid, Typography, Button, Slider,
 } from '@material-ui/core';
 import TopicOptions from './TopicOptions.jsx';
+import useShouldRenderVoteButton from '../hooks/useRenderVoteButton';
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -17,16 +18,17 @@ const useStyles = makeStyles(() => ({
 }));
 
 function TopicVotingBox({
-  options, topicInstance, web3, accountAddress, predictionMarketAddress,
+  options, topicInstance, web3, accountAddress,
 }) {
   const classes = useStyles();
   const [sliderValue, setSliderValue] = useState(0.5);
   const [selectedOption, setSelectedOption] = useState(1);
+  const shouldRenderVoteButton = useShouldRenderVoteButton(topicInstance, accountAddress);
   const handleMakeBet = useCallback(
     () => {
       // // Make the bet
       topicInstance.methods
-        .voteOption(selectedOption.toString(), predictionMarketAddress)
+        .voteOption(selectedOption.toString())
         .send({ from: accountAddress, value: web3.utils.toWei(sliderValue.toString()) })
         .then(() => {
           alert('Congratuations! You have just made a bet!');
@@ -34,7 +36,7 @@ function TopicVotingBox({
         })
         .catch((err) => { if (err.code === -32603) { alert('Your betting price should be more than the pending price!'); } });
     },
-    [topicInstance, sliderValue, web3, accountAddress, selectedOption, predictionMarketAddress],
+    [topicInstance, sliderValue, web3, accountAddress, selectedOption],
   );
   return (
     <Paper>
@@ -63,9 +65,9 @@ function TopicVotingBox({
           <TopicOptions selectedOption={selectedOption} setSelectedOption={setSelectedOption} options={options} />
         </Grid>
         <Grid item container xs={12}>
-          <Button variant="contained" color="primary" onClick={handleMakeBet}>
+          {shouldRenderVoteButton && <Button variant="contained" color="primary" onClick={handleMakeBet}>
             Submit Bet
-          </Button>
+          </Button>}
         </Grid>
       </Grid>
     </Paper>
