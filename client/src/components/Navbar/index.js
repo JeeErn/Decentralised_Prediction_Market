@@ -21,7 +21,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Navbar({ userType }) {
+export default function Navbar({ userType, reputation }) {
   const classes = useStyles();
 
   return (
@@ -30,6 +30,9 @@ export default function Navbar({ userType }) {
         <Toolbar>
           <Typography variant="h6" className={classes.title} align="left">
             {`${userType} account`}
+          </Typography>
+          <Typography variant="h6" className={classes.title} align="left">
+            {`Reputation: ${reputation}`}
           </Typography>
         </Toolbar>
       </AppBar>

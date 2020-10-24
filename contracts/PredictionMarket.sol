@@ -65,6 +65,11 @@ contract PredictionMarket {
         return names;
     }
 
+    //VOTER'S REPUTATION 
+    function getVotersReputation(address id) public view returns (uint[2] memory){
+        return [traders[id].winScore, traders[id].loseScore];
+    }
+
     // AUTHENTICATION
     function checkIdentity() public view returns (bytes32) {
         // Check if user is a trader
@@ -88,8 +93,7 @@ contract PredictionMarket {
         address payable creatorId = msg.sender;
 
         // Creator must have a trader account
-        // TODO: Commented out for testing purposes, uncomment when createTrader is implemented
-        // require(traders[creatorId].isValid);
+        require(traders[creatorId].isValid);
 
         // Must have value above 0 ETH for payment of creation bond
         require(msg.value > 0 ether);

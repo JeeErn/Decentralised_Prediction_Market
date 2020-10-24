@@ -24,15 +24,11 @@ const useStyles = makeStyles(() => ({
 }));
 
 // View component for topic
-function Topic({ web3, topicInstance, accountAddress }) {
+function Topic({
+  web3, topicInstance, accountAddress, predictionMarketAddress,
+}) {
   const classes = useStyles();
   const { name, balance, options } = useGetTopicInfo({ topicInstance, accountAddress, web3 });
-
-  const defaultOptions = [
-    { optionName: 'yes', lastTradedPrice: 0.2, weightedScore: 50 },
-    { optionName: 'no', lastTradedPrice: 0.3, weightedScore: 20 },
-    { optionName: 'maybe', lastTradedPrice: 0.5, weightedScore: 30 },
-  ];
 
   return (
     <Paper className={classes.root}>
@@ -47,7 +43,7 @@ function Topic({ web3, topicInstance, accountAddress }) {
           </Grid>
 
           <Grid container item xs={12} spacing={10}>
-            <TopicProperty title="Weighted Score" options={defaultOptions} propKey="weightedScore" />
+            <TopicProperty title="Weighted Score" options={options} propKey="weightedScore" />
             <TopicProperty title="Last Traded Price" options={options} propKey="lastTradedPrices" />
             <TopicProperty title="Pending Price" options={options} propKey="pendingVotePrice" />
           </Grid>
@@ -64,7 +60,7 @@ function Topic({ web3, topicInstance, accountAddress }) {
 
         </Grid>
         <Grid item xs={3}>
-          {options && <TopicVotingBox options={options} web3={web3} topicInstance={topicInstance} accountAddress={accountAddress} />}
+          {options && <TopicVotingBox options={options} web3={web3} topicInstance={topicInstance} accountAddress={accountAddress} predictionMarketAddress={predictionMarketAddress} />}
         </Grid>
 
       </Grid>

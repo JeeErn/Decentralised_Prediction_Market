@@ -1,4 +1,25 @@
+/* eslint-disable max-len */
+/* eslint-disable no-underscore-dangle */
 import { useState, useEffect, useCallback } from 'react';
+
+const parseWeightedScores = (winScores, loseScores) => {
+  let weightedScores = [];
+
+  winScores.forEach((el, index) => {
+    weightedScores.push(winScores[index] / (loseScores[index] + winScores[index]));
+  });
+
+  // Computing the ratio
+  let total = 0;
+  weightedScores.forEach((score) => {
+    if (!isNaN(score)) {
+      total += score;
+    }
+  });
+  weightedScores = weightedScores.map((score) => (!isNaN(score) ? Math.round((score / total) * 100) : 0));
+
+  return weightedScores;
+};
 
 function useGetTopicInfo({ topicInstance, accountAddress, web3 }) {
   const [name, setName] = useState(null);
@@ -6,6 +27,8 @@ function useGetTopicInfo({ topicInstance, accountAddress, web3 }) {
   const [optionNames, setOptionNames] = useState([]);
   const [optionPendingPrices, setOptionPendingPrices] = useState([]);
   const [lastTradedPrices, setLastTradedPrices] = useState([]);
+  const [winScores, setWinScores] = useState([]);
+  const [loseScores, setLoseScores] = useState([]);
 
   useEffect(() => {
     if (accountAddress && topicInstance) {
@@ -47,20 +70,41 @@ function useGetTopicInfo({ topicInstance, accountAddress, web3 }) {
           tempPrices = prices.map((price) => web3.utils.fromWei(parseInt(price, 16).toString(), 'ether'));
           setLastTradedPrices(tempPrices);
         });
+
+      // Get Win Scores
+      topicInstance.methods.getWinScores()
+        .call({ from: accountAddress })
+        .then((_winScores) => {
+          const _score = _winScores.map((score) => parseInt(score, 16));
+          console.log(_score);
+
+          setWinScores(_score);
+        });
+
+      // Get Lose Scores
+      topicInstance.methods.getLoseScores()
+        .call({ from: accountAddress })
+        .then((_loseScores) => {
+          const _score = _loseScores.map((score) => parseInt(score, 16));
+          console.log(_score);
+          setLoseScores(_score);
+        });
     }
   }, [topicInstance, accountAddress, web3]);
 
   const parseOptionData = useCallback(() => {
     const options = [];
+
     optionNames.forEach((_name, index) => {
       options.push({
         optionName: _name,
         pendingVotePrice: optionPendingPrices[index],
         lastTradedPrices: lastTradedPrices[index],
+        weightedScore: parseWeightedScores(winScores, loseScores)[index],
       });
     });
     return options;
-  }, [optionNames, optionPendingPrices, lastTradedPrices]);
+  }, [optionNames, optionPendingPrices, lastTradedPrices, winScores, loseScores]);
 
   return { name, balance, options: parseOptionData() };
 }
