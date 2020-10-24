@@ -303,8 +303,6 @@ contract("PredictionMarket", accounts => {
             const winScore = await predictionMarketInstance.getWinScore(accounts[0]);
             await predictionMarketInstance.updateWinScore(accounts[0]);
             const newWinScore = await predictionMarketInstance.getWinScore(accounts[0]);
-            console.log(Number(winScore));
-            console.log(Number(newWinScore));
             assert.strictEqual(Number(newWinScore), Number(winScore)+1);
         });
 
@@ -313,8 +311,6 @@ contract("PredictionMarket", accounts => {
             const loseScore = await predictionMarketInstance.getWinScore(accounts[1]);
             await predictionMarketInstance.updateLoseScore(accounts[1]);
             const newLoseScore = await predictionMarketInstance.getLoseScore(accounts[1]);
-            console.log(Number(loseScore));
-            console.log(Number(newLoseScore));
             assert.strictEqual(Number(newLoseScore), Number(loseScore)+1);
         });
     });
