@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 
-function useShouldRenderVoteButton({ topicInstance, accountAddress }) {
+function useShouldRenderVoteButton(topicInstance, accountAddress) {
     const [shouldRenderButton, setShouldRenderButton] = useState(null);
 
     useEffect(() => {
         topicInstance.methods
-            .getAllArbitrators()
+            .getArbitrators()
             .call()
             .then(arbs => {
-                const shouldRender = !arbs.contains(accountAddress);
+                const shouldRender = !arbs.includes(accountAddress);
                 setShouldRenderButton(shouldRender);
             })
             .catch(err => {
