@@ -88,6 +88,8 @@ contract Topic {
   }
      
   function voteOption(uint option, address predictionMarketAddress) public payable returns(bool){
+    require(!arbitratorAssigned[msg.sender]);
+
     uint amount = msg.value;
     require(msg.value < 1 ether);
     // Reject the vote if it is lower than the last available vote
