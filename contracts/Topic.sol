@@ -199,6 +199,7 @@ contract Topic {
     // Trigger resolve if all selected arbitrators have voted
     numArbitratorVoted++;
     if (numArbitratorVoted == arbitrators.length) {
+      emit ResolveCalled("Arbitrator");
       resolve();
     }
   }
@@ -215,6 +216,7 @@ contract Topic {
     // Trigger resolve if all selected jury have voted
     numJuryVoted++;
     if (numJuryVoted == numOfJury) {
+      emit ResolveCalled("Jury");
       resolve();
     }
   }
@@ -227,17 +229,23 @@ contract Topic {
   /*
   resolve() will be called after all selected arbitrators have voted for the truth
   TODO: figure out how to make last arbitrator call resolve function and are we going to charge gas fees to last arbitrator? 
+  NOTE: Events for testing purpose. Can see if FE requires events as well else remove before deployment on testnet
   */
+  event ResolveCalled(string source);
+  event WinningOption(bytes32 option);
+
   function resolve() internal {
     require(contractPhase != Phase.Open && contractPhase != Phase.Resolved);
     if(contractPhase == Phase.Jury){ 
       uint finalWinIndex = getJuryVerdict();
+      emit WinningOption(options[finalWinIndex]);
       resolveWithoutTie(finalWinIndex);
       return;
     }
     
     (bool hasTie, uint winIndex) = getArbitratorVerdict();
     if (!hasTie) {
+      emit WinningOption(options[winIndex]);
       resolveWithoutTie(winIndex);
     } else {
       resolveWithTie();
