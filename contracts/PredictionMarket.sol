@@ -67,6 +67,7 @@ contract PredictionMarket {
 
     //VOTER'S REPUTATION 
     function getVotersReputation(address id) public view returns (uint[2] memory){
+        require(traders[id].isValid);
         return [traders[id].winScore, traders[id].loseScore];
     }
 
@@ -82,6 +83,11 @@ contract PredictionMarket {
         }
         // If all the above fails, return invalid
         return bytes32("Invalid");
+    }
+
+    // Check if a trader is valid, this is called from external contracts/ views
+    function checkValidTrader(address trader) public view returns (bool) {
+        return traders[trader].isValid;
     }
 
 
