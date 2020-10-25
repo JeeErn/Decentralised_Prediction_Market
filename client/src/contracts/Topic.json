@@ -16057,7 +16057,7 @@
                           "name": "this",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1903,
+                          "referencedDeclaration": 1901,
                           "src": "11762:4:2",
                           "typeDescriptions": {
                             "typeIdentifier": "t_contract$_Topic_$1872",
@@ -32032,7 +32032,7 @@
                           "name": "this",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1903,
+                          "referencedDeclaration": 1901,
                           "src": "11762:4:2",
                           "typeDescriptions": {
                             "typeIdentifier": "t_contract$_Topic_$1872",
@@ -32526,7 +32526,7 @@
   },
   "networks": {},
   "schemaVersion": "3.2.5",
-  "updatedAt": "2020-10-25T04:51:58.498Z",
+  "updatedAt": "2020-10-25T06:36:11.826Z",
   "networkType": "ethereum",
   "devdoc": {
     "methods": {}

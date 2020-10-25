@@ -3,11 +3,13 @@
 /* eslint-disable max-len */
 import React from 'react';
 import {
-  makeStyles, Paper, Grid, Typography,
+  makeStyles, Paper, Grid, Typography, Button,
 } from '@material-ui/core';
 import useGetTopicInfo from './hooks/useGetTopicInfo';
 import TopicProperty from './TopicProperty';
 import TopicVotingBox from './TopicVotingBox';
+import useShouldRenderResolveButton from './hooks/useShouldRenderResolveButton';
+import TopicResolve from './TopicResolve';
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -29,6 +31,7 @@ function Topic({
 }) {
   const classes = useStyles();
   const { name, balance, options } = useGetTopicInfo({ topicInstance, accountAddress, web3 });
+  const renderResolveButton = useShouldRenderResolveButton({ topicInstance, accountAddress });
 
   return (
     <Paper className={classes.root}>
@@ -62,7 +65,11 @@ function Topic({
         <Grid item xs={3}>
           {options && <TopicVotingBox options={options} web3={web3} topicInstance={topicInstance} accountAddress={accountAddress} />}
         </Grid>
-
+        <Grid item xs={12}>
+          { renderResolveButton && (
+          <TopicResolve options={options} />
+          )}
+        </Grid>
       </Grid>
     </Paper>
 

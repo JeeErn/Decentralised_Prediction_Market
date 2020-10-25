@@ -6,7 +6,6 @@ import {
   makeStyles, Paper, Grid, Typography, Button, Slider,
 } from '@material-ui/core';
 import TopicOptions from './TopicOptions.jsx';
-import useShouldRenderVoteButton from '../hooks/useRenderVoteButton';
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -23,7 +22,10 @@ function TopicVotingBox({
   const classes = useStyles();
   const [sliderValue, setSliderValue] = useState(0.5);
   const [selectedOption, setSelectedOption] = useState(1);
-  const shouldRenderVoteButton = useShouldRenderVoteButton(topicInstance, accountAddress);
+
+  // TODO: Make hook for considtional rendering of the vote button (E.g. if the user is an arbitrator)
+  const shouldRenderVoteButton = true;
+
   const handleMakeBet = useCallback(
     () => {
       // // Make the bet
@@ -65,9 +67,11 @@ function TopicVotingBox({
           <TopicOptions selectedOption={selectedOption} setSelectedOption={setSelectedOption} options={options} />
         </Grid>
         <Grid item container xs={12}>
-          {shouldRenderVoteButton && <Button variant="contained" color="primary" onClick={handleMakeBet}>
+          {shouldRenderVoteButton && (
+          <Button variant="contained" color="primary" onClick={handleMakeBet}>
             Submit Bet
-          </Button>}
+          </Button>
+          )}
         </Grid>
       </Grid>
     </Paper>
