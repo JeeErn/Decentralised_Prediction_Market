@@ -14,9 +14,9 @@ import useGetTopicInstances from './hooks/useGetTopicInstances';
 
 // Components
 import CreateTopic from './components/CreateTopic';
-import Topic from './components/Topic';
 import Navbar from './components/Navbar';
 import Login from './components/Login';
+import TopicsList from './components/TopicsList';
 
 function App() {
   const web3 = useGetWeb3();
@@ -33,7 +33,8 @@ function App() {
       {(userType !== 'Invalid' && <Navbar userType={userType} reputation={reputation} />) }
 
       {(userType === 'Trader') && predictionMarketInstance && <CreateTopic predictionMarketInstance={predictionMarketInstance} accountAddress={accounts?.[0]} />}
-      {(userType !== 'Invalid') && topicInstances && topicInstances.map((topicInstance) => <Topic web3={web3} topicInstance={topicInstance} accountAddress={accounts?.[0]} />) }
+      {(userType !== 'Invalid') && topicInstances && predictionMarketInstance && <TopicsList web3={web3} predictionMarketInstance={predictionMarketInstance} topicInstances={topicInstances} accountAddress={accounts?.[0]} contractPhaseFilter={0} /> }
+
     </>
   );
 }

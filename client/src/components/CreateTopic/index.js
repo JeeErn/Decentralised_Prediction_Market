@@ -19,7 +19,11 @@ import useGetArbitrators from './hooks/useGetArbitrators';
 const useStyles = makeStyles(() => ({
   root: {
     width: '100%',
-    margin: '0.5em',
+    textAlign: 'center',
+    marginTop: '0.9em',
+  },
+  button: {
+    width: '90%',
   },
   modal: {
     position: 'absolute',
@@ -98,9 +102,12 @@ function CreateTopic({ predictionMarketInstance, accountAddress }) {
     predictionMarketInstance
     && (
     <>
-      <Button className={classes.root} onClick={handleModalOpen} variant="contained" color="primary">
-        Create Topic
-      </Button>
+      <div className={classes.root}>
+        <Button className={classes.button} onClick={handleModalOpen} variant="outlined" color="primary">
+          Create Topic
+        </Button>
+      </div>
+
       <Modal
         open={open}
         onClose={handleClose}

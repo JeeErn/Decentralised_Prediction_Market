@@ -4138,7 +4138,7 @@
                             "name": "this",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1905,
+                            "referencedDeclaration": 1903,
                             "src": "3745:4:1",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_PredictionMarket_$610",
@@ -7627,7 +7627,7 @@
                           "name": "this",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1905,
+                          "referencedDeclaration": 1903,
                           "src": "6666:4:1",
                           "typeDescriptions": {
                             "typeIdentifier": "t_contract$_PredictionMarket_$610",
@@ -11366,7 +11366,7 @@
                             "name": "this",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1905,
+                            "referencedDeclaration": 1903,
                             "src": "3745:4:1",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_PredictionMarket_$610",
@@ -14855,7 +14855,7 @@
                           "name": "this",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1905,
+                          "referencedDeclaration": 1903,
                           "src": "6666:4:1",
                           "typeDescriptions": {
                             "typeIdentifier": "t_contract$_PredictionMarket_$610",
@@ -14999,12 +14999,12 @@
         }
       },
       "links": {},
-      "address": "0x49B1030C00016eeaBbCf65adD2E0c39166eEAa7f",
-      "transactionHash": "0xb97c57525090123f8378bf8ed7da9d8acd7bc31f76410e4e690492407d8f24ae"
+      "address": "0xFd20751fCF74f51C731Fe4d75cd93BF5D5432051",
+      "transactionHash": "0xe1517121d58cea1e8d0ae014cdb43e5978ec66ff9422209f5071a0d2d0327a7d"
     }
   },
   "schemaVersion": "3.2.5",
-  "updatedAt": "2020-10-25T04:51:58.487Z",
+  "updatedAt": "2020-10-25T06:36:11.810Z",
   "networkType": "ethereum",
   "devdoc": {
     "methods": {}
