@@ -59,7 +59,7 @@ function CreateTopic({ predictionMarketInstance, accountAddress }) {
   }, [predictionMarketInstance, name, description, options, expiryDate, selectedArbitrators, accountAddress, creatorBond]);
 
   const handleEditOption = (event, index) => {
-    const temp = options.copy();
+    const temp = [...options];
     temp[index] = event.target.value;
     setOptions(temp);
   };

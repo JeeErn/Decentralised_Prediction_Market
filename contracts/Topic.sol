@@ -86,14 +86,19 @@ contract Topic {
     }
 
 // TODO: TEST CASES
-  function updateWeightedVotes(address predictionMarketAddress) private {
-    PredictionMarket pm = PredictionMarket(predictionMarketAddress);
+  function updateWeightedVotes() private {
+    PredictionMarket pm = PredictionMarket(parentContract);
     trade memory lastTrade = confirmedTrades[confirmedTrades.length - 1];
     for(uint i=0; i<4; i++){
       address voterAddress = lastTrade.shareOwners[i]; 
-      uint[2] memory winLose = pm.getVotersReputation(voterAddress); 
-      winScores[i] = winScores[i] + (winLose[0] * lastTradedPrices[i]);
-      loseScores[i] = loseScores[i] + (winLose[1] * (1 - lastTradedPrices[i]));
+      
+      if(voterAddress != address(0x0000000000000000000000000000000000000000)){
+        // getVotersReputation only accepts a valid voterAddress. 
+        uint[2] memory winLose = pm.getVotersReputation(voterAddress);   
+        emit UpdateWeightedVotes(voterAddress, winLose);
+        winScores[i] = winScores[i] + (winLose[0] * lastTradedPrices[i]);
+        loseScores[i] = loseScores[i] + (winLose[1] * (1 - lastTradedPrices[i]));
+      }
     }
   }
      
@@ -104,6 +109,11 @@ contract Topic {
     require(msg.value < 1 ether);
     // Reject the vote if it is lower than the last available vote
     require(pendingVotes[option].price <  amount);
+
+    // Check if the voter is valid
+    PredictionMarket pm = PredictionMarket(parentContract);
+    bool validTrader = pm.checkValidTrader(msg.sender);
+    require(validTrader);
 
     // If the vote is higher than the last available price, send money back to the previous voter
     pendingVotes[option].voter.transfer(pendingVotes[option].price);
@@ -144,7 +154,7 @@ contract Topic {
       msg.sender.transfer(amount - balance);
 
       // 4) Update the weighted votes according to the last trade
-      updateWeightedVotes(parentContract);
+      updateWeightedVotes();
 
       // 5) Reset the pending votes instance
       for(uint i =0; i< 4; i++){
@@ -356,4 +366,9 @@ contract Topic {
   function getJury() public view returns (address payable[] memory) {
     return jury;
   }
+
+  // ===================================================
+  // For testing purposes
+  // ===================================================
+  event UpdateWeightedVotes(address add, uint[2] beforeUpdate);
 }

@@ -6,17 +6,42 @@ const PredictionMarket = artifacts.require("./PredictionMarket.sol");
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 
 contract("Topic", accounts => {
+    let predictionMarketInstance = null;
     let topicInstance = null; 
     let resolveTopicInstance = null;
     before( async () => {
-        const options = stringUtils.stringToBytes(["option 1", "option 2", "option 3", "option 4"]);
-        topicInstance = await Topic.new(accounts[0], "Test", "", [], 0, 0, [accounts[9],accounts[8]], "0xc85E1Ba8F9D7cfdf27ff7604A8802FD589Ac7149");
-        resolveTopicInstance = await Topic.new(accounts[0], "TestResolve", "My bets will make me a billionaire", options, 0, 0, [accounts[9],accounts[8],accounts[7]],"0xc85E1Ba8F9D7cfdf27ff7604A8802FD589Ac7149");
-        payoutTopicInstance = await Topic.new(accounts[0], "TestPayOut", "My bets will make me a billionaire", options, 0, 0, [accounts[9],accounts[8],accounts[7]],"0xc85E1Ba8F9D7cfdf27ff7604A8802FD589Ac7149");
+        // Creates a test topic and initializes 1 trader and 2 arbitrators
+        predictionMarketInstance = await PredictionMarket.deployed();
+        await predictionMarketInstance.createTrader({from: accounts[0]});
+        await predictionMarketInstance.createTrader({from: accounts[1]});
+        await predictionMarketInstance.createArbitrator(stringUtils.stringToBytes("test1"), {from: accounts[8]});
+        await predictionMarketInstance.createArbitrator(stringUtils.stringToBytes("test2"), {from: accounts[9]});
+
+         // set up variables
+         const name = "test";
+         const description = "test description foo bar";
+         const options = ["option 1", "option 2", "option 3", "option 4"];
+         const optionsBytes = stringUtils.stringToBytes(options)
+         const expiryDate = (new Date()).getTime();
+         const selectedArbitrators = [accounts[8], accounts[9]];
+ 
+         // Create topic and retrieve address
+         // Note: accounts[0] trading account is already created as of above test
+         topicInstance = await predictionMarketInstance.createTopic(name, description, optionsBytes, expiryDate, selectedArbitrators, { from: accounts[0], value: 1.0 });
+         events = await predictionMarketInstance.getPastEvents("TopicCreated");
+         assert.isOk(events.length > 0, "events are not null");
+         const topicAddress = events[0].returnValues._topicAddress;
+         topicInstance = await Topic.at(topicAddress);
+
+        // TODO: put this in a specific test case instead 
+        const options1 = stringUtils.stringToBytes(["option 1", "option 2", "option 3", "option 4"]);
+        // topicInstance = await Topic.new(accounts[0], "Test", "", [], 0, 0, [accounts[9],accounts[8]], "0xc85E1Ba8F9D7cfdf27ff7604A8802FD589Ac7149");
+        resolveTopicInstance = await Topic.new(accounts[0], "TestResolve", "My bets will make me a billionaire", options1, 0, 0, [accounts[9],accounts[8],accounts[7]],"0xc85E1Ba8F9D7cfdf27ff7604A8802FD589Ac7149");
+        payoutTopicInstance = await Topic.new(accounts[0], "TestPayOut", "My bets will make me a billionaire", options1, 0, 0, [accounts[9],accounts[8],accounts[7]],"0xc85E1Ba8F9D7cfdf27ff7604A8802FD589Ac7149");
     })
 
     it("should be created with the correct initial values", async () => {
-        assert.strictEqual(await topicInstance.name(), "Test", "Name is correct");
+        assert.strictEqual(await topicInstance.name(), "test", "Name is correct");
 
         const contractPhase = await topicInstance.contractPhase();
         assert.strictEqual(contractPhase.toString(), "0", "state is Open");
@@ -27,13 +52,15 @@ contract("Topic", accounts => {
         });
     })
 
-    // TODO: Fix getPendingVotePrice calls and change "xit" to "it"
-    xit("should allow traders to vote", async () => {
+    it("Test vote", async () => {
+        // Create the traders first
+
         const balanceBef = await topicInstance.balanceOf(); 
         const senderBalanceBef = await web3.eth.getBalance(accounts[0]);
-        const pendingVoteBef = await topicInstance.getPendingVotePrice(1);
-        assert.equal(pendingVoteBef, 0, "Pending vote for option 1 should be 0 before voting");
-        await topicInstance.voteOption(1, {
+        const pendingVoteBef = await topicInstance.getAllPendingVotePrice();
+
+        assert.equal(parseInt(pendingVoteBef[1], 16), 0, "Pending vote for option 1 should be 0 before voting");
+        await topicInstance.voteOption( 1, {
             from: accounts[0], 
             value: web3.utils.toWei("0.1"),
         });
@@ -44,23 +71,26 @@ contract("Topic", accounts => {
         assert.isOk(senderBalanceBef-senderBalanceAft > web3.utils.toWei("0.1"), "Balance deducted");
 
         // 1) 1 vote is set for option 1 at 0.1 eth, --> Pending vote
-        const pendingVoteAft = await topicInstance.getPendingVotePrice(1);
-        assert.strictEqual(pendingVoteAft.toString(), web3.utils.toWei("0.1"), "Pending vote for option 1 should be 0.1 after voting");
+        const pendingVoteAft = await topicInstance.getAllPendingVotePrice();
+        assert.strictEqual(parseInt(pendingVoteAft[1], 16), parseInt(web3.utils.toWei("0.1"), 10), "Pending vote for option 1 should be 0.1 after voting");
 
-        // // 2) 1 vote is set for option 2 at 0.1 eth, --> Vote should go through at 0.9 eth
+        // 2) 1 vote is set for option 2 at 0.1 eth, --> Vote should go through at 0.9 eth
         const sender2BalanceBef = await web3.eth.getBalance(accounts[1]);
         const success = await topicInstance.voteOption(2, {
             from: accounts[1], 
             value: web3.utils.toWei("0.99"),
         });
+
+        // FOR DEBUGGING PURPOSES IF ERROR COMES UP
+        let event = await topicInstance.getPastEvents("UpdateWeightedVotes"); 
+        event = event.map((event) => event.returnValues);
+
         const sender2BalanceAft = await web3.eth.getBalance(accounts[1]);
-   
         assert.isOk(success, "Vote should have gone through successfully"); 
         assert.isOk(sender2BalanceBef-sender2BalanceAft < web3.utils.toWei("0.91") && sender2BalanceBef-sender2BalanceAft > web3.utils.toWei("0.90"), "Balance deducted for successful trade should be more than 0.9 but less than 0.91");
 
-        const pendingVoteAft2 = await topicInstance.getPendingVotePrice(1);
-        assert.strictEqual(pendingVoteAft2.toString(), web3.utils.toWei("0"), "Pending vote for option 2 should be reset");
-        console.log(topicInstance.confirmedTrades);
+        const pendingVoteAft2 = await topicInstance.getAllPendingVotePrice();
+        assert.strictEqual(parseInt(pendingVoteAft2[1], 16).toString(), web3.utils.toWei("0"), "Pending vote for option 2 should be reset");
 
     });
 
@@ -164,13 +194,7 @@ contract("Topic", accounts => {
 
 
     it("should not allow selected arbitrator to vote", async () => {
-        const predictionMarketInstance = await PredictionMarket.deployed();
-        // Make account[9] an arbitrator
-        const testName = stringUtils.stringToBytes("test");
-        await predictionMarketInstance.createArbitrator(testName, { from: accounts[9] });
-
-        // Make account[1] and account[9] a trader
-        await predictionMarketInstance.createTrader({ from: accounts[1] });
+        // Account 9 is already  an arbitrator
         await predictionMarketInstance.createTrader({ from: accounts[9] });
 
         const name = "test";
@@ -183,7 +207,7 @@ contract("Topic", accounts => {
         events = await predictionMarketInstance.getPastEvents("TopicCreated");
         const topicAddress = events[0].returnValues._topicAddress;
 
-         // Retrieve instance of newly created topic and get current balance
+        //  // Retrieve instance of newly created topic and get current balance
          let newTopicInstance = await Topic.at(topicAddress);
          const balanceBef = await newTopicInstance.balanceOf();
 
@@ -210,39 +234,24 @@ contract("Topic", accounts => {
     });
 
     it("should be able to execute resolve with tie and select jury correctly", async () => {
-        const predictionMarketInstance = await PredictionMarket.deployed();
         // Make everyone an arbitrator
         const testName = stringUtils.stringToBytes("test");
         for (let i = 0; i < 10; i++) {
-            if ((await predictionMarketInstance.arbitrators(accounts[i])).isValid) {
-                continue;
+            if(i != 8 && i != 9){
+                await predictionMarketInstance.createArbitrator(testName, { from: accounts[i] });
             }
-            await predictionMarketInstance.createArbitrator(testName, { from: accounts[i] });
         }
-
-        // Create the new topic through the prediction market
+        // Creation of topic instance is already done above
         // accounts[8] and accounts[9] are selected arbitrators
-        // accounts[1] is already a trader
-        const name = "test";
-        const description = "test description foo bar";
-        const options = ["option 1"];
-        const optionsBytes = stringUtils.stringToBytes(options)
-        const expiryDate = (new Date()).getTime();
         const selectedArbitrators = [accounts[8], accounts[9]];
-        await predictionMarketInstance.createTopic(name, description, optionsBytes, expiryDate, selectedArbitrators, { from: accounts[1], value: 1.0 });
-        events = await predictionMarketInstance.getPastEvents("TopicCreated");
-        const topicAddress = events[0].returnValues._topicAddress;
-
-        // Retrieve instance of newly created topic
-        let newTopicInstance = await Topic.at(topicAddress);
 
         // Call resolve with tie
-        await newTopicInstance.resolveWithTie();
+        await topicInstance.resolveWithTie();
 
-        const contractPhase = await newTopicInstance.contractPhase();
+        const contractPhase = await topicInstance.contractPhase();
         assert.strictEqual(contractPhase.toString(), "2", "state is Jury");
 
-        const jury = await newTopicInstance.getJury();
+        const jury = await topicInstance.getJury();
         selectedArbitrators.forEach(arbitrator => {
             assert.isFalse(jury.includes(arbitrator), "selected arbitrator is not in jury");
         });
