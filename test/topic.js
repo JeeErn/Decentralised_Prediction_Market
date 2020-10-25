@@ -99,7 +99,7 @@ contract("Topic", accounts => {
         it("should be able to add arbitrator's vote", async () => {
             await resolveTopicInstance.addArbitratorVote(options[0], {from: accounts[9]});
             await resolveTopicInstance.addArbitratorVote(options[3], {from: accounts[8]});
-            const arbitratorNineVoteStatus = await resolveTopicInstance.arbVotes(accounts[9]);
+            const arbitratorNineVoteStatus = await resolveTopicInstance.selectedArbitrators(accounts[9]);
             const numVotesForOptionZero = await resolveTopicInstance.countofArbVotes(options[0]);
             const arbVotedAccNine = await resolveTopicInstance.arbitratorsVotes(options[0],0);
             const arbVotedAccEight = await resolveTopicInstance.arbitratorsVotes(options[3],0);
