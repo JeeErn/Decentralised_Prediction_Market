@@ -1,4 +1,3 @@
-const { resolve4 } = require("dns");
 const stringUtils = require("./utils/stringUtil.js");
 const Topic = artifacts.require("./Topic.sol");
 const PredictionMarket = artifacts.require("./PredictionMarket.sol");
@@ -103,7 +102,7 @@ contract("Topic", accounts => {
             const numVotesForOptionZero = await resolveTopicInstance.countofArbVotes(options[0]);
             const arbVotedAccNine = await resolveTopicInstance.arbitratorsVotes(options[0],0);
             const arbVotedAccEight = await resolveTopicInstance.arbitratorsVotes(options[3],0);
-            assert.isTrue(arbitratorNineVoteStatus[0]);
+            assert.isTrue(arbitratorNineVoteStatus.hasVoted);
             assert.strictEqual(accounts[9],arbVotedAccNine);
             assert.strictEqual(accounts[8],arbVotedAccEight);
             assert.strictEqual(Number(numVotesForOptionZero), 1);
@@ -315,4 +314,119 @@ contract("Topic", accounts => {
         assert.strictEqual(numOfJurySelected.toString(), "3", "numOfJury is set correctly");
     });
 
+    context("jury voting", async () => {
+        const options = stringUtils.stringToBytes(["option 1", "option 2"]);
+        it("should be allow selected jury to vote", async () => {
+            const predictionMarketInstance = await PredictionMarket.deployed();
+
+            const name = "test";
+            const description = "test description foo bar";
+            const optionsBytes = stringUtils.stringToBytes(options)
+            const expiryDate = (new Date()).getTime();
+            const selectedArbitrators = [accounts[4], accounts[5], accounts[6], accounts[7], accounts[8], accounts[9]];
+            await predictionMarketInstance.createTopic(name, description, optionsBytes, expiryDate, selectedArbitrators, { from: accounts[1], value: 1.0 });
+            events = await predictionMarketInstance.getPastEvents("TopicCreated");
+            const topicAddress = events[0].returnValues._topicAddress;
+
+            // Retrieve instance of newly created topic
+            let newTopicInstance = await Topic.at(topicAddress);
+
+            // Call resolve with tie to select jury. Accounts[0, 2, 3] are jury
+            await newTopicInstance.resolveWithTie();
+
+            await newTopicInstance.addJuryVote(options[0], {from: accounts[2]});
+            await newTopicInstance.addJuryVote(options[0], {from: accounts[3]});
+            const juryTwoVoteStatus = await newTopicInstance.selectedJurys(accounts[2]);
+            const numVotesForOptionZero = await newTopicInstance.countofJuryVotes(options[0]);
+            const juryVotedAccTwo = await newTopicInstance.jurysVotes(options[0],0);
+            const juryVotedAccThree = await newTopicInstance.jurysVotes(options[0],1);
+            assert.isTrue(juryTwoVoteStatus.hasVoted);
+            assert.strictEqual(accounts[2],juryVotedAccTwo);
+            assert.strictEqual(accounts[3],juryVotedAccThree);
+            assert.strictEqual(Number(numVotesForOptionZero), 2);
+        });
+
+        it("should not allow jury to vote if resolveWithTie has not been called before", async () => {
+            const predictionMarketInstance = await PredictionMarket.deployed();
+
+            const name = "test";
+            const description = "test description foo bar";
+            const optionsBytes = stringUtils.stringToBytes(options)
+            const expiryDate = (new Date()).getTime();
+            const selectedArbitrators = [accounts[4], accounts[5], accounts[6], accounts[7], accounts[8], accounts[9]];
+            await predictionMarketInstance.createTopic(name, description, optionsBytes, expiryDate, selectedArbitrators, { from: accounts[1], value: 1.0 });
+            events = await predictionMarketInstance.getPastEvents("TopicCreated");
+            const topicAddress = events[0].returnValues._topicAddress;
+
+            // Retrieve instance of newly created topic
+            let newTopicInstance = await Topic.at(topicAddress);
+            
+            const currentContractState = await newTopicInstance.contractPhase();
+            assert.isFalse(currentContractState.toString === "2", "current contract state is not jury");
+
+            try {
+                await newTopicInstance.addJuryVote(options[0], {from: accounts[2]});
+            } catch (error) {
+                assert.isOk(error.message.indexOf("revert") >= 0, "error message must contain revert");
+            }
+        });
+
+        it("should not allow non-selected arbitrator to vote as jury", async () => {
+            const predictionMarketInstance = await PredictionMarket.deployed();
+
+            const name = "test";
+            const description = "test description foo bar";
+            const optionsBytes = stringUtils.stringToBytes(options)
+            const expiryDate = (new Date()).getTime();
+            const selectedArbitrators = [accounts[4], accounts[5], accounts[6], accounts[7], accounts[8], accounts[9]];
+            await predictionMarketInstance.createTopic(name, description, optionsBytes, expiryDate, selectedArbitrators, { from: accounts[1], value: 1.0 });
+            events = await predictionMarketInstance.getPastEvents("TopicCreated");
+            const topicAddress = events[0].returnValues._topicAddress;
+
+            // Retrieve instance of newly created topic
+            let newTopicInstance = await Topic.at(topicAddress);
+
+            // Call resolve with tie to select jury. Accounts[0, 2, 3] are jury
+            await newTopicInstance.resolveWithTie();
+
+            try {
+                await newTopicInstance.addJuryVote(options[0], {from: accounts[1]});
+            } catch (error) {
+                assert.isOk(error.message.indexOf("revert") >= 0, "error message must contain revert");
+            }
+        });
+        
+        it("should trigger resolve with correct winning option when the last jury votes", async () => {
+            const predictionMarketInstance = await PredictionMarket.deployed();
+
+            const name = "test";
+            const description = "test description foo bar";
+            const optionsBytes = stringUtils.stringToBytes(options)
+            const expiryDate = (new Date()).getTime();
+            const selectedArbitrators = [accounts[4], accounts[5], accounts[6], accounts[7], accounts[8], accounts[9]];
+            await predictionMarketInstance.createTopic(name, description, optionsBytes, expiryDate, selectedArbitrators, { from: accounts[1], value: 1.0 });
+            let events = await predictionMarketInstance.getPastEvents("TopicCreated");
+            const topicAddress = events[0].returnValues._topicAddress;
+
+            // Retrieve instance of newly created topic
+            let newTopicInstance = await Topic.at(topicAddress);
+
+            // Call resolve with tie to select jury. Accounts[0, 2, 3] are jury
+            await newTopicInstance.resolveWithTie();
+
+            await newTopicInstance.addJuryVote(options[0], {from: accounts[2]});
+            await newTopicInstance.addJuryVote(options[0], {from: accounts[3]});
+
+            // Last jury accounts[0] vote
+            await newTopicInstance.addJuryVote(options[1], {from: accounts[0]}); 
+            events = await newTopicInstance.getPastEvents("ResolveCalled");
+            assert.strictEqual(events.length, 1, "resolve is called automatically");
+            assert.strictEqual(events[0].returnValues.source, "Jury", "resolve event is emitted from addJuryVote");
+
+            events = await newTopicInstance.getPastEvents("WinningOption");
+            assert.strictEqual(events.length, 1, "1 winning option is selected after resolve");
+            const winningOption = stringUtils.bytesToString(events[0].returnValues.option);
+            assert.strictEqual(winningOption, options[0], "options 0 is determined as winning option");
+        });
+    });
 })
