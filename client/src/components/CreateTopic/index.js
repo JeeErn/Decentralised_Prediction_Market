@@ -10,7 +10,7 @@
  */
 
 import {
-  Button, makeStyles, Modal, Typography, Paper, TextField, Grid, MenuItem, Select, FormControl, InputLabel,
+  Button, makeStyles, Modal, Typography, Paper, TextField, Grid, MenuItem, Select, FormControl, InputLabel, Input, Chip,
 } from '@material-ui/core';
 import React, { useCallback, useState } from 'react';
 import Web3 from 'web3';
@@ -34,6 +34,27 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
+};
+
+// BAD STRUCTURE OF GETTING NAMES (POOR COMPLEXITY) - Change this if scalability is a concern or solidity does not return deterministic orders of arrays.
+const getSelectedArbitratorAddresses = (selectedArbitrators, arbitrators, arbitratorNames) => {
+  const selectedAddresses = [];
+  selectedArbitrators.forEach((_name) => {
+    const index = arbitratorNames.findIndex((n) => (n === _name));
+    selectedAddresses.push(arbitrators[index]);
+  });
+  return selectedAddresses;
+};
+
 function CreateTopic({ predictionMarketInstance, accountAddress }) {
   const classes = useStyles();
   const [name, setName] = useState('Will Joe Biden Win the election');
@@ -44,33 +65,34 @@ function CreateTopic({ predictionMarketInstance, accountAddress }) {
   const [creatorBond, setCreatorBond] = useState(0.1);
   const [open, setOpen] = useState(false);
 
-  const arbitrators = useGetArbitrators({ predictionMarketInstance });
+  const { arbitrators, arbitratorNames } = useGetArbitrators({ predictionMarketInstance });
 
   const handleCreateTopic = useCallback(() => {
     const options32Bytes = options.map((option) => Web3.utils.fromAscii(option));
+    const selectedArbitratorAddresses = getSelectedArbitratorAddresses(selectedArbitrators, arbitrators, arbitratorNames);
     predictionMarketInstance.methods
-      .createTopic(name, description, options32Bytes, expiryDate, selectedArbitrators)
+      .createTopic(name, description, options32Bytes, expiryDate, selectedArbitratorAddresses)
       .send({ from: accountAddress, value: Web3.utils.toWei(creatorBond.toString(), 'ether') })
       .then(() => {
         window.location.reload(false);
       })
       .catch((error) => { console.log(error); });
   // eslint-disable-next-line max-len
-  }, [predictionMarketInstance, name, description, options, expiryDate, selectedArbitrators, accountAddress, creatorBond]);
+  }, [predictionMarketInstance, name, description, options, expiryDate, selectedArbitrators, accountAddress, creatorBond, arbitratorNames, arbitrators]);
 
-  const handleEditOption = (event, index) => {
+  const handleEditOption = useCallback((event, index) => {
     const temp = [...options];
     temp[index] = event.target.value;
     setOptions(temp);
-  };
+  });
 
-  const handleModalOpen = () => {
+  const handleModalOpen = useCallback(() => {
     setOpen(true);
-  };
+  });
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setOpen(false);
-  };
+  });
 
   return (
     predictionMarketInstance
@@ -109,16 +131,23 @@ function CreateTopic({ predictionMarketInstance, accountAddress }) {
               </Grid>
             </Grid>
             <Grid item xs={12}>
-              Selected Arbitrators: [...]
-            </Grid>
-            <Grid item xs={12}>
               <FormControl className={classes.textField}>
                 <InputLabel>Select Arbitrators</InputLabel>
                 <Select
-                  labelId="demo-simple-select-helper-label"
-                  id="demo-simple-select-helper"
+                  multiple
+                  value={selectedArbitrators}
+                  input={<Input id="select-multiple-chip" />}
+                  renderValue={(selected) => (
+                    <div className={classes.chips}>
+                      {selected.map((value) => (
+                        <Chip key={value} label={value} className={classes.chip} />
+                      ))}
+                    </div>
+                  )}
+                  MenuProps={MenuProps}
+                  onChange={(event) => { setSelectedArbitrators(event.target.value); }}
                 >
-                  {arbitrators.map((arb) => <MenuItem value={arb}>{arb}</MenuItem>)}
+                  {arbitratorNames.map((arbName) => <MenuItem value={arbName}>{arbName}</MenuItem>)}
                 </Select>
               </FormControl>
             </Grid>
