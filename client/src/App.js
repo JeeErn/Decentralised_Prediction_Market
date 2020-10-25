@@ -21,7 +21,7 @@ import Login from './components/Login';
 function App() {
   const web3 = useGetWeb3();
   const accounts = useGetAccounts({ web3 });
-  const { predictionMarketInstance, predictionMarketAddress } = useGetContractInstance({ web3, contract: PredictionMarketContract });
+  const { predictionMarketInstance } = useGetContractInstance({ web3, contract: PredictionMarketContract });
   const { userType, reputation } = useGetUserType({ predictionMarketInstance, accountAddress: accounts?.[0] });
   const topicAddressesList = useGetTopicAddressesList({ predictionMarketInstance });
   const topicInstances = useGetTopicInstances({ web3, contract: TopicContract, contractAddresses: topicAddressesList });
@@ -33,9 +33,7 @@ function App() {
       {(userType !== 'Invalid' && <Navbar userType={userType} reputation={reputation} />) }
 
       {(userType === 'Trader') && predictionMarketInstance && <CreateTopic predictionMarketInstance={predictionMarketInstance} accountAddress={accounts?.[0]} />}
-      {
-        (userType !== 'Invalid') && topicInstances && topicInstances.map((topicInstance) => <Topic web3={web3} topicInstance={topicInstance} accountAddress={accounts?.[0]} />)
-      }
+      {(userType !== 'Invalid') && topicInstances && topicInstances.map((topicInstance) => <Topic web3={web3} topicInstance={topicInstance} accountAddress={accounts?.[0]} />) }
     </>
   );
 }
