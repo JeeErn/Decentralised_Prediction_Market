@@ -259,6 +259,9 @@ contract("Topic", accounts => {
         jury.forEach(juror => {
             assert.strictEqual(jury.filter(address => address === juror).length, 1, "address is only selected once per juror");
         });
+
+        const numOfJurySelected = await topicInstance.getNumOfJurySelected();
+        assert.strictEqual(numOfJurySelected.toString(), "5", "numOfJury is set correctly");
     });
 
     it("should select all remaining arbitrators if 5 or less are available for jury", async () => {
@@ -307,6 +310,9 @@ contract("Topic", accounts => {
 
         // Only accounts[0], accounts[2] and accounts[3] are left available for jury
         assert.strictEqual(jury.filter(address => address != zeroAddress).length, 3, "all remaining arbitrators are selected as jury");
+        
+        const numOfJurySelected = await newTopicInstance.getNumOfJurySelected();
+        assert.strictEqual(numOfJurySelected.toString(), "3", "numOfJury is set correctly");
     });
 
 })
