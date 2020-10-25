@@ -19,10 +19,6 @@ contract Topic {
   address parentContract;
   uint16 nonce;
 
-  // Mapping for easier checking of address having been assigned a role
-  mapping(address => bool) arbitratorAssigned;
-  mapping(address => bool) juryAssigned;
-
   // Pending votes
   voteStruct[4] pendingVotes;
   struct voteStruct {
@@ -43,14 +39,26 @@ contract Topic {
     address payable[4] shareOwners;
   }
 
-  struct ArbitratorVote {
+  // Arbitrator voting related variables
+  struct SelectedArbitrator {
+        bool isAssigned;
         bool hasVoted;
         bytes32 votedOption;
   }
 
-  mapping (address => ArbitratorVote) public arbVotes;
+  mapping (address => SelectedArbitrator) public selectedArbitrators;
   mapping (bytes32 => address[]) public arbitratorsVotes;
   mapping (bytes32 => uint) public countofArbVotes;
+
+  // Jury voting related variables
+  struct SelectedJury {
+      bool isAssigned;
+      bool hasVoted;
+      bytes32 votedOption;
+  }
+  mapping (address => SelectedJury) public selectedJurys;
+  mapping (bytes32 => address[]) public jurysVotes;
+  mapping (bytes32 => uint) public countofJuryVotes;
 
   // State of contract
   // 0 => Open, 1 => Arbitrator Voting, 2 => Jury Voting, 3 => Resolved / closed
@@ -81,7 +89,7 @@ contract Topic {
         }
 
         for (uint j = 0; j < _arbitrators.length; j++) {
-          arbitratorAssigned[_arbitrators[j]] = true;
+          selectedArbitrators[_arbitrators[j]] = SelectedArbitrator(true, false, bytes32(0));
         }
     }
 
@@ -103,7 +111,7 @@ contract Topic {
   }
      
   function voteOption(uint option) public payable returns(bool){
-    require(!arbitratorAssigned[msg.sender]);
+    require(!selectedArbitrators[msg.sender].isAssigned);
 
     uint amount = msg.value;
     require(msg.value < 1 ether);
@@ -172,18 +180,17 @@ contract Topic {
   }
 
   function addArbitratorVote(bytes32 _option) public {
-    require(arbVotes[msg.sender].hasVoted == false); //no double voting
-    require(checkIfSelectedArbitrator());
-    arbVotes[msg.sender] = ArbitratorVote(true, _option);
+    require(!selectedArbitrators[msg.sender].hasVoted); //no double voting
+    require(selectedArbitrators[msg.sender].isAssigned);
+    selectedArbitrators[msg.sender].hasVoted = true;
+    selectedArbitrators[msg.sender].votedOption = _option;
     arbitratorsVotes[_option].push(msg.sender);
     countofArbVotes[_option]++;
   }
 
+  // Getter function for test
   function checkIfSelectedArbitrator() public view returns (bool) {
-    for (uint i = 0; i < arbitrators.length; i++){
-      if(arbitrators[i] == msg.sender) return true;
-    }
-    return false;
+    return selectedArbitrators[msg.sender].isAssigned;
   }
 
   /*
@@ -199,9 +206,8 @@ contract Topic {
     if (!hasTie) {
       resolveWithoutTie(winIndex);
     } else {
-      //resolveWithTie();
+      resolveWithTie();
       //get jury verdict, ie. count their votes --> TODO: write function for this, similar to getArbitratorVerdict()
-      //resolveWithoutTie(); 
     }
   }
 
@@ -222,6 +228,7 @@ contract Topic {
     return (hasTie, winningOption);
   }
 
+  // TODO: Payout to arbitrators, jury/creator
   function resolveWithoutTie(uint winIndex) public payable returns(uint) {
     PredictionMarket marketInstance = PredictionMarket(parentContract);
     uint temp = 0;
@@ -231,7 +238,7 @@ contract Topic {
           temp = temp + 10;
           if(j == winIndex){
             // marketInstance.updateWinScore(address(uint160(confirmedTrades[i].shareOwners[j])));
-          payoutToWinners(confirmedTrades[i].shareOwners[j]); 
+            payoutToWinners(confirmedTrades[i].shareOwners[j]); 
           } else {
             // marketInstance.updateLoseScore(confirmedTrades[i].shareOwners[j]);
           }
@@ -262,10 +269,10 @@ contract Topic {
       uint ptr = 0;
       for (uint k = 0; k < allArbitrators.length; k++) {
         address payable arb = allArbitrators[k];
-        if (arbitratorAssigned[arb] || arb == topicCreator) {
+        if (selectedArbitrators[arb].isAssigned || arb == topicCreator) {
           continue;
         }
-        juryAssigned[arb] = true;
+        selectedJurys[arb] = SelectedJury(true, false, bytes32(0));
         remainingArbitrators[ptr] = arb;
         ptr++;
       }
@@ -281,7 +288,7 @@ contract Topic {
 
     for (uint i = 0; i < allArbitrators.length; i++) {
       address payable arbitrator = allArbitrators[i];
-      if (arbitratorAssigned[arbitrator] || arbitrator == topicCreator) {
+      if (selectedArbitrators[arbitrator].isAssigned || arbitrator == topicCreator) {
         continue;
       }
       (,uint8 trustworthiness,) = marketInstance.arbitrators(arbitrator); // Access trustworthiness score of struct
@@ -300,8 +307,8 @@ contract Topic {
       uint next = uint(keccak256(abi.encodePacked(block.timestamp, msg.sender, nonce))) % ballotPointer;
       nonce++;
       address payable potential = ballot[next];
-      if (!juryAssigned[potential]) {
-        juryAssigned[potential] = true;
+      if (!selectedJurys[potential].isAssigned) {
+        selectedJurys[potential] = SelectedJury(true, false, bytes32(0));
         juryMemory[juryPointer] = potential;
         juryPointer++;
       }
