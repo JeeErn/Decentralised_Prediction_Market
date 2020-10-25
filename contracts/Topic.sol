@@ -18,6 +18,9 @@ contract Topic {
   // Private attributes
   address parentContract;
   uint16 nonce;
+  uint8 numArbitratorVoted;
+  uint numOfJury;
+  uint8 numJuryVoted;
 
   // Pending votes
   voteStruct[4] pendingVotes;
@@ -65,7 +68,7 @@ contract Topic {
   enum Phase { Open, Verification, Jury, Resolved }
   Phase public contractPhase = Phase.Open;
 
-  // FIXME: Ignore linter warning about visibility modifier being ignored. 
+  // NOTE: Ignore linter warning about visibility modifier being ignored. 
   // It is required for successful compilation
   constructor (
       address payable _creator, string memory _name, string memory _description, bytes32[] memory _options, 
@@ -81,7 +84,9 @@ contract Topic {
         expiryDate = _expiryDate;
         arbitrators = _arbitrators;
 
-        nonce = 23; // FIXME: Random number for the nonce
+        nonce = 23; // NOTE: Random number for the nonce
+        numArbitratorVoted = 0;
+        numJuryVoted = 0;
 
         // init pending votes
         for (uint i = 0; i < _options.length; i++) {
@@ -180,12 +185,38 @@ contract Topic {
   }
 
   function addArbitratorVote(bytes32 _option) public {
+    // Shift contract phase
+    if (contractPhase != Phase.Verification) { // TODO: Add check for expiry date as well!
+      contractPhase = Phase.Verification;
+    }
     require(!selectedArbitrators[msg.sender].hasVoted); //no double voting
     require(selectedArbitrators[msg.sender].isAssigned);
     selectedArbitrators[msg.sender].hasVoted = true;
     selectedArbitrators[msg.sender].votedOption = _option;
     arbitratorsVotes[_option].push(msg.sender);
     countofArbVotes[_option]++;
+
+    // Trigger resolve if all selected arbitrators have voted
+    numArbitratorVoted++;
+    if (numArbitratorVoted == arbitrators.length) {
+      resolve();
+    }
+  }
+
+  function addJuryVote(bytes32 _option) public {
+    require(contractPhase == Phase.Jury); // require it to be in jury phase
+    require(!selectedJurys[msg.sender].hasVoted); //no double voting
+    require(selectedJurys[msg.sender].isAssigned);
+    selectedJurys[msg.sender].hasVoted = true;
+    selectedJurys[msg.sender].votedOption = _option;
+    jurysVotes[_option].push(msg.sender);
+    countofJuryVotes[_option]++;
+
+    // Trigger resolve if all selected jury have voted
+    numJuryVoted++;
+    if (numJuryVoted == numOfJury) {
+      resolve();
+    }
   }
 
   // Getter function for test
@@ -197,18 +228,33 @@ contract Topic {
   resolve() will be called after all selected arbitrators have voted for the truth
   TODO: figure out how to make last arbitrator call resolve function and are we going to charge gas fees to last arbitrator? 
   */
-  function resolve() public {
-    // if(contractPhase == Phase.Jury){ 
-    //   resolveWithTie();
-    // }
+  function resolve() internal {
+    require(contractPhase != Phase.Open && contractPhase != Phase.Resolved);
+    if(contractPhase == Phase.Jury){ 
+      uint finalWinIndex = getJuryVerdict();
+      resolveWithoutTie(finalWinIndex);
+      return;
+    }
     
     (bool hasTie, uint winIndex) = getArbitratorVerdict();
     if (!hasTie) {
       resolveWithoutTie(winIndex);
     } else {
       resolveWithTie();
-      //get jury verdict, ie. count their votes --> TODO: write function for this, similar to getArbitratorVerdict()
     }
+  }
+
+  function getJuryVerdict() public view returns (uint) {
+    uint largest = 0;
+    uint winningOption;
+    for (uint i = 0; i < options.length; i++){
+      uint temp = countofJuryVotes[options[i]];
+      if (temp > largest){
+        largest = temp;
+        winningOption = i;
+      }
+    }
+    return winningOption;
   }
 
   function getArbitratorVerdict() public view returns (bool,uint){
@@ -230,7 +276,9 @@ contract Topic {
 
   // TODO: Payout to arbitrators, jury/creator
   function resolveWithoutTie(uint winIndex) public payable returns(uint) {
+    require(contractPhase != Phase.Open && contractPhase != Phase.Resolved); // Check required as function is public
     PredictionMarket marketInstance = PredictionMarket(parentContract);
+    contractPhase = Phase.Resolved;
     uint temp = 0;
     for(uint i = 0; i<confirmedTrades.length; i++){
       for(uint j = 0; j<confirmedTrades[i].shareOwners.length; j++){
@@ -252,6 +300,8 @@ contract Topic {
     winner.transfer(0.98 ether);
   }
  
+  // FIXME: Change visibility to internal before deploying on testnet!
+  // Use public for unit tests
   function resolveWithTie() public {
     contractPhase = Phase.Jury;
     selectJury();
@@ -279,6 +329,7 @@ contract Topic {
       // If less than diff arbitrators are selected (i.e. one of the remaining is the topic creator)
       // last address will be address(0)
       jury = remainingArbitrators;
+      numOfJury = ptr; // Ptr will indicate how many jury were selected in the end
       return;
     }
 
@@ -303,7 +354,10 @@ contract Topic {
     // Rechoose if address is already selected in the jury
     address payable[] memory juryMemory = new address payable[](5);
     uint juryPointer = 0;
-    while (juryPointer < 5) {
+    // Max tries is bounded by 51 => For 1st 4 jury, repeated hit their address again = 4 * 10, 
+    // 10 additional tries if creator is arbitrator, hence 51st try is guaranteed to resolve
+    uint8 triesLeft = 51; 
+    while (juryPointer < 5 && triesLeft > 0) {
       uint next = uint(keccak256(abi.encodePacked(block.timestamp, msg.sender, nonce))) % ballotPointer;
       nonce++;
       address payable potential = ballot[next];
@@ -312,8 +366,10 @@ contract Topic {
         juryMemory[juryPointer] = potential;
         juryPointer++;
       }
+      triesLeft--;
     }
     jury = juryMemory;
+    numOfJury = 5;
   }
 
   // ===================================================
@@ -378,4 +434,8 @@ contract Topic {
   // For testing purposes
   // ===================================================
   event UpdateWeightedVotes(address add, uint[2] beforeUpdate);
+
+  function getNumOfJurySelected() public view returns (uint) {
+    return numOfJury;
+  }
 }
