@@ -25,10 +25,13 @@ function useGetTopicInfo({ topicInstance, accountAddress, web3 }) {
   const [name, setName] = useState(null);
   const [balance, setBalance] = useState(null);
   const [optionNames, setOptionNames] = useState([]);
+  const [description, setDescription] = useState(null);
   const [optionPendingPrices, setOptionPendingPrices] = useState([]);
   const [lastTradedPrices, setLastTradedPrices] = useState([]);
   const [winScores, setWinScores] = useState([]);
   const [loseScores, setLoseScores] = useState([]);
+  const [arbitratorAddresses, setArbitratorAddresses] = useState([]);
+  const [contractPhase, setContractPhase] = useState(0);
 
   useEffect(() => {
     if (accountAddress && topicInstance) {
@@ -43,6 +46,11 @@ function useGetTopicInfo({ topicInstance, accountAddress, web3 }) {
       topicInstance.methods.name()
         .call({ from: accountAddress })
         .then((_name) => setName(_name));
+
+      // Get description
+      topicInstance.methods.description()
+        .call({ from: accountAddress })
+        .then((_des) => setDescription(_des));
 
       // Get options
       topicInstance.methods.getOptions()
@@ -76,8 +84,6 @@ function useGetTopicInfo({ topicInstance, accountAddress, web3 }) {
         .call({ from: accountAddress })
         .then((_winScores) => {
           const _score = _winScores.map((score) => parseInt(score, 16));
-          console.log(_score);
-
           setWinScores(_score);
         });
 
@@ -86,11 +92,24 @@ function useGetTopicInfo({ topicInstance, accountAddress, web3 }) {
         .call({ from: accountAddress })
         .then((_loseScores) => {
           const _score = _loseScores.map((score) => parseInt(score, 16));
-          console.log(_score);
           setLoseScores(_score);
         });
+
+      // Get all Arbitrator names
+      topicInstance.methods.getArbitrators()
+        .call({ from: accountAddress })
+        .then((_arbitratorAddresses) => {
+          setArbitratorAddresses(_arbitratorAddresses);
+        });
+
+      // Get topic status
+      topicInstance.methods.contractPhase()
+        .call({ from: accountAddress })
+        .then((_contractPhase) => {
+          setContractPhase(parseInt(_contractPhase, 10));
+        });
     }
-  }, [topicInstance, accountAddress, web3]);
+  }, [topicInstance, accountAddress, web3, contractPhase]);
 
   const parseOptionData = useCallback(() => {
     const options = [];
@@ -106,7 +125,9 @@ function useGetTopicInfo({ topicInstance, accountAddress, web3 }) {
     return options;
   }, [optionNames, optionPendingPrices, lastTradedPrices, winScores, loseScores]);
 
-  return { name, balance, options: parseOptionData() };
+  return {
+    name, description, balance, arbitratorAddresses, contractPhase, options: parseOptionData(),
+  };
 }
 
 export default useGetTopicInfo;
