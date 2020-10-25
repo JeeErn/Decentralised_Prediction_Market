@@ -167,8 +167,7 @@ contract("PredictionMarket", accounts => {
         assert.strictEqual(currentContractBalance.toString(), "1", "creator bond is transferred to contract's balance");
     });
 
-    //TODO: Change back to "it" when the require in the contract is uncommented
-    xit("does not allow user with no trading account to create a new topic", async () => {
+    it("does not allow user with no trading account to create a new topic", async () => {
         // set up variables
         const name = "test";
         const description = "test description foo bar";
@@ -297,5 +296,22 @@ contract("PredictionMarket", accounts => {
             const allTopicAddresses = await predictionMarketInstance.getAllTopics();
             assert.strictEqual(allTopicAddresses.length, 2, "only previously created topic still exist");
         };
+    });
+
+    context("with resolution", async () => {
+        it("should be able to increase winner winScore", async () => {
+            const winScore = await predictionMarketInstance.getWinScore(accounts[0]);
+            await predictionMarketInstance.updateWinScore(accounts[0]);
+            const newWinScore = await predictionMarketInstance.getWinScore(accounts[0]);
+            assert.strictEqual(Number(newWinScore), Number(winScore)+1);
+        });
+
+        it("should be able to increase loser loseScore", async () => {
+            const loser = await predictionMarketInstance.traders(accounts[1]);
+            const loseScore = await predictionMarketInstance.getWinScore(accounts[1]);
+            await predictionMarketInstance.updateLoseScore(accounts[1]);
+            const newLoseScore = await predictionMarketInstance.getLoseScore(accounts[1]);
+            assert.strictEqual(Number(newLoseScore), Number(loseScore)+1);
+        });
     });
 })
