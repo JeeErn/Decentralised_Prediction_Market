@@ -27,6 +27,9 @@ contract PredictionMarket {
     // Array of addresses of arbitrators to return to front end
     address payable[] arbitratorAddresses;
 
+    // Guard against reentrancy attacks
+    mapping (address => bool) transferredToWithinWindow;
+
     // Struct create functions
     function createTrader() public {
         address id = msg.sender;
@@ -148,6 +151,14 @@ contract PredictionMarket {
         return loser.loseScore;
     }
 
+    // Transfer creator bond function
+    function transferCreatorBond(address payable targetAddress, uint bondValue) external payable {
+        if (!transferredToWithinWindow[targetAddress]) {
+            transferredToWithinWindow[targetAddress] = true;
+            targetAddress.transfer(bondValue);
+            transferredToWithinWindow[targetAddress] = false;
+        }
+    }
 
     // ===============================================================
     // For testing purposes

@@ -22,6 +22,9 @@ contract Topic {
   uint numOfJury;
   uint8 numJuryVoted;
 
+  // Guard against reentrancy => applicable for all receivers of ether
+  mapping (address => bool) hasReceivedPayout;
+
   // Pending votes
   voteStruct[4] pendingVotes;
   struct voteStruct {
@@ -105,7 +108,7 @@ contract Topic {
     for(uint i=0; i<4; i++){
       address voterAddress = lastTrade.shareOwners[i]; 
       
-      if(voterAddress != address(0x0000000000000000000000000000000000000000)){
+      if(voterAddress != address(0)){
         // getVotersReputation only accepts a valid voterAddress. 
         uint[2] memory winLose = pm.getVotersReputation(voterAddress);   
         emit UpdateWeightedVotes(voterAddress, winLose);
@@ -173,6 +176,9 @@ contract Topic {
       for(uint i =0; i< 4; i++){
         pendingVotes[i].price =0; 
       }
+
+      // 6) Add to market cap for future payouts calculations
+      marketCap += 1 ether;
       return true;
     }
 
@@ -184,7 +190,7 @@ contract Topic {
     }
   }
 
-  function addArbitratorVote(bytes32 _option) public {
+  function addArbitratorVote(bytes32 _option, bool forUnitTest) public { // FIXME: Remove unit test options before deploying to testnet!
     // Shift contract phase
     if (contractPhase != Phase.Verification) { // TODO: Add check for expiry date as well!
       contractPhase = Phase.Verification;
@@ -200,11 +206,11 @@ contract Topic {
     numArbitratorVoted++;
     if (numArbitratorVoted == arbitrators.length) {
       emit ResolveCalled("Arbitrator");
-      resolve();
+      resolve(forUnitTest);
     }
   }
 
-  function addJuryVote(bytes32 _option) public {
+  function addJuryVote(bytes32 _option, bool forUnitTest) public { // FIXME: Remove unit test options before deploying to testnet!
     require(contractPhase == Phase.Jury); // require it to be in jury phase
     require(!selectedJurys[msg.sender].hasVoted); //no double voting
     require(selectedJurys[msg.sender].isAssigned);
@@ -217,7 +223,7 @@ contract Topic {
     numJuryVoted++;
     if (numJuryVoted == numOfJury) {
       emit ResolveCalled("Jury");
-      resolve();
+      resolve(forUnitTest);
     }
   }
 
@@ -234,19 +240,19 @@ contract Topic {
   event ResolveCalled(string source);
   event WinningOption(bytes32 option);
 
-  function resolve() internal {
+  function resolve(bool forUnitTest) internal { // FIXME: Remove unit test options before deploying to testnet!
     require(contractPhase != Phase.Open && contractPhase != Phase.Resolved);
     if(contractPhase == Phase.Jury){ 
       uint finalWinIndex = getJuryVerdict();
       emit WinningOption(options[finalWinIndex]);
-      resolveWithoutTie(finalWinIndex);
+      resolveWithoutTie(finalWinIndex, forUnitTest);
       return;
     }
     
     (bool hasTie, uint winIndex) = getArbitratorVerdict();
     if (!hasTie) {
       emit WinningOption(options[winIndex]);
-      resolveWithoutTie(winIndex);
+      resolveWithoutTie(winIndex, forUnitTest);
     } else {
       resolveWithTie();
     }
@@ -283,7 +289,7 @@ contract Topic {
   }
 
   // TODO: Payout to arbitrators, jury/creator
-  function resolveWithoutTie(uint winIndex) public payable returns(uint) {
+  function resolveWithoutTie(uint winIndex, bool forUnitTest) public payable returns(uint) { // FIXME: Remove unit test options before deploying to testnet!
     require(contractPhase != Phase.Open && contractPhase != Phase.Resolved); // Check required as function is public
     PredictionMarket marketInstance = PredictionMarket(parentContract);
     contractPhase = Phase.Resolved;
@@ -301,11 +307,59 @@ contract Topic {
         }
       }
     }
+    if (forUnitTest) {
+      return temp;
+    }
+    payoutToArbitrators(winIndex);
+    if (contractPhase != Phase.Jury) {
+      payoutToCreator();
+    } else {
+      payoutToJury(winIndex);
+    }
     return temp;
   }
 
+  function payoutToCreator() public payable {
+    if (!hasReceivedPayout[topicCreator]) {
+      hasReceivedPayout[topicCreator] = true;
+      topicCreator.transfer(uint(marketCap) / uint(100));
+      PredictionMarket marketInstance = PredictionMarket(parentContract);
+      marketInstance.transferCreatorBond(topicCreator, uint(creatorBond));
+    }
+  }
+
+  function payoutToJury(uint winIndex) public payable {
+    PredictionMarket marketInstance = PredictionMarket(parentContract);
+
+    // Creator bond is forfeited to the jury
+    marketInstance.transferCreatorBond(address(uint160(address(this))), uint(creatorBond));
+    uint juryShare = creatorBond + (uint(marketCap) / uint(100)); // integer division
+    bytes32 winningOption = options[winIndex];
+    uint numWinners = countofJuryVotes[winningOption];
+    for (uint i = 0; i < numWinners; i++) {
+      address payable winningJury = address(uint160(jurysVotes[winningOption][i]));
+      hasReceivedPayout[winningJury] = true;
+      winningJury.transfer(uint(juryShare) / uint(numWinners));
+    }
+  }
+
+  function payoutToArbitrators(uint winIndex) public payable {
+    uint arbitratorShare = uint(marketCap) / uint(100); // integer division
+    bytes32 winningOption = options[winIndex];
+    uint numWinners = countofArbVotes[winningOption];
+    for (uint i = 0; i < numWinners; i++) {
+      address payable winningArbitrator = address(uint160(arbitratorsVotes[winningOption][i]));
+      hasReceivedPayout[winningArbitrator] = true;
+      winningArbitrator.transfer(uint(arbitratorShare) / uint(numWinners));
+    }
+  }
+
   function payoutToWinners(address payable winner) public payable {
-    winner.transfer(0.98 ether);
+    if (!hasReceivedPayout[winner]) {
+      hasReceivedPayout[winner] = true;
+      winner.transfer(0.98 ether);
+      hasReceivedPayout[winner] = false; // set back to false in case trader bought more than 1 share
+    }
   }
  
   // FIXME: Change visibility to internal before deploying on testnet!
