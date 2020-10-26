@@ -96,8 +96,8 @@ contract("Topic", accounts => {
     context("with the addArbitratorVote and getArbitratorVerdict", async () => {
         const options = stringUtils.stringToBytes(["option 1", "option 2", "option 3", "option 4"]);
         it("should be able to add arbitrator's vote", async () => {
-            await resolveTopicInstance.addArbitratorVote(options[0], {from: accounts[9]});
-            await resolveTopicInstance.addArbitratorVote(options[3], {from: accounts[8]});
+            await resolveTopicInstance.addArbitratorVote(options[0], true, {from: accounts[9]});
+            await resolveTopicInstance.addArbitratorVote(options[3], true, {from: accounts[8]});
             const arbitratorNineVoteStatus = await resolveTopicInstance.selectedArbitrators(accounts[9]);
             const numVotesForOptionZero = await resolveTopicInstance.countofArbVotes(options[0]);
             const arbVotedAccNine = await resolveTopicInstance.arbitratorsVotes(options[0],0);
@@ -128,7 +128,7 @@ contract("Topic", accounts => {
         });
 
         it("should be able to get False hasTie condition and winning option", async () => {
-            await resolveTopicInstance.addArbitratorVote(options[3], {from: accounts[7]});
+            await resolveTopicInstance.addArbitratorVote(options[3], true, {from: accounts[7]});
             const result = await resolveTopicInstance.getArbitratorVerdict({from: accounts[7]});
             assert.isFalse(result[0]);
             assert.strictEqual(3,Number(result[1]));
@@ -334,8 +334,8 @@ contract("Topic", accounts => {
             // Call resolve with tie to select jury. Accounts[0, 2, 3] are jury
             await newTopicInstance.resolveWithTie();
 
-            await newTopicInstance.addJuryVote(options[0], {from: accounts[2]});
-            await newTopicInstance.addJuryVote(options[0], {from: accounts[3]});
+            await newTopicInstance.addJuryVote(options[0], true, {from: accounts[2]});
+            await newTopicInstance.addJuryVote(options[0], true, {from: accounts[3]});
             const juryTwoVoteStatus = await newTopicInstance.selectedJurys(accounts[2]);
             const numVotesForOptionZero = await newTopicInstance.countofJuryVotes(options[0]);
             const juryVotedAccTwo = await newTopicInstance.jurysVotes(options[0],0);
@@ -365,7 +365,7 @@ contract("Topic", accounts => {
             assert.isFalse(currentContractState.toString === "2", "current contract state is not jury");
 
             try {
-                await newTopicInstance.addJuryVote(options[0], {from: accounts[2]});
+                await newTopicInstance.addJuryVote(options[0], true, {from: accounts[2]});
             } catch (error) {
                 assert.isOk(error.message.indexOf("revert") >= 0, "error message must contain revert");
             }
@@ -390,7 +390,7 @@ contract("Topic", accounts => {
             await newTopicInstance.resolveWithTie();
 
             try {
-                await newTopicInstance.addJuryVote(options[0], {from: accounts[1]});
+                await newTopicInstance.addJuryVote(options[0], true, {from: accounts[1]});
             } catch (error) {
                 assert.isOk(error.message.indexOf("revert") >= 0, "error message must contain revert");
             }
@@ -414,11 +414,11 @@ contract("Topic", accounts => {
             // Call resolve with tie to select jury. Accounts[0, 2, 3] are jury
             await newTopicInstance.resolveWithTie();
 
-            await newTopicInstance.addJuryVote(options[0], {from: accounts[2]});
-            await newTopicInstance.addJuryVote(options[0], {from: accounts[3]});
+            await newTopicInstance.addJuryVote(options[0], true, {from: accounts[2]});
+            await newTopicInstance.addJuryVote(options[0], true, {from: accounts[3]});
 
             // Last jury accounts[0] vote
-            await newTopicInstance.addJuryVote(options[1], {from: accounts[0]}); 
+            await newTopicInstance.addJuryVote(options[1], true, {from: accounts[0]}); 
             events = await newTopicInstance.getPastEvents("ResolveCalled");
             assert.strictEqual(events.length, 1, "resolve is called automatically");
             assert.strictEqual(events[0].returnValues.source, "Jury", "resolve event is emitted from addJuryVote");
