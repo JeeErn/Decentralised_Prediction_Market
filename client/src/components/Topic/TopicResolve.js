@@ -29,7 +29,7 @@ const useStyles = makeStyles(() => ({
 
 // Resolve component for both Juror and Arbitrator
 function TopicResolve({
-  options, topicInstance, accountAddress, userType,
+  options, topicInstance, accountAddress, userType, winningOptionIndex,
 }) {
   const classes = useStyles();
   const [selectedOption, setSelectedOption] = useState(0);
@@ -54,6 +54,16 @@ function TopicResolve({
     }
   }, [accountAddress, options, selectedOption, topicInstance.methods]);
 
+  if (winningOptionIndex !== 10) {
+    const winningOptionName = options[winningOptionIndex].optionName;
+    return (
+      <MuiAlert elevation={0} variant="filled" severity="success">
+        This topic has been resolved, the final outcome is:
+        {' '}
+        {`${winningOptionName}`}
+      </MuiAlert>
+    );
+  }
   if (hasSubmittedResolve) {
     return (
       <MuiAlert elevation={0} variant="filled" severity="info">
@@ -64,12 +74,16 @@ function TopicResolve({
       </MuiAlert>
     );
   }
-  if (userType === 'juror') {
+  if (userType === 'juror' || userType === 'arbitrator') {
     return (
       <Accordion className={classes.root}>
         <AccordionSummary>
           <Typography>
-            You are a selected Juror for this topic. Click begin resolution.
+            You are a selected
+            {' '}
+            {`${userType}`}
+            {' '}
+            for this topic. Click begin resolution.
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
@@ -81,7 +95,7 @@ function TopicResolve({
               <TopicOptions options={options} selectedOption={selectedOption} setSelectedOption={setSelectedOption} />
             </Grid>
             <Grid item xs={12}>
-              <Button variant="contained" color="primary" className={classes.button} onClick={() => { handleResolveSubmit('juror'); }}>
+              <Button variant="contained" color="primary" className={classes.button} onClick={() => { handleResolveSubmit(userType); }}>
                 Submit
               </Button>
             </Grid>
@@ -90,31 +104,8 @@ function TopicResolve({
       </Accordion>
     );
   }
-  if (userType === 'arbitrator') {
-    return (
-      <Accordion className={classes.root}>
-        <AccordionSummary>
-          <Typography>
-            You are a selected arbitrator for this topic. Click begin resolution.
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Grid container>
-            <Grid item xs={12}>
-              <Typography variant="h6">What is the final result?</Typography>
-            </Grid>
-            <Grid item xs={12}>
-              <TopicOptions options={options} selectedOption={selectedOption} setSelectedOption={setSelectedOption} />
-            </Grid>
-            <Grid item xs={12}>
-              <Button variant="contained" color="primary" className={classes.button} onClick={() => { handleResolveSubmit('arbitrator'); }}>
-                Submit
-              </Button>
-            </Grid>
-          </Grid>
-        </AccordionDetails>
-      </Accordion>
-    );
+  if (userType === 'trader') {
+    return <></>;
   }
 }
 
