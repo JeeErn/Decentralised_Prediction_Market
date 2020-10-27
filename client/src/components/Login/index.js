@@ -32,18 +32,23 @@ function Login({ predictionMarketInstance, accountAddress }) {
   const classes = useStyles();
   const [name, setName] = useState('');
   const handleSignUp = (type) => {
-    if (type === 'arbitrator') {
+    if (type === 'trader and arbitrator') {
+      predictionMarketInstance.methods.createTrader()
+        .send({ from: accountAddress })
+        .then((receipt) => {
+          window.location.reload(false);
+        });
       predictionMarketInstance.methods.createArbitrator(Web3.utils.asciiToHex(name))
         .send({ from: accountAddress })
         .then((receipt) => {
-          console.log(receipt);
+          window.location.reload(false);
         });
     }
     if (type === 'trader') {
       predictionMarketInstance.methods.createTrader()
         .send({ from: accountAddress })
         .then((receipt) => {
-          console.log(receipt);
+          window.location.reload(false);
         });
     }
   };
@@ -53,11 +58,11 @@ function Login({ predictionMarketInstance, accountAddress }) {
         Welcome to Decentralised Betting Platform
       </Typography>
       <TextField className={classes.textField} label="name" value={name} onChange={(event) => { setName(event.target.value); }} />
-      <Button color="primary" variant="contained" className={classes.button} onClick={() => handleSignUp('arbitrator')}>
-        Sign up as Arbitrator
+      <Button color="primary" variant="contained" className={classes.button} onClick={() => handleSignUp('trader and arbitrator')}>
+        Sign up as an Arbitrator and Trader
       </Button>
       <Button color="primary" variant="contained" className={classes.button} onClick={() => handleSignUp('trader')}>
-        Sign up as Trader
+        Sign up only as a Trader
       </Button>
     </Paper>
   );

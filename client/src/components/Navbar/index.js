@@ -21,19 +21,25 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Navbar({ userType, reputation }) {
+export default function Navbar({ userType, reputation, arbitratorName }) {
   const classes = useStyles();
-
   return (
     <div className={classes.root}>
       <AppBar position="static" color="transparent">
         <Toolbar>
-          <Typography variant="h6" className={classes.title} align="left">
+          <Typography variant="" className={classes.title} align="left">
             {`${userType} account`}
           </Typography>
-          <Typography variant="h6" className={classes.title} align="left">
-            {`Reputation: ${reputation}`}
+          <Typography variant="" className={classes.title} align="left">
+            {`Trader Reputation: ${reputation}`}
           </Typography>
+          {
+            arbitratorName && (
+            <Typography variant="" className={classes.title} align="left">
+              {`Arbitrator Name: ${arbitratorName}`}
+            </Typography>
+            )
+          }
         </Toolbar>
       </AppBar>
     </div>

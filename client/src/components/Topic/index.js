@@ -8,7 +8,6 @@ import {
 import useGetTopicInfo from './hooks/useGetTopicInfo';
 import TopicProperty from './TopicProperty';
 import TopicVotingBox from './TopicVotingBox';
-import useShouldRenderResolveButton from './hooks/useShouldRenderResolveButton';
 import TopicResolve from './TopicResolve';
 // TODO: Bring this hook out of create topic
 import useGetArbitrators from '../CreateTopic/hooks/useGetArbitrators';
@@ -38,12 +37,14 @@ function Topic({
 }) {
   const classes = useStyles();
   const {
-    name, description, balance, options, arbitratorAddresses, contractPhase,
+    name, description, balance, options, arbitratorAddresses, contractPhase, juryAddresses,
   } = useGetTopicInfo({ topicInstance, accountAddress, web3 });
 
   const { arbitrators, arbitratorNames } = useGetArbitrators({ predictionMarketInstance });
 
-  const renderResolveButton = useShouldRenderResolveButton({ topicInstance, accountAddress });
+  // Bad complexity but can do for small array
+  const isJuror = juryAddresses.includes(accountAddress);
+  const isArbitrator = arbitratorAddresses.includes(accountAddress);
 
   return contractPhase === contractPhaseFilter
     ? (
@@ -68,6 +69,13 @@ function Topic({
                   {' '}
                 </Typography>
               ))}
+              <br />
+              {contractPhase === 2 && <Typography display="inline" className={classes.arbitratorNames}>Selected Jurors: </Typography>}
+              {contractPhase === 2 && getArbitratorNamesFromAddress({ selectedAddresses: juryAddresses, allAddresses: arbitrators, allNames: arbitratorNames }).map((_name) => (
+                <Typography display="inline" className={classes.arbitratorNames}>
+                  {_name}
+                </Typography>
+              ))}
             </Grid>
             <Grid container item xs={12} spacing={10}>
               <TopicProperty title="Weighted Probability" options={options} propKey="weightedScore" />
@@ -77,7 +85,7 @@ function Topic({
             <Grid container item xs={12}>
               <Grid container item xs direction="column" align="center">
                 <Typography variant="h6"> Num Successful Trades</Typography>
-                <Typography>60</Typography>
+                <Typography>{ Math.floor(balance)}</Typography>
               </Grid>
               <Grid container item xs direction="column" align="center">
                 <Typography variant="h6"> Market Cap</Typography>
@@ -86,13 +94,23 @@ function Topic({
             </Grid>
 
           </Grid>
-          <Grid item xs={3}>
-            {options && <TopicVotingBox options={options} web3={web3} topicInstance={topicInstance} accountAddress={accountAddress} />}
-          </Grid>
+          {
+            contractPhaseFilter === 0
+            && (
+            <Grid item xs={3}>
+              {options && <TopicVotingBox options={options} web3={web3} topicInstance={topicInstance} accountAddress={accountAddress} />}
+            </Grid>
+            )
+          }
 
           <Grid item xs={12}>
-            { renderResolveButton && (
-            <TopicResolve options={options} />
+            { isArbitrator && (
+            <TopicResolve options={options} topicInstance={topicInstance} accountAddress={accountAddress} userType="arbitrator" />
+            )}
+          </Grid>
+          <Grid item xs={12}>
+            { isJuror && (
+            <TopicResolve options={options} topicInstance={topicInstance} accountAddress={accountAddress} userType="juror" />
             )}
           </Grid>
         </Grid>

@@ -15,7 +15,6 @@ contract PredictionMarket {
         uint8 trustworthiness;
         bool isValid;
     }
-
     // Maps of addresses to different entities
     mapping (address => Trader) public traders;
     mapping (address => Arbitrator) public arbitrators;
@@ -56,6 +55,10 @@ contract PredictionMarket {
         return arbitratorAddresses;
     }
 
+    function getArbitratorName() public view returns (bytes32){
+        return arbitrators[msg.sender].displayName;
+    }
+
     function getAllArbitratorNames() public view returns (bytes32[] memory) {
         uint len = arbitratorAddresses.length;
         bytes32[] memory names = new bytes32[](len);
@@ -77,6 +80,11 @@ contract PredictionMarket {
     // AUTHENTICATION
     function checkIdentity() public view returns (bytes32) {
         // Check if user is a trader
+        if(traders[msg.sender].isValid && arbitrators[msg.sender].isValid){
+            return bytes32("Trader and Arbitrator");
+        }
+
+        // Check if user is a trader
         if(traders[msg.sender].isValid){
             return bytes32("Trader");
         }
@@ -89,6 +97,7 @@ contract PredictionMarket {
     }
 
     // Check if a trader is valid, this is called from external contracts/ views
+    // This function is for internal use between contracts only
     function checkValidTrader(address trader) public view returns (bool) {
         return traders[trader].isValid;
     }
