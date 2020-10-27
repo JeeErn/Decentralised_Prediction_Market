@@ -71,6 +71,18 @@ contract PredictionMarket {
         return names;
     }
 
+    function getArbitratorReputations() public view returns (uint[] memory) {
+        uint len = arbitratorAddresses.length;
+        uint[] memory reputations = new uint[](len);
+
+        for (uint i = 0; i < len; i++) {
+            address arbitratorAddress = arbitratorAddresses[i];
+            Arbitrator memory arbitrator = arbitrators[arbitratorAddress];
+            reputations[i] = arbitrator.trustworthiness;
+        }
+        return reputations;
+    }
+
     //VOTER'S REPUTATION 
     function getVotersReputation(address id) public view returns (uint[2] memory){
         require(traders[id].isValid);
