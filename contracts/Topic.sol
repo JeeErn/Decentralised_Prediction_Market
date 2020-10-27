@@ -150,7 +150,7 @@ contract Topic {
         tempTrade[i] = pendingVotes[i].voter;
       }
     }
-    
+
     // Update hasBoughtShare
     hasBoughtShare[msg.sender] = true;
     
@@ -304,7 +304,6 @@ contract Topic {
   function resolveWithoutTie(uint winIndex, bool forUnitTest) public payable returns(uint) { // FIXME: Remove unit test options before deploying to testnet!
     require(contractPhase != Phase.Open && contractPhase != Phase.Resolved); // Check required as function is public
     PredictionMarket marketInstance = PredictionMarket(parentContract);
-    contractPhase = Phase.Resolved;
     uint temp = 0;
     for(uint i = 0; i<confirmedTrades.length; i++){
       for(uint j = 0; j<confirmedTrades[i].shareOwners.length; j++){
@@ -319,15 +318,15 @@ contract Topic {
         }
       }
     }
-    if (forUnitTest) {
-      return temp;
+    if (!forUnitTest) {
+      payoutToArbitrators(winIndex);
+      if (contractPhase != Phase.Jury) {
+        payoutToCreator();
+      } else {
+        payoutToJury(winIndex);
+      }
     }
-    payoutToArbitrators(winIndex);
-    if (contractPhase != Phase.Jury) {
-      payoutToCreator();
-    } else {
-      payoutToJury(winIndex);
-    }
+    contractPhase = Phase.Resolved;
     return temp;
   }
 
@@ -344,14 +343,15 @@ contract Topic {
     PredictionMarket marketInstance = PredictionMarket(parentContract);
 
     // Creator bond is forfeited to the jury
-    marketInstance.transferCreatorBond(address(uint160(address(this))), uint(creatorBond));
-    uint juryShare = creatorBond + (uint(marketCap) / uint(100)); // integer division
+    uint juryShare = (uint(marketCap) / uint(100)); // integer division
     bytes32 winningOption = options[winIndex];
     uint numWinners = countofJuryVotes[winningOption];
     for (uint i = 0; i < numWinners; i++) {
       address payable winningJury = address(uint160(jurysVotes[winningOption][i]));
       hasReceivedPayout[winningJury] = true;
-      winningJury.transfer(uint(juryShare) / uint(numWinners));
+      uint transferAmount = uint(juryShare) / uint(numWinners);
+      marketInstance.transferCreatorBond(winningJury, (uint(creatorBond) / numWinners));
+      winningJury.transfer(transferAmount);
     }
   }
 

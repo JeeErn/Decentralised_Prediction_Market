@@ -7,6 +7,10 @@ import { makeStyles, Grid, Typography } from '@material-ui/core';
 const useStyles = makeStyles(() => ({
   root: {
     textAlign: 'center',
+
+  },
+  info: {
+    color: '#666666',
   },
   header: {
     fontWeight: '500',
@@ -17,13 +21,13 @@ const useStyles = makeStyles(() => ({
 function TopicProperty({ title, options, propKey }) {
   const classes = useStyles();
   return (
-    <Grid item container xs className={classes.root}>
+    <Grid item container xs className={classes.root} spacing={1}>
       <Grid item xs={12}>
-        <Typography center variant="h6">
+        <Typography center>
           {title}
         </Typography>
       </Grid>
-      <Grid item xs={12} container>
+      <Grid item xs={12} container className={classes.info}>
         {options.map((option, index) => (
           <Grid item container xs direction="column" key={index}>
             <Grid item xs>{option.optionName}</Grid>

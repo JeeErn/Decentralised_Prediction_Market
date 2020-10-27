@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable react/prop-types */
 /* eslint-disable react/jsx-filename-extension */
 /* eslint-disable max-len */
@@ -28,6 +29,12 @@ const useStyles = makeStyles(() => ({
     color: '#888888',
     fontSize: '0.9em',
   },
+  marketCapContainer: {
+    borderRight: '1px solid #DDDDDD',
+  },
+  marketCap: {
+    color: '#888888',
+  },
 
 }));
 
@@ -37,7 +44,7 @@ function Topic({
 }) {
   const classes = useStyles();
   const {
-    name, description, balance, options, arbitratorAddresses, contractPhase, juryAddresses,
+    name, description, balance, options, arbitratorAddresses, contractPhase, juryAddresses, winningOptionIndex,
   } = useGetTopicInfo({ topicInstance, accountAddress, web3 });
 
   const { arbitrators, arbitratorNames } = useGetArbitrators({ predictionMarketInstance });
@@ -46,11 +53,22 @@ function Topic({
   const isJuror = juryAddresses.includes(accountAddress);
   const isArbitrator = arbitratorAddresses.includes(accountAddress);
 
+  // Minor logic to make code cleaner. 10 is the default index
+  const userType = isJuror ? 'juror' : (isArbitrator ? 'arbitrator' : 'trader');
+
   return contractPhase === contractPhaseFilter
     ? (
       <Paper className={classes.root}>
         <Grid container spacing={2}>
-          <Grid container item xs={9} spacing={3}>
+          <Grid container item direction="column" xs={1} className={classes.marketCapContainer}>
+            <Grid container item xs direction="column" align="center">
+              <Typography className={classes.marketCap}> Market Cap</Typography>
+              <Typography variant="h2">{`${balance}`}</Typography>
+              <Typography className={classes.marketCap}>eth</Typography>
+
+            </Grid>
+          </Grid>
+          <Grid container item xs={8} spacing={3} style={{ paddingLeft: '1em' }}>
             <Grid item xs={12} className={classes.header}>
               <Typography variant="h5">
                 {' '}
@@ -82,16 +100,6 @@ function Topic({
               <TopicProperty title="Last Traded Price" options={options} propKey="lastTradedPrices" />
               <TopicProperty title="Pending Price" options={options} propKey="pendingVotePrice" />
             </Grid>
-            <Grid container item xs={12}>
-              <Grid container item xs direction="column" align="center">
-                <Typography variant="h6"> Num Successful Trades</Typography>
-                <Typography>{ Math.floor(balance)}</Typography>
-              </Grid>
-              <Grid container item xs direction="column" align="center">
-                <Typography variant="h6"> Market Cap</Typography>
-                <Typography>{`${balance} eth`}</Typography>
-              </Grid>
-            </Grid>
 
           </Grid>
           {
@@ -103,16 +111,12 @@ function Topic({
             )
           }
 
+          {/* WinningOptionIndex Might Be 0 */}
+          {options && winningOptionIndex !== null && (
           <Grid item xs={12}>
-            { isArbitrator && (
-            <TopicResolve options={options} topicInstance={topicInstance} accountAddress={accountAddress} userType="arbitrator" />
-            )}
+            <TopicResolve options={options} topicInstance={topicInstance} accountAddress={accountAddress} userType={userType} winningOptionIndex={winningOptionIndex} />
           </Grid>
-          <Grid item xs={12}>
-            { isJuror && (
-            <TopicResolve options={options} topicInstance={topicInstance} accountAddress={accountAddress} userType="juror" />
-            )}
-          </Grid>
+          )}
         </Grid>
       </Paper>
     ) : (<></>);

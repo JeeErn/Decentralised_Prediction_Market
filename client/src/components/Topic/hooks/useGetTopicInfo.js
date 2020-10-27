@@ -33,6 +33,7 @@ function useGetTopicInfo({ topicInstance, accountAddress, web3 }) {
   const [arbitratorAddresses, setArbitratorAddresses] = useState([]);
   const [contractPhase, setContractPhase] = useState(null);
   const [juryAddresses, setJuryAddresses] = useState([]);
+  const [winningOptionIndex, setWinningOptionIndex] = useState(null);
 
   useEffect(() => {
     if (accountAddress && topicInstance) {
@@ -116,6 +117,13 @@ function useGetTopicInfo({ topicInstance, accountAddress, web3 }) {
         .then((_contractPhase) => {
           setContractPhase(parseInt(_contractPhase, 10));
         });
+
+      // Get final outcome if valid
+      topicInstance.methods.winningOptionIndex()
+        .call({ from: accountAddress })
+        .then((_winningOption) => {
+          setWinningOptionIndex(parseInt(_winningOption, 10));
+        });
     }
   }, [topicInstance, accountAddress, web3, contractPhase]);
 
@@ -134,7 +142,7 @@ function useGetTopicInfo({ topicInstance, accountAddress, web3 }) {
   }, [optionNames, optionPendingPrices, lastTradedPrices, winScores, loseScores]);
 
   return {
-    name, description, balance, arbitratorAddresses, juryAddresses, contractPhase, options: parseOptionData(),
+    name, description, balance, arbitratorAddresses, juryAddresses, contractPhase, options: parseOptionData(), winningOptionIndex,
   };
 }
 
