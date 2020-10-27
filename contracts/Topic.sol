@@ -492,6 +492,14 @@ contract Topic {
     return jury;
   }
 
+  function hasArbitratorVoted(address arbitratorAddress) public view returns (bool) {
+    return selectedArbitrators[arbitratorAddress].hasVoted;
+  }
+
+  function hasJuryVoted(address juryAddress) public view returns (bool) {
+    return selectedJurys[juryAddress].hasVoted;
+  }
+
   // ===================================================
   // For testing purposes
   // ===================================================
