@@ -295,6 +295,11 @@ contract Topic {
     return (hasTie, winningOption);
   }
 
+  function testUpdateWinScore() public {
+    PredictionMarket marketInstance = PredictionMarket(parentContract);
+    marketInstance.updateWinScore(address(uint160(confirmedTrades[0].shareOwners[0])));
+  }
+
   // TODO: Payout to arbitrators, jury/creator
   function resolveWithoutTie(uint winIndex, bool forUnitTest) public payable returns(uint) { // FIXME: Remove unit test options before deploying to testnet!
     require(contractPhase != Phase.Open && contractPhase != Phase.Resolved); // Check required as function is public
@@ -306,10 +311,10 @@ contract Topic {
         if (confirmedTrades[i].shareOwners[j] != address(uint160(0x0))){
           temp = temp + 10;
           if(j == winIndex){
-            // marketInstance.updateWinScore(address(uint160(confirmedTrades[i].shareOwners[j])));
+            marketInstance.updateWinScore(address(uint160(confirmedTrades[i].shareOwners[j])));
             payoutToWinners(confirmedTrades[i].shareOwners[j]); 
           } else {
-            // marketInstance.updateLoseScore(confirmedTrades[i].shareOwners[j]);
+            marketInstance.updateLoseScore(confirmedTrades[i].shareOwners[j]);
           }
         }
       }
