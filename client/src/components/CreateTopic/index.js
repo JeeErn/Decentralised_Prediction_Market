@@ -69,7 +69,7 @@ function CreateTopic({ predictionMarketInstance, accountAddress }) {
   const [creatorBond, setCreatorBond] = useState(0.1);
   const [open, setOpen] = useState(false);
 
-  const { arbitrators, arbitratorNames } = useGetArbitrators({ predictionMarketInstance });
+  const { arbitrators, arbitratorNames, arbitratorReputations } = useGetArbitrators({ predictionMarketInstance });
 
   const handleCreateTopic = useCallback(() => {
     const options32Bytes = options.map((option) => Web3.utils.fromAscii(option));
@@ -154,7 +154,12 @@ function CreateTopic({ predictionMarketInstance, accountAddress }) {
                   MenuProps={MenuProps}
                   onChange={(event) => { setSelectedArbitrators(event.target.value); }}
                 >
-                  {arbitratorNames.map((arbName) => <MenuItem value={arbName}>{arbName}</MenuItem>)}
+                  {arbitratorNames.map((arbName, index) => (
+                    <MenuItem value={arbName}>
+                      {`${arbName} - Reputation: ${arbitratorReputations[index]}`}
+                      {' '}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>
