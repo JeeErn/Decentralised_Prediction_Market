@@ -14,6 +14,7 @@ contract Topic {
   uint256 public expiryDate;
   address payable[] public arbitrators;
   address payable[] public jury;
+  uint public winningOptionIndex;
 
   // Private attributes
   address parentContract;
@@ -21,6 +22,7 @@ contract Topic {
   uint8 numArbitratorVoted;
   uint numOfJury;
   uint8 numJuryVoted;
+  mapping (address => bool) hasBoughtShare;
 
   // Guard against reentrancy => applicable for all receivers of ether
   mapping (address => bool) hasReceivedPayout;
@@ -90,6 +92,7 @@ contract Topic {
         nonce = 23; // NOTE: Random number for the nonce
         numArbitratorVoted = 0;
         numJuryVoted = 0;
+        winningOptionIndex = 10; // Assign random value not within [0, 3]
 
         // init pending votes
         for (uint i = 0; i < _options.length; i++) {
@@ -147,6 +150,9 @@ contract Topic {
         tempTrade[i] = pendingVotes[i].voter;
       }
     }
+    
+    // Update hasBoughtShare
+    hasBoughtShare[msg.sender] = true;
     
     // If vote can go through
     if(balance <= amount){
@@ -240,20 +246,19 @@ contract Topic {
   NOTE: Events for testing purpose. Can see if FE requires events as well else remove before deployment on testnet
   */
   event ResolveCalled(string source);
-  event WinningOption(bytes32 option);
 
   function resolve(bool forUnitTest) internal { // FIXME: Remove unit test options before deploying to testnet!
     require(contractPhase != Phase.Open && contractPhase != Phase.Resolved);
     if(contractPhase == Phase.Jury){ 
       uint finalWinIndex = getJuryVerdict();
-      emit WinningOption(options[finalWinIndex]);
+      winningOptionIndex = finalWinIndex;
       resolveWithoutTie(finalWinIndex, forUnitTest);
       return;
     }
     
     (bool hasTie, uint winIndex) = getArbitratorVerdict();
     if (!hasTie) {
-      emit WinningOption(options[winIndex]);
+      winningOptionIndex = winIndex;
       resolveWithoutTie(winIndex, forUnitTest);
     } else {
       resolveWithTie();
@@ -383,7 +388,7 @@ contract Topic {
       uint ptr = 0;
       for (uint k = 0; k < allArbitrators.length; k++) {
         address payable arb = allArbitrators[k];
-        if (selectedArbitrators[arb].isAssigned || arb == topicCreator) {
+        if (selectedArbitrators[arb].isAssigned || arb == topicCreator || hasBoughtShare[arb]) {
           continue;
         }
         selectedJurys[arb] = SelectedJury(true, false, bytes32(0));
@@ -403,7 +408,7 @@ contract Topic {
 
     for (uint i = 0; i < allArbitrators.length; i++) {
       address payable arbitrator = allArbitrators[i];
-      if (selectedArbitrators[arbitrator].isAssigned || arbitrator == topicCreator) {
+      if (selectedArbitrators[arbitrator].isAssigned || arbitrator == topicCreator || hasBoughtShare[arbitrator]) {
         continue;
       }
       (,uint8 trustworthiness,) = marketInstance.arbitrators(arbitrator); // Access trustworthiness score of struct
@@ -433,7 +438,7 @@ contract Topic {
       triesLeft--;
     }
     jury = juryMemory;
-    numOfJury = 5;
+    numOfJury = juryPointer; // Jury pointer would indicate number of jury members finally selected. Should be 5 but can be lower in edge cases
   }
 
   // ===================================================
