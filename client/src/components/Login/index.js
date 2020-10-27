@@ -35,19 +35,19 @@ function Login({ predictionMarketInstance, accountAddress }) {
     if (type === 'trader and arbitrator') {
       predictionMarketInstance.methods.createTrader()
         .send({ from: accountAddress })
-        .then((receipt) => {
+        .then(() => {
           window.location.reload(false);
         });
       predictionMarketInstance.methods.createArbitrator(Web3.utils.asciiToHex(name))
         .send({ from: accountAddress })
-        .then((receipt) => {
+        .then(() => {
           window.location.reload(false);
         });
     }
     if (type === 'trader') {
       predictionMarketInstance.methods.createTrader()
         .send({ from: accountAddress })
-        .then((receipt) => {
+        .then(() => {
           window.location.reload(false);
         });
     }

@@ -2,7 +2,7 @@
 /* eslint-disable max-len */
 /* eslint-disable react/jsx-filename-extension */
 import {
-  Accordion, AccordionDetails, AccordionSummary, Button, Typography, makeStyles, Grid, Paper, Snackbar,
+  Accordion, AccordionDetails, AccordionSummary, Button, Typography, makeStyles, Grid,
 } from '@material-ui/core';
 import MuiAlert from '@material-ui/lab/Alert';
 
