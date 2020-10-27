@@ -120,6 +120,7 @@ contract Topic {
      
   function voteOption(uint option) public payable returns(bool){
     require(!selectedArbitrators[msg.sender].isAssigned);
+    require(contractPhase == Phase.Open);
 
     uint amount = msg.value;
     require(msg.value < 1 ether);
@@ -192,9 +193,10 @@ contract Topic {
 
   function addArbitratorVote(bytes32 _option, bool forUnitTest) public { // FIXME: Remove unit test options before deploying to testnet!
     // Shift contract phase
-    if (contractPhase != Phase.Verification) { // TODO: Add check for expiry date as well!
+    if (contractPhase == Phase.Open) { // TODO: Add check for expiry date as well!
       contractPhase = Phase.Verification;
     }
+    require(contractPhase == Phase.Verification);
     require(!selectedArbitrators[msg.sender].hasVoted); //no double voting
     require(selectedArbitrators[msg.sender].isAssigned);
     selectedArbitrators[msg.sender].hasVoted = true;
@@ -369,7 +371,7 @@ contract Topic {
     selectJury();
   }
 
-  function selectJury() public {
+  function selectJury() internal {
     PredictionMarket marketInstance = PredictionMarket(parentContract);
     address payable[] memory allArbitrators = marketInstance.getAllArbitrators();
 
@@ -507,5 +509,11 @@ contract Topic {
 
   function getNumOfJurySelected() public view returns (uint) {
     return numOfJury;
+  }
+
+  function getLastConfirmedTradeAddresses() public view returns (address, address, address, address) {
+    trade memory lastConfirmedTrade = confirmedTrades[confirmedTrades.length - 1];
+    address payable[4] memory tradeOwners = lastConfirmedTrade.shareOwners;
+    return (tradeOwners[0], tradeOwners[1], tradeOwners[2], tradeOwners[3]);
   }
 }
