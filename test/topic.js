@@ -423,10 +423,8 @@ contract("Topic", accounts => {
             assert.strictEqual(events.length, 1, "resolve is called automatically");
             assert.strictEqual(events[0].returnValues.source, "Jury", "resolve event is emitted from addJuryVote");
 
-            events = await newTopicInstance.getPastEvents("WinningOption");
-            assert.strictEqual(events.length, 1, "1 winning option is selected after resolve");
-            const winningOption = stringUtils.bytesToString(events[0].returnValues.option);
-            assert.strictEqual(winningOption, options[0], "options 0 is determined as winning option");
+            const winningOptionIndex = await newTopicInstance.winningOptionIndex();
+            assert.strictEqual(winningOptionIndex.toString(), "0", "options 0 is determined as winning option");
         });
     });
 })
