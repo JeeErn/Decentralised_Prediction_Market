@@ -25,6 +25,7 @@ const useStyles = makeStyles(() => ({
     padding: '10px',
     transform: 'translate(-50%,-50%)',
   },
+
 }));
 
 function TopicVotingBox({

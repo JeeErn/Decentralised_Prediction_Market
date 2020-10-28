@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 /* eslint-disable max-len */
 /* eslint-disable react/prop-types */
 /* eslint-disable react/jsx-filename-extension */
@@ -12,7 +13,7 @@
 import {
   Button, makeStyles, Modal, Typography, Paper, TextField, Grid, MenuItem, Select, FormControl, InputLabel, Input, Chip,
 } from '@material-ui/core';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import Web3 from 'web3';
 import useGetArbitrators from './hooks/useGetArbitrators';
 
@@ -49,6 +50,25 @@ const MenuProps = {
   },
 };
 
+// TODO: CAN OPTIMIZE - SCALABILITY PROBLEM
+// Filters arbitrators to not include the current user
+const filterArbitrators = ({
+  arbitratorNames, arbitratorReputations, arbitrators, accountAddress,
+}) => {
+  const _names = [];
+  const _reps = [];
+  const _add = [];
+  arbitrators.forEach((add, index) => {
+    if (add !== accountAddress) {
+      _names.push(arbitratorNames[index]);
+      _reps.push(arbitratorReputations[index]);
+      _add.push(add);
+    }
+  });
+  return { arbitratorNames: _names, arbitratorReputations: _reps, arbitrators: _add };
+};
+
+// TODO: CAN OPTIMIZE - SCALABILITY PROBLEM
 // BAD STRUCTURE OF GETTING NAMES (POOR COMPLEXITY) - Change this if scalability is a concern or solidity does not return deterministic orders of arrays.
 const getSelectedArbitratorAddresses = (selectedArbitrators, arbitrators, arbitratorNames) => {
   const selectedAddresses = [];
@@ -68,8 +88,9 @@ function CreateTopic({ predictionMarketInstance, accountAddress }) {
   const [selectedArbitrators, setSelectedArbitrators] = useState([]);
   const [creatorBond, setCreatorBond] = useState(0.1);
   const [open, setOpen] = useState(false);
-
-  const { arbitrators, arbitratorNames, arbitratorReputations } = useGetArbitrators({ predictionMarketInstance });
+  const arbitratorInfo = useGetArbitrators({ predictionMarketInstance });
+  // Excludes the current user
+  const { arbitrators, arbitratorNames, arbitratorReputations } = useMemo(() => (arbitratorInfo ? filterArbitrators({ accountAddress, ...arbitratorInfo }) : {}), [arbitratorInfo, accountAddress]);
 
   const handleCreateTopic = useCallback(() => {
     const options32Bytes = options.map((option) => Web3.utils.fromAscii(option));
@@ -88,15 +109,15 @@ function CreateTopic({ predictionMarketInstance, accountAddress }) {
     const temp = [...options];
     temp[index] = event.target.value;
     setOptions(temp);
-  });
+  }, [options]);
 
   const handleModalOpen = useCallback(() => {
     setOpen(true);
-  });
+  }, [setOpen]);
 
   const handleClose = useCallback(() => {
     setOpen(false);
-  });
+  }, [setOpen]);
 
   return (
     predictionMarketInstance

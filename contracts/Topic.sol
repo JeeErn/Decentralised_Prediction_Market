@@ -45,6 +45,7 @@ contract Topic {
   trade[] confirmedTrades;
   struct trade {
     address payable[4] shareOwners;
+    uint[4] price;
   }
 
   // Arbitrator voting related variables
@@ -71,7 +72,7 @@ contract Topic {
   // State of contract
   // 0 => Open, 1 => Arbitrator Voting, 2 => Jury Voting, 3 => Resolved / closed
   enum Phase { Open, Verification, Jury, Resolved }
-  Phase public contractPhase = Phase.Open;
+  Phase public contractPhase;
 
   // NOTE: Ignore linter warning about visibility modifier being ignored. 
   // It is required for successful compilation
@@ -88,6 +89,7 @@ contract Topic {
         creatorBond = _bondValue;
         expiryDate = _expiryDate;
         arbitrators = _arbitrators;
+        contractPhase = Phase.Open;
 
         nonce = 23; // NOTE: Random number for the nonce
         numArbitratorVoted = 0;
@@ -121,7 +123,11 @@ contract Topic {
     }
   }
      
-  function voteOption(uint option) public payable returns(bool){
+  function voteOption(uint option, uint256 timeStamp) public payable returns (bool) {
+    if (timeStamp > expiryDate) {
+      openPhaseToVerificationPhase();
+      return false;
+    }
     require(!selectedArbitrators[msg.sender].isAssigned);
     require(contractPhase == Phase.Open);
 
@@ -143,11 +149,13 @@ contract Topic {
 
     // Entry to insert into the confirmed trades if vote goes through
     address payable[4] memory tempTrade;
+    uint[4] memory tempPrice;
 
     for(uint i=0; i< 4; i++){
       if(i != option){
         balance = balance - pendingVotes[i].price; 
         tempTrade[i] = pendingVotes[i].voter;
+        tempPrice[i] = pendingVotes[i].price;
       }
     }
 
@@ -159,7 +167,8 @@ contract Topic {
       
       // 1) Confirm the trade by putting it into trade confirmed
       tempTrade[option] = msg.sender;
-      trade memory tradeConfirmed = trade(tempTrade);
+      tempPrice[option] = balance;
+      trade memory tradeConfirmed = trade(tempTrade, tempPrice);
       confirmedTrades.push(tradeConfirmed);
       
       // 2) Update the lastTradedPrices
@@ -181,7 +190,8 @@ contract Topic {
 
       // 5) Reset the pending votes instance
       for(uint i =0; i< 4; i++){
-        pendingVotes[i].price =0; 
+        pendingVotes[i].price = 0;
+        pendingVotes[i].voter = address(0);
       }
 
       // 6) Add to market cap for future payouts calculations
@@ -197,17 +207,36 @@ contract Topic {
     }
   }
 
-  function openOrResolvedPhaseToVerificationPhase() public {
-    if (contractPhase == Phase.Open || contractPhase == Phase.Resolved) { // TODO: @jee, should we refactor this from addArbitratorVote cos this is needed in unit testing
+  function openPhaseToVerificationPhase() public { // FIXME: Change visibility to internal before deploying on testnet!
+    if (contractPhase == Phase.Open) { 
       contractPhase = Phase.Verification;
+    }
+    refundPendingVotes();
+  }
+
+  function refundPendingVotes() internal {
+    for(uint i = 0; i< 4; i++) {
+      if (pendingVotes[i].voter == address(0)) {
+        continue;
+      }
+      address payable refundAddress = pendingVotes[i].voter;
+      uint amount = pendingVotes[i].price;
+      if (hasReceivedPayout[refundAddress]) {
+        continue;
+      }
+      pendingVotes[i].price = 0;
+      pendingVotes[i].voter = address(0);
+      hasReceivedPayout[refundAddress] = true;
+      refundAddress.transfer(amount);
+      hasReceivedPayout[refundAddress] = false;
     }
   }
 
-  function addArbitratorVote(bytes32 _option, bool forUnitTest) public { // FIXME: Remove unit test options before deploying to testnet!
+  function addArbitratorVote(bytes32 _option, uint256 timeStamp, bool forUnitTest) public { // FIXME: Remove unit test options before deploying to testnet!
     // Shift contract phase
-    if (contractPhase == Phase.Open) { // TODO: Add check for expiry date as well!
-      contractPhase = Phase.Verification;
-      // refundPendingVotes();
+    require(timeStamp > expiryDate);
+    if (contractPhase == Phase.Open) {
+      openPhaseToVerificationPhase();
     }
     require(contractPhase == Phase.Verification);
     require(!selectedArbitrators[msg.sender].hasVoted); //no double voting
@@ -302,18 +331,18 @@ contract Topic {
     return (hasTie, winningOption);
   }
 
-function updateArbitratorsTrustworthiness(uint winIndex) public {
-  PredictionMarket marketInstance = PredictionMarket(parentContract);
-  for (uint o=0; o < options.length; o++){
-      for (uint i=0; i<arbitratorsVotes[options[o]].length; i++){
-        if (o == winIndex){
-          marketInstance.updateHonestTrustworthiness(arbitratorsVotes[options[o]][i]);
-        } else {
-          marketInstance.updateDishonestTrustworthiness(arbitratorsVotes[options[o]][i]);
+  function updateArbitratorsTrustworthiness(uint winIndex) public {
+    PredictionMarket marketInstance = PredictionMarket(parentContract);
+    for (uint o=0; o < options.length; o++){
+        for (uint i=0; i<arbitratorsVotes[options[o]].length; i++){
+          if (o == winIndex){
+            marketInstance.updateHonestTrustworthiness(arbitratorsVotes[options[o]][i]);
+          } else {
+            marketInstance.updateDishonestTrustworthiness(arbitratorsVotes[options[o]][i]);
+          }
         }
       }
-    }
-}
+  }
 
   // TODO: Payout to arbitrators, jury/creator
   function resolveWithoutTie(uint winIndex, bool forUnitTest) public payable returns(uint) { // FIXME: Remove unit test options before deploying to testnet!
@@ -385,7 +414,7 @@ function updateArbitratorsTrustworthiness(uint winIndex) public {
     }
   }
 
-  function payoutToWinners(address payable winner) internal {
+  function payoutToWinners(address payable winner) public {
     if (!hasReceivedPayout[winner]) {
       hasReceivedPayout[winner] = true;
       winner.transfer(0.98 ether);
@@ -507,6 +536,26 @@ function updateArbitratorsTrustworthiness(uint winIndex) public {
     return bytesArray;
   }
 
+  // Gets all the addresses for the people who voted for that option
+  function getConfirmedTradeAddresses(uint option) public view returns (address payable[] memory){
+    uint len = confirmedTrades.length;
+    address payable[] memory addArray = new address payable[](len);
+    for (uint i = 0; i < len; i++) {
+      addArray[i] = confirmedTrades[i].shareOwners[option];
+    }
+    return addArray;
+  }
+
+  // Gets all the addresses for the people who voted for that option
+  function getConfirmedTradePrices(uint option) public view returns (bytes32[] memory){
+    uint len = confirmedTrades.length;
+    bytes32[] memory bytesArray = new bytes32[](len);
+    for (uint i = 0; i < len; i++) {
+      bytesArray[i] = bytes32(confirmedTrades[i].price[option]);
+    }
+    return bytesArray;
+  }
+
   function balanceOf() external view returns(uint) {
     return address(this).balance;
   }
@@ -530,6 +579,8 @@ function updateArbitratorsTrustworthiness(uint winIndex) public {
   function hasJuryVoted(address juryAddress) public view returns (bool) {
     return selectedJurys[juryAddress].hasVoted;
   }
+
+
 
   // ===================================================
   // For testing purposes
