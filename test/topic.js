@@ -150,7 +150,7 @@ contract("Topic", accounts => {
     });
 
     context("with resolution without tie", async () => {
-        xit("should be able to increase winScore and loseScore and payoutToWinners", async () => {
+        it("should be able to increase winScore and loseScore and payoutToWinners", async () => {
             // const resolvePredMarkInstance = await PredictionMarket.deployed();
             const traderZeroVoteZeroSuccess = await resolveNoTieInstance.voteOption(0, {
                 from: accounts[0], 
@@ -163,31 +163,28 @@ contract("Topic", accounts => {
             });
             assert.isOk(traderZeroVoteZeroSuccess);
             assert.isOk(traderOneVoteTwoSuccess);
+
+            await resolveNoTieInstance.openPhaseToVerificationPhase();
             
             const topicBalance = await resolveNoTieInstance.balanceOf();
             const before = await web3.eth.getBalance(accounts[0]);
             
-            // need to change contractPhase to 1(verification) from 0(open)
-            const contractPhase = await resolveNoTieInstance.contractPhase();
-            console.log(contractPhase);
-
             const beforeWin = await predictionMarketInstance.getWinScore(accounts[0]); 
-            console.log(beforeWin);
             const beforeLose = await predictionMarketInstance.getLoseScore(accounts[1]); 
-            console.log(beforeLose);
             
-            const resolve = await resolveNoTieInstance.resolveWithoutTie(0, { from : accounts[0]});
-
-            const afterWin = await predictionMarketInstance.getWinScore(accounts[0]); 
-            console.log(afterWin);
-            const afterLose = await predictionMarketInstance.getLoseScore(accounts[1]); 
-            console.log(afterLose);
+            await resolveNoTieInstance.resolveWithoutTie(0, { from : accounts[0]});
             
             const topicBalanceAfter = await resolveNoTieInstance.balanceOf();
             const after = await web3.eth.getBalance(accounts[0]);
             
-            // assert.strictEqual((topicBalance-topicBalanceAfter).toString(),web3.utils.toWei("0.98"));
-            // assert.isTrue(after-before < web3.utils.toWei("0.98"));
+            const afterWin = await predictionMarketInstance.getWinScore(accounts[0]); 
+            const afterLose = await predictionMarketInstance.getLoseScore(accounts[1]); 
+
+            assert.strictEqual((topicBalance-topicBalanceAfter).toString(),web3.utils.toWei("0.98"));
+            assert.isTrue(after-before < web3.utils.toWei("0.98"));
+            assert.strictEqual(Number(afterWin),Number(beforeWin)+1);
+            assert.strictEqual(Number(afterLose),Number(beforeLose)+1);
+
         
 
         });

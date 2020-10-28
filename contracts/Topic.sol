@@ -197,6 +197,12 @@ contract Topic {
     }
   }
 
+  function openPhaseToVerificationPhase() public {
+    if (contractPhase == Phase.Open) { // TODO: @jee, should we refactor this from addArbitratorVote cos this is needed in unit testing
+      contractPhase = Phase.Verification;
+    }
+  }
+
   function addArbitratorVote(bytes32 _option, bool forUnitTest) public { // FIXME: Remove unit test options before deploying to testnet!
     // Shift contract phase
     if (contractPhase == Phase.Open) { // TODO: Add check for expiry date as well!
