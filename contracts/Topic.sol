@@ -45,6 +45,7 @@ contract Topic {
   trade[] confirmedTrades;
   struct trade {
     address payable[4] shareOwners;
+    uint[4] price;
   }
 
   // Arbitrator voting related variables
@@ -143,11 +144,13 @@ contract Topic {
 
     // Entry to insert into the confirmed trades if vote goes through
     address payable[4] memory tempTrade;
+    uint[4] memory tempPrice;
 
     for(uint i=0; i< 4; i++){
       if(i != option){
         balance = balance - pendingVotes[i].price; 
         tempTrade[i] = pendingVotes[i].voter;
+        tempPrice[i] = pendingVotes[i].price;
       }
     }
 
@@ -159,7 +162,8 @@ contract Topic {
       
       // 1) Confirm the trade by putting it into trade confirmed
       tempTrade[option] = msg.sender;
-      trade memory tradeConfirmed = trade(tempTrade);
+      tempPrice[option] = balance;
+      trade memory tradeConfirmed = trade(tempTrade, tempPrice);
       confirmedTrades.push(tradeConfirmed);
       
       // 2) Update the lastTradedPrices
@@ -495,6 +499,26 @@ contract Topic {
     return bytesArray;
   }
 
+  // Gets all the addresses for the people who voted for that option
+  function getConfirmedTradeAddresses(uint option) public view returns (address payable[] memory){
+    uint len = confirmedTrades.length;
+    address payable[] memory addArray = new address payable[](len);
+    for (uint i = 0; i < len; i++) {
+      addArray[i] = confirmedTrades[i].shareOwners[option];
+    }
+    return addArray;
+  }
+
+  // Gets all the addresses for the people who voted for that option
+  function getConfirmedTradePrices(uint option) public view returns (bytes32[] memory){
+    uint len = confirmedTrades.length;
+    bytes32[] memory bytesArray = new bytes32[](len);
+    for (uint i = 0; i < len; i++) {
+      bytesArray[i] = bytes32(confirmedTrades[i].price[option]);
+    }
+    return bytesArray;
+  }
+
   function balanceOf() external view returns(uint) {
     return address(this).balance;
   }
@@ -518,6 +542,8 @@ contract Topic {
   function hasJuryVoted(address juryAddress) public view returns (bool) {
     return selectedJurys[juryAddress].hasVoted;
   }
+
+
 
   // ===================================================
   // For testing purposes

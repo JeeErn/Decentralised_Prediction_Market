@@ -66,8 +66,6 @@ contract("Topic", accounts => {
     })
 
     it("Test vote", async () => {
-        // Create the traders first
-
         const balanceBef = await topicInstance.balanceOf(); 
         const senderBalanceBef = await web3.eth.getBalance(accounts[0]);
         const pendingVoteBef = await topicInstance.getAllPendingVotePrice();
@@ -93,10 +91,14 @@ contract("Topic", accounts => {
             from: accounts[1], 
             value: web3.utils.toWei("0.99"),
         });
+        const confrimedTradePrices1 = await topicInstance.getConfirmedTradePrices(1)
+        const confrimedTradePrices2 = await topicInstance.getConfirmedTradePrices(2)
+        assert.equal(parseInt(confrimedTradePrices1[0], 16), web3.utils.toWei("0.1"), "Confirmed Trades should have been recorded for option 1");
+        assert.equal(parseInt(confrimedTradePrices2[0], 16), web3.utils.toWei("0.9"), "Confirmed Trades should have been recorded for option 2");
 
         // FOR DEBUGGING PURPOSES IF ERROR COMES UP
-        let event = await topicInstance.getPastEvents("UpdateWeightedVotes"); 
-        event = event.map((event) => event.returnValues);
+        // let event = await topicInstance.getPastEvents("UpdateWeightedVotes"); 
+        // event = event.map((event) => event.returnValues);
 
         const sender2BalanceAft = await web3.eth.getBalance(accounts[1]);
         assert.isOk(success, "Vote should have gone through successfully"); 

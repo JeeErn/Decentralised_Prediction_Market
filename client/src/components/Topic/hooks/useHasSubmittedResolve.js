@@ -18,7 +18,7 @@ function useHasSubmittedResolve({ topicInstance, accountAddress, userType }) {
           setHasSubmittedResolve(res);
         });
     }
-  }, [accountAddress, topicInstance]);
+  }, [accountAddress, topicInstance, userType]);
   return hasSubmittedResolve;
 }
 
