@@ -207,6 +207,7 @@ contract Topic {
     // Shift contract phase
     if (contractPhase == Phase.Open) { // TODO: Add check for expiry date as well!
       contractPhase = Phase.Verification;
+      // refundPendingVotes();
     }
     require(contractPhase == Phase.Verification);
     require(!selectedArbitrators[msg.sender].hasVoted); //no double voting
@@ -271,7 +272,7 @@ contract Topic {
     }
   }
 
-  function getJuryVerdict() public view returns (uint) {
+  function getJuryVerdict() internal view returns (uint) {
     uint largest = 0;
     uint winningOption;
     for (uint i = 0; i < options.length; i++){
@@ -336,7 +337,7 @@ contract Topic {
     return temp;
   }
 
-  function payoutToCreator() public payable {
+  function payoutToCreator() internal {
     if (!hasReceivedPayout[topicCreator]) {
       hasReceivedPayout[topicCreator] = true;
       topicCreator.transfer(uint(marketCap) / uint(100));
@@ -345,7 +346,7 @@ contract Topic {
     }
   }
 
-  function payoutToJury(uint winIndex) public payable {
+  function payoutToJury(uint winIndex) internal {
     PredictionMarket marketInstance = PredictionMarket(parentContract);
 
     // Creator bond is forfeited to the jury
@@ -361,7 +362,7 @@ contract Topic {
     }
   }
 
-  function payoutToArbitrators(uint winIndex) public payable {
+  function payoutToArbitrators(uint winIndex) internal {
     uint arbitratorShare = uint(marketCap) / uint(100); // integer division
     bytes32 winningOption = options[winIndex];
     uint numWinners = countofArbVotes[winningOption];
@@ -372,7 +373,7 @@ contract Topic {
     }
   }
 
-  function payoutToWinners(address payable winner) public payable {
+  function payoutToWinners(address payable winner) internal {
     if (!hasReceivedPayout[winner]) {
       hasReceivedPayout[winner] = true;
       winner.transfer(0.98 ether);
