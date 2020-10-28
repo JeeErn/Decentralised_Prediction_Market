@@ -37,8 +37,7 @@ contract("Topic", accounts => {
         // TODO: put this in a specific test case instead 
         const options1 = stringUtils.stringToBytes(["option 1", "option 2", "option 3", "option 4"]);
         // topicInstance = await Topic.new(accounts[0], "Test", "", [], 0, 0, [accounts[9],accounts[8]], "0xc85E1Ba8F9D7cfdf27ff7604A8802FD589Ac7149");
-        resolveTopicInstance = await Topic.new(accounts[0], "TestResolve", "My bets will make me a billionaire", options1, 0, 0, [accounts[9],accounts[8],accounts[7]],"0xc85E1Ba8F9D7cfdf27ff7604A8802FD589Ac7149");
-        
+        resolveTopicInstance = await Topic.new(accounts[0], "TestResolve", "My bets will make me a billionaire", options1, 0, 0, [accounts[9],accounts[8],accounts[7],accounts[6]],"0xc85E1Ba8F9D7cfdf27ff7604A8802FD589Ac7149");
         
         // payoutTopicInstance = await Topic.new(accounts[0], "TestPayOut", "My bets will make me a billionaire", options1, 0, 0, [accounts[9],accounts[8],accounts[7]],"0xc85E1Ba8F9D7cfdf27ff7604A8802FD589Ac7149");
         payoutTopicInstance = await predictionMarketInstance.createTopic("TestPayOut", "My bets will make me a billionaire", optionsBytes, expiryDate, [accounts[9],accounts[8],accounts[7]], { from: accounts[0], value: 1.0 });
@@ -46,11 +45,10 @@ contract("Topic", accounts => {
         const payoutTopicAddress = eventsWithPayout[0].returnValues._topicAddress;
         payoutTopicInstance = await Topic.at(payoutTopicAddress);
 
-        resolveNoTieInstance = await predictionMarketInstance.createTopic("TestrRsolveWithoutTie", "My bets will make me a billionaire", optionsBytes, expiryDate, [accounts[9],accounts[8],accounts[7]], { from: accounts[0], value: 1.0 });
+        resolveNoTieInstance = await predictionMarketInstance.createTopic("TestResolveWithoutTie", "My bets will make me a billionaire", optionsBytes, expiryDate, [accounts[9],accounts[8],accounts[7]], { from: accounts[0], value: 1.0 });
         eventsResolveNoTie = await predictionMarketInstance.getPastEvents("TopicCreated");
         const resolveNoTieTopicAddress = eventsResolveNoTie[0].returnValues._topicAddress;
         resolveNoTieInstance = await Topic.at(resolveNoTieTopicAddress);
-    
     })
 
     it("should be created with the correct initial values", async () => {
@@ -142,6 +140,8 @@ contract("Topic", accounts => {
         });
 
         it("should be able to get False hasTie condition and winning option", async () => {
+            const hasVoted = await resolveTopicInstance.hasArbitratorVoted(accounts[7]);
+            console.log(hasVoted);
             await resolveTopicInstance.addArbitratorVote(options[3], true, {from: accounts[7]});
             const result = await resolveTopicInstance.getArbitratorVerdict({from: accounts[7]});
             assert.isFalse(result[0]);
@@ -151,7 +151,10 @@ contract("Topic", accounts => {
 
     context("with resolution without tie", async () => {
         it("should be able to increase winScore and loseScore and payoutToWinners", async () => {
-            // const resolvePredMarkInstance = await PredictionMarket.deployed();
+            const options = ["option 1", "option 2", "option 3", "option 4"];
+            const optionsBytes = stringUtils.stringToBytes(options)
+
+            // traders vote
             const traderZeroVoteZeroSuccess = await resolveNoTieInstance.voteOption(0, {
                 from: accounts[0], 
                 value: web3.utils.toWei("0.1"),
@@ -164,15 +167,28 @@ contract("Topic", accounts => {
             assert.isOk(traderZeroVoteZeroSuccess);
             assert.isOk(traderOneVoteTwoSuccess);
 
-            await resolveNoTieInstance.openPhaseToVerificationPhase();
-            
+            //arbitrators vote
+            await resolveNoTieInstance.addArbitratorVote(optionsBytes[0], true, {from: accounts[9]});
+            await resolveNoTieInstance.addArbitratorVote(optionsBytes[3], true, {from: accounts[8]});
+            await resolveNoTieInstance.addArbitratorVote(optionsBytes[0], true, {from: accounts[7]});
+
+            await resolveNoTieInstance.openOrResolvedPhaseToVerificationPhase();
+            const contractPhase = await resolveNoTieInstance.contractPhase();
+            console.log(contractPhase);
+
+
             const topicBalance = await resolveNoTieInstance.balanceOf();
             const before = await web3.eth.getBalance(accounts[0]);
             
             const beforeWin = await predictionMarketInstance.getWinScore(accounts[0]); 
             const beforeLose = await predictionMarketInstance.getLoseScore(accounts[1]); 
+
+            const arbNineTrustBefore = await predictionMarketInstance.getTrustworthinessScore(accounts[9]);
+            const arbEightTrustBefore = await predictionMarketInstance.getTrustworthinessScore(accounts[8]);
+            const arbSevenTrustBefore = await predictionMarketInstance.getTrustworthinessScore(accounts[7]);
             
-            await resolveNoTieInstance.resolveWithoutTie(0, { from : accounts[0]});
+            await resolveNoTieInstance.resolveWithoutTie(0, true, {from : accounts[0]});
+            // await resolveNoTieInstance.updateArbitratorsTrustworthiness(0, {from : accounts[0]});
             
             const topicBalanceAfter = await resolveNoTieInstance.balanceOf();
             const after = await web3.eth.getBalance(accounts[0]);
@@ -180,13 +196,17 @@ contract("Topic", accounts => {
             const afterWin = await predictionMarketInstance.getWinScore(accounts[0]); 
             const afterLose = await predictionMarketInstance.getLoseScore(accounts[1]); 
 
-            assert.strictEqual((topicBalance-topicBalanceAfter).toString(),web3.utils.toWei("0.98"));
-            assert.isTrue(after-before < web3.utils.toWei("0.98"));
-            assert.strictEqual(Number(afterWin),Number(beforeWin)+1);
-            assert.strictEqual(Number(afterLose),Number(beforeLose)+1);
+            const arbNineTrustAfter = await predictionMarketInstance.getTrustworthinessScore(accounts[9]);
+            const arbEightTrustAfter = await predictionMarketInstance.getTrustworthinessScore(accounts[8]);
+            const arbSevenTrustAfter = await predictionMarketInstance.getTrustworthinessScore(accounts[7]);
 
-        
-
+            // assert.strictEqual((topicBalance-topicBalanceAfter).toString(),web3.utils.toWei("0.98"));
+            // assert.isTrue(after-before < web3.utils.toWei("0.98"));
+            // assert.strictEqual(Number(afterWin),Number(beforeWin)+1);
+            // assert.strictEqual(Number(afterLose),Number(beforeLose)+1);
+            assert.strictEqual(Number(arbNineTrustAfter),Number(arbNineTrustBefore)+5);
+            assert.strictEqual(Number(arbEightTrustAfter),0);
+            assert.strictEqual(Number(arbSevenTrustAfter),Number(arbSevenTrustBefore)+5);
         });
     });
 
@@ -208,18 +228,14 @@ contract("Topic", accounts => {
         
         const topicBalance = await payoutTopicInstance.balanceOf();
         const before = await web3.eth.getBalance(accounts[0]);
+
         await payoutTopicInstance.payoutToWinners(accounts[0]);
+
         const after = await web3.eth.getBalance(accounts[0]);
         const topicBalanceAfter = await payoutTopicInstance.balanceOf();
         
         assert.strictEqual((topicBalance-topicBalanceAfter).toString(),web3.utils.toWei("0.98"));
         assert.isTrue(after-before < web3.utils.toWei("0.98"));
-
-        // const beforeWin = await predictionMarketInstance.getWinScore(accounts[0]); 
-        // console.log(beforeWin);
-        // const addWinScore = await payoutTopicInstance.testUpdateWinScore();
-        // const afterWin = await predictionMarketInstance.getWinScore(accounts[0]); 
-        // console.log(afterWin);
     });
 
 

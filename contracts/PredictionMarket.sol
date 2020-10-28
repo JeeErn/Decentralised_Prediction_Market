@@ -181,6 +181,19 @@ contract PredictionMarket {
         }
     }
 
+    function updateHonestTrustworthiness(address honestArb) public {
+        if (arbitrators[honestArb].trustworthiness < 100) {
+            arbitrators[honestArb].trustworthiness += 5;
+        } 
+    }
+
+    function updateDishonestTrustworthiness(address dishonestArb) public {
+        arbitrators[dishonestArb].trustworthiness -= arbitrators[dishonestArb].trustworthiness;
+    }
+
+    function getTrustworthinessScore(address arbitrator) public view returns (uint){
+        return arbitrators[arbitrator].trustworthiness;
+    }
     // ===============================================================
     // For testing purposes
     // ===============================================================

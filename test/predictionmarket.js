@@ -307,11 +307,43 @@ contract("PredictionMarket", accounts => {
         });
 
         it("should be able to increase loser loseScore", async () => {
-            const loser = await predictionMarketInstance.traders(accounts[1]);
             const loseScore = await predictionMarketInstance.getWinScore(accounts[1]);
             await predictionMarketInstance.updateLoseScore(accounts[1]);
             const newLoseScore = await predictionMarketInstance.getLoseScore(accounts[1]);
             assert.strictEqual(Number(newLoseScore), Number(loseScore)+1);
         });
+
+        it("should be able to increase honest arbitrator's trustworthiness", async () => {
+            const trustBefore = await predictionMarketInstance.getTrustworthinessScore(accounts[2]);
+            await predictionMarketInstance.updateHonestTrustworthiness(accounts[2]);
+            const trustAfter = await predictionMarketInstance.getTrustworthinessScore(accounts[2]);
+            // console.log(trustBefore);
+            // console.log(trustAfter);
+            assert.strictEqual(Number(trustAfter), Number(trustBefore)+5);
+        });
+
+        it("should be able to decrease dishonest arbitrator's trustworthiness", async () => {
+            const trustBefore = await predictionMarketInstance.getTrustworthinessScore(accounts[3]);
+            await predictionMarketInstance.updateDishonestTrustworthiness(accounts[3]);
+            const trustAfter = await predictionMarketInstance.getTrustworthinessScore(accounts[3]);
+            // console.log(trustBefore);
+            // console.log(trustAfter);
+            assert.strictEqual(Number(trustAfter), 0);
+        });
+
+        it("should be able to cap honest arbitrator's trustworthiness at 100", async () => {
+            for (let i = 0; i < 12; i++) {
+                await predictionMarketInstance.updateHonestTrustworthiness(accounts[4]);
+            }
+            const trustAfter = await predictionMarketInstance.getTrustworthinessScore(accounts[4]);
+            
+            assert.strictEqual(Number(trustAfter), 100);
+        });
+
+
+
+
     });
+
+    
 })

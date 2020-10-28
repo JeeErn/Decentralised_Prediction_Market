@@ -197,8 +197,8 @@ contract Topic {
     }
   }
 
-  function openPhaseToVerificationPhase() public {
-    if (contractPhase == Phase.Open) { // TODO: @jee, should we refactor this from addArbitratorVote cos this is needed in unit testing
+  function openOrResolvedPhaseToVerificationPhase() public {
+    if (contractPhase == Phase.Open || contractPhase == Phase.Resolved) { // TODO: @jee, should we refactor this from addArbitratorVote cos this is needed in unit testing
       contractPhase = Phase.Verification;
     }
   }
@@ -302,29 +302,41 @@ contract Topic {
     return (hasTie, winningOption);
   }
 
-  function testUpdateWinScore() public {
-    PredictionMarket marketInstance = PredictionMarket(parentContract);
-    marketInstance.updateWinScore(address(uint160(confirmedTrades[0].shareOwners[0])));
-  }
+function updateArbitratorsTrustworthiness(uint winIndex) public {
+  PredictionMarket marketInstance = PredictionMarket(parentContract);
+  for (uint o=0; o < options.length; o++){
+      for (uint i=0; i<arbitratorsVotes[options[o]].length; i++){
+        if (o == winIndex){
+          marketInstance.updateHonestTrustworthiness(arbitratorsVotes[options[o]][i]);
+        } else {
+          marketInstance.updateDishonestTrustworthiness(arbitratorsVotes[options[o]][i]);
+        }
+      }
+    }
+}
 
   // TODO: Payout to arbitrators, jury/creator
   function resolveWithoutTie(uint winIndex, bool forUnitTest) public payable returns(uint) { // FIXME: Remove unit test options before deploying to testnet!
     require(contractPhase != Phase.Open && contractPhase != Phase.Resolved); // Check required as function is public
     PredictionMarket marketInstance = PredictionMarket(parentContract);
     uint temp = 0;
+    
     for(uint i = 0; i<confirmedTrades.length; i++){
       for(uint j = 0; j<confirmedTrades[i].shareOwners.length; j++){
         if (confirmedTrades[i].shareOwners[j] != address(uint160(0x0))){
           temp = temp + 10;
           if(j == winIndex){
             marketInstance.updateWinScore(address(uint160(confirmedTrades[i].shareOwners[j])));
-            payoutToWinners(confirmedTrades[i].shareOwners[j]); 
+            payoutToWinners(confirmedTrades[i].shareOwners[j]);
           } else {
             marketInstance.updateLoseScore(confirmedTrades[i].shareOwners[j]);
           }
         }
       }
     }
+
+    updateArbitratorsTrustworthiness(winIndex);
+
     if (!forUnitTest) {
       payoutToArbitrators(winIndex);
       if (contractPhase != Phase.Jury) {
