@@ -3,6 +3,9 @@ const Topic = artifacts.require("./Topic.sol");
 const PredictionMarket = artifacts.require("./PredictionMarket.sol");
 
 const zeroAddress = "0x0000000000000000000000000000000000000000";
+// validTimeStamp = valid for trader, invalid for arbitrator; invalidTimeStamp = valid for arbitrator, invalid for trader
+const validTimeStamp = (new Date(2020, 10, 28)).getTime();
+const invalidTimeStamp = (new Date(2090, 1, 1)).getTime();
 
 contract("Topic", accounts => {
     let predictionMarketInstance = null;
@@ -23,7 +26,7 @@ contract("Topic", accounts => {
          const description = "test description foo bar";
          const options = ["option 1", "option 2", "option 3", "option 4"];
          const optionsBytes = stringUtils.stringToBytes(options)
-         const expiryDate = (new Date()).getTime();
+         const expiryDate = (new Date(2050, 12, 31)).getTime();
          const selectedArbitrators = [accounts[8], accounts[9]];
  
          // Create topic and retrieve address
@@ -71,7 +74,7 @@ contract("Topic", accounts => {
         const pendingVoteBef = await topicInstance.getAllPendingVotePrice();
 
         assert.equal(parseInt(pendingVoteBef[1], 16), 0, "Pending vote for option 1 should be 0 before voting");
-        await topicInstance.voteOption( 1, {
+        await topicInstance.voteOption( 1, validTimeStamp, {
             from: accounts[0], 
             value: web3.utils.toWei("0.1"),
         });
@@ -87,7 +90,7 @@ contract("Topic", accounts => {
 
         // 2) 1 vote is set for option 2 at 0.1 eth, --> Vote should go through at 0.9 eth
         const sender2BalanceBef = await web3.eth.getBalance(accounts[1]);
-        const success = await topicInstance.voteOption(2, {
+        const success = await topicInstance.voteOption(2, validTimeStamp, {
             from: accounts[1], 
             value: web3.utils.toWei("0.99"),
         });
@@ -112,8 +115,8 @@ contract("Topic", accounts => {
     context("with the addArbitratorVote and getArbitratorVerdict", async () => {
         const options = stringUtils.stringToBytes(["option 1", "option 2", "option 3", "option 4"]);
         it("should be able to add arbitrator's vote", async () => {
-            await resolveTopicInstance.addArbitratorVote(options[0], true, {from: accounts[9]});
-            await resolveTopicInstance.addArbitratorVote(options[3], true, {from: accounts[8]});
+            await resolveTopicInstance.addArbitratorVote(options[0], invalidTimeStamp, true, {from: accounts[9]});
+            await resolveTopicInstance.addArbitratorVote(options[3], invalidTimeStamp, true, {from: accounts[8]});
             const arbitratorNineVoteStatus = await resolveTopicInstance.selectedArbitrators(accounts[9]);
             const numVotesForOptionZero = await resolveTopicInstance.countofArbVotes(options[0]);
             const arbVotedAccNine = await resolveTopicInstance.arbitratorsVotes(options[0],0);
@@ -144,7 +147,7 @@ contract("Topic", accounts => {
         });
 
         it("should be able to get False hasTie condition and winning option", async () => {
-            await resolveTopicInstance.addArbitratorVote(options[3], true, {from: accounts[7]});
+            await resolveTopicInstance.addArbitratorVote(options[3], invalidTimeStamp, true, {from: accounts[7]});
             const result = await resolveTopicInstance.getArbitratorVerdict({from: accounts[7]});
             assert.isFalse(result[0]);
             assert.strictEqual(3,Number(result[1]));
@@ -154,12 +157,12 @@ contract("Topic", accounts => {
     context("with resolution without tie", async () => {
         it("should be able to increase winScore and loseScore and payoutToWinners", async () => {
             // const resolvePredMarkInstance = await PredictionMarket.deployed();
-            const traderZeroVoteZeroSuccess = await resolveNoTieInstance.voteOption(0, {
+            const traderZeroVoteZeroSuccess = await resolveNoTieInstance.voteOption(0, validTimeStamp, {
                 from: accounts[0], 
                 value: web3.utils.toWei("0.1"),
             });
     
-            const traderOneVoteTwoSuccess = await resolveNoTieInstance.voteOption(2, {
+            const traderOneVoteTwoSuccess = await resolveNoTieInstance.voteOption(2, validTimeStamp, {
                 from: accounts[1], 
                 value: web3.utils.toWei("0.9"),
             });
@@ -195,12 +198,12 @@ contract("Topic", accounts => {
     it("should be able transfer to winner", async () => {
         // const resolvePredMarkInstance = await PredictionMarket.deployed();
         
-        const traderZeroVoteZeroSuccess = await payoutTopicInstance.voteOption(0, {
+        const traderZeroVoteZeroSuccess = await payoutTopicInstance.voteOption(0, validTimeStamp, {
             from: accounts[0], 
             value: web3.utils.toWei("0.1"),
         });
 
-        const traderOneVoteTwoSuccess = await payoutTopicInstance.voteOption(2, { //TODO: figure out why there is an error in this line
+        const traderOneVoteTwoSuccess = await payoutTopicInstance.voteOption(2, validTimeStamp, { //TODO: figure out why there is an error in this line
 
             from: accounts[1], 
             value: web3.utils.toWei("0.9"),
@@ -233,7 +236,7 @@ contract("Topic", accounts => {
         const description = "test description foo bar";
         const options = ["option 1"];
         const optionsBytes = stringUtils.stringToBytes(options)
-        const expiryDate = (new Date()).getTime();
+        const expiryDate = (new Date(2050, 12, 31)).getTime();
         const selectedArbitrators = [accounts[9]];
         await predictionMarketInstance.createTopic(name, description, optionsBytes, expiryDate, selectedArbitrators, { from: accounts[1], value: 1.0 });
         events = await predictionMarketInstance.getPastEvents("TopicCreated");
@@ -245,7 +248,7 @@ contract("Topic", accounts => {
 
          // Try vote with accounts[9] => fail as accounts[9] is selected arbitrator
          try {
-            await newTopicInstance.voteOption(1, {
+            await newTopicInstance.voteOption(1, validTimeStamp, {
                 from: accounts[9], 
                 value: web3.utils.toWei("0.1"),
             });
@@ -256,7 +259,7 @@ contract("Topic", accounts => {
              assert.strictEqual(balanceBef.toString(), balanceAftFailVote.toString(), "balance of contract does not change");
 
             // Try vote with accounts[1] => succeed
-            await newTopicInstance.voteOption(1, {
+            await newTopicInstance.voteOption(1, validTimeStamp, {
                 from: accounts[1], 
                 value: web3.utils.toWei("0.1"),
             });

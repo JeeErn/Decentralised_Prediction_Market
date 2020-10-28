@@ -122,7 +122,11 @@ contract Topic {
     }
   }
      
-  function voteOption(uint option) public payable returns(bool){
+  function voteOption(uint option, uint256 timeStamp) public payable returns (bool) {
+    if (timeStamp > expiryDate) {
+      openPhaseToVerificationPhase();
+      return false;
+    }
     require(!selectedArbitrators[msg.sender].isAssigned);
     require(contractPhase == Phase.Open);
 
@@ -185,7 +189,8 @@ contract Topic {
 
       // 5) Reset the pending votes instance
       for(uint i =0; i< 4; i++){
-        pendingVotes[i].price =0; 
+        pendingVotes[i].price = 0;
+        pendingVotes[i].voter = address(0);
       }
 
       // 6) Add to market cap for future payouts calculations
@@ -201,17 +206,36 @@ contract Topic {
     }
   }
 
-  function openPhaseToVerificationPhase() public {
-    if (contractPhase == Phase.Open) { // TODO: @jee, should we refactor this from addArbitratorVote cos this is needed in unit testing
+  function openPhaseToVerificationPhase() public { // FIXME: Change visibility to internal before deploying on testnet!
+    if (contractPhase == Phase.Open) { 
       contractPhase = Phase.Verification;
+    }
+    // refundPendingVotes();
+  }
+
+  function refundPendingVotes() internal {
+    for(uint i = 0; i< 4; i++) {
+      if (pendingVotes[i].voter == address(0)) {
+        continue;
+      }
+      address payable refundAddress = pendingVotes[i].voter;
+      uint amount = pendingVotes[i].price;
+      if (hasReceivedPayout[refundAddress]) {
+        continue;
+      }
+      pendingVotes[i].price = 0;
+      pendingVotes[i].voter = address(0);
+      hasReceivedPayout[refundAddress] = true;
+      refundAddress.transfer(amount);
+      hasReceivedPayout[refundAddress] = false;
     }
   }
 
-  function addArbitratorVote(bytes32 _option, bool forUnitTest) public { // FIXME: Remove unit test options before deploying to testnet!
+  function addArbitratorVote(bytes32 _option, uint256 timeStamp, bool forUnitTest) public { // FIXME: Remove unit test options before deploying to testnet!
     // Shift contract phase
-    if (contractPhase == Phase.Open) { // TODO: Add check for expiry date as well!
-      contractPhase = Phase.Verification;
-      // refundPendingVotes();
+    require(timeStamp > expiryDate);
+    if (contractPhase == Phase.Open) {
+      openPhaseToVerificationPhase();
     }
     require(contractPhase == Phase.Verification);
     require(!selectedArbitrators[msg.sender].hasVoted); //no double voting
@@ -377,7 +401,7 @@ contract Topic {
     }
   }
 
-  function payoutToWinners(address payable winner) internal {
+  function payoutToWinners(address payable winner) public {
     if (!hasReceivedPayout[winner]) {
       hasReceivedPayout[winner] = true;
       winner.transfer(0.98 ether);
