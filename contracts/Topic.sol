@@ -72,7 +72,7 @@ contract Topic {
   // State of contract
   // 0 => Open, 1 => Arbitrator Voting, 2 => Jury Voting, 3 => Resolved / closed
   enum Phase { Open, Verification, Jury, Resolved }
-  Phase public contractPhase = Phase.Open;
+  Phase public contractPhase;
 
   // NOTE: Ignore linter warning about visibility modifier being ignored. 
   // It is required for successful compilation
@@ -89,6 +89,7 @@ contract Topic {
         creatorBond = _bondValue;
         expiryDate = _expiryDate;
         arbitrators = _arbitrators;
+        contractPhase = Phase.Open;
 
         nonce = 23; // NOTE: Random number for the nonce
         numArbitratorVoted = 0;
@@ -210,7 +211,7 @@ contract Topic {
     if (contractPhase == Phase.Open) { 
       contractPhase = Phase.Verification;
     }
-    // refundPendingVotes();
+    refundPendingVotes();
   }
 
   function refundPendingVotes() internal {
