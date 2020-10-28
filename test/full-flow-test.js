@@ -7,6 +7,9 @@ contract("Topic", accounts => {
     let withoutTieTopicInstance = null;
     let withTieTopicInstance = null;
     const zeroAddress = "0x0000000000000000000000000000000000000000";
+    const validTraderTimeStamp = (new Date(2020, 10, 28)).getTime();
+    const validArbTimeStamp = (new Date(2070, 10, 28)).getTime();
+
 
     /*
     - Both topics created will have 2 options
@@ -17,7 +20,7 @@ contract("Topic", accounts => {
     */
     const name = "test";
     const description = "test description foo bar";
-    const expiryDate = (new Date()).getTime();
+    const expiryDate = (new Date(2050, 12, 31)).getTime();
     const selectedArbitrators = [accounts[6], accounts[7], accounts[8], accounts[9]];
     const options = stringUtils.stringToBytes(["option 1", "option 2"]);
 
@@ -51,11 +54,11 @@ contract("Topic", accounts => {
             assert.strictEqual(startContractState.toString(), "0", "contract state is at 0 -> Open");
 
             const topicBalanceBeforeVoting = await withoutTieTopicInstance.balanceOf();
-            await withoutTieTopicInstance.voteOption(0, {
+            await withoutTieTopicInstance.voteOption(0, validTraderTimeStamp, {
                 from: accounts[1],
                 value: web3.utils.toWei("0.5"),
             });
-            await withoutTieTopicInstance.voteOption(1, {
+            await withoutTieTopicInstance.voteOption(1, validTraderTimeStamp, {
                 from: accounts[2],
                 value: web3.utils.toWei("0.5"),
             });
@@ -87,9 +90,9 @@ contract("Topic", accounts => {
         - Accounts[9] will vote for options[1] in next "it" block to trigger resolve
         */
         it("allows arbitrators to vote", async () => {
-            await withoutTieTopicInstance.addArbitratorVote(options[0], false, { from: accounts[6] });
-            await withoutTieTopicInstance.addArbitratorVote(options[0], false, { from: accounts[7] });
-            await withoutTieTopicInstance.addArbitratorVote(options[0], false, { from: accounts[8] });
+            await withoutTieTopicInstance.addArbitratorVote(options[0], validArbTimeStamp, false, { from: accounts[6] });
+            await withoutTieTopicInstance.addArbitratorVote(options[0], validArbTimeStamp, false, { from: accounts[7] });
+            await withoutTieTopicInstance.addArbitratorVote(options[0], validArbTimeStamp, false, { from: accounts[8] });
 
             const currentContractState = await withoutTieTopicInstance.contractPhase();
             assert.strictEqual(currentContractState.toString(), "1", "contract state is shifted to 1 -> Verification");
@@ -115,7 +118,7 @@ contract("Topic", accounts => {
             const accountSevenBalanceBef = await web3.eth.getBalance(accounts[7]);
             const accountEightBalanceBef = await web3.eth.getBalance(accounts[8]);
 
-            await withoutTieTopicInstance.addArbitratorVote(options[1], false, { from: accounts[9] });
+            await withoutTieTopicInstance.addArbitratorVote(options[1], validArbTimeStamp, false, { from: accounts[9] });
 
             const topicCreatorBalanceAft = await web3.eth.getBalance(accounts[0]);
             const winningVoterBalanceAft = await web3.eth.getBalance(accounts[1]);
@@ -153,13 +156,13 @@ contract("Topic", accounts => {
             assert.isTrue(contractBalance < Number(web3.utils.toWei("10", "wei")), "contract balance is less than 10 wei");
 
             try {
-                await withoutTieTopicInstance.voteOption(0, { from: accounts[0] });
+                await withoutTieTopicInstance.voteOption(0, validTraderTimeStamp, { from: accounts[0] });
             } catch (error) {
                 assert.isTrue(error.message.indexOf("revert") >= 0, "error message must contain revert");
             }
 
             try {
-                await withoutTieTopicInstance.addArbitratorVote(options[0], false, { from: accounts[6] });
+                await withoutTieTopicInstance.addArbitratorVote(options[0], validArbTimeStamp, false, { from: accounts[6] });
             } catch (error) {
                 assert.isTrue(error.message.indexOf("revert") >= 0, "error message must contain revert");
             }
@@ -172,11 +175,11 @@ contract("Topic", accounts => {
             assert.strictEqual(startContractState.toString(), "0", "contract state is at 0 -> Open");
 
             const topicBalanceBeforeVoting = await withTieTopicInstance.balanceOf();
-            await withTieTopicInstance.voteOption(0, {
+            await withTieTopicInstance.voteOption(0, validTraderTimeStamp, {
                 from: accounts[1],
                 value: web3.utils.toWei("0.5"),
             });
-            await withTieTopicInstance.voteOption(1, {
+            await withTieTopicInstance.voteOption(1, validTraderTimeStamp, {
                 from: accounts[2],
                 value: web3.utils.toWei("0.5"),
             });
@@ -210,9 +213,9 @@ contract("Topic", accounts => {
         - Jury will be accounts[3, 4, 5]
         */
         it("allows arbitrators to vote", async () => {
-            await withTieTopicInstance.addArbitratorVote(options[0], false, { from: accounts[6] });
-            await withTieTopicInstance.addArbitratorVote(options[0], false, { from: accounts[7] });
-            await withTieTopicInstance.addArbitratorVote(options[1], false, { from: accounts[8] });
+            await withTieTopicInstance.addArbitratorVote(options[0], validArbTimeStamp, false, { from: accounts[6] });
+            await withTieTopicInstance.addArbitratorVote(options[0], validArbTimeStamp, false, { from: accounts[7] });
+            await withTieTopicInstance.addArbitratorVote(options[1], validArbTimeStamp, false, { from: accounts[8] });
 
             const currentContractState = await withTieTopicInstance.contractPhase();
             assert.strictEqual(currentContractState.toString(), "1", "contract state is shifted to 1 -> Verification");
@@ -236,7 +239,7 @@ contract("Topic", accounts => {
         });
 
         it("triggers resolve with tie when last arbitrator votes and select jury accordingly", async () => {
-            await withTieTopicInstance.addArbitratorVote(options[1], false, { from: accounts[9] });
+            await withTieTopicInstance.addArbitratorVote(options[1], validArbTimeStamp, false, { from: accounts[9] });
 
             const currentContractState = await withTieTopicInstance.contractPhase();
             assert.strictEqual(currentContractState.toString(), "2", "contract state is shifted to 2 -> Jury");
@@ -351,13 +354,13 @@ contract("Topic", accounts => {
             assert.isTrue(contractBalance < Number(web3.utils.toWei("10", "wei")), "contract balance is less than 10 wei");
 
             try {
-                await withTieTopicInstance.voteOption(0, { from: accounts[0] });
+                await withTieTopicInstance.voteOption(0, validTraderTimeStamp, { from: accounts[0] });
             } catch (error) {
                 assert.isTrue(error.message.indexOf("revert") >= 0, "trader error message must contain revert");
             }
 
             try {
-                await withTieTopicInstance.addArbitratorVote(options[0], false, { from: accounts[6] });
+                await withTieTopicInstance.addArbitratorVote(options[0], validArbTimeStamp, false, { from: accounts[6] });
             } catch (error) {
                 assert.isTrue(error.message.indexOf("revert") >= 0, "arbitrator error message must contain revert");
             }
