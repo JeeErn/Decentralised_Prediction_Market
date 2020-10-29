@@ -86,7 +86,7 @@ function CreateTopic({ predictionMarketInstance, accountAddress }) {
   const [options, setOptions] = useState([]);
   const [expiryDate, setExpiryDate] = useState(0);
   const [selectedArbitrators, setSelectedArbitrators] = useState([]);
-  const [creatorBond, setCreatorBond] = useState(0.1);
+  const [creatorBond, setCreatorBond] = useState(1);
   const [open, setOpen] = useState(false);
   const arbitratorInfo = useGetArbitrators({ predictionMarketInstance });
   // Excludes the current user
