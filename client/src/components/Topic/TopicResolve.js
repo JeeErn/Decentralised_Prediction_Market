@@ -10,6 +10,7 @@ import React, { useCallback, useState } from 'react';
 import Web3 from 'web3';
 import useHasSubmittedResolve from './hooks/useHasSubmittedResolve';
 import TopicOptions from './TopicVotingBox/TopicOptions';
+import { formatDate } from "./Util";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -29,7 +30,7 @@ const useStyles = makeStyles(() => ({
 
 // Resolve component for both Juror and Arbitrator
 function TopicResolve({
-  options, topicInstance, accountAddress, userType, winningOptionIndex,
+  options, topicInstance, accountAddress, userType, winningOptionIndex, expiryDate
 }) {
   const classes = useStyles();
   const [selectedOption, setSelectedOption] = useState(0);
@@ -37,6 +38,7 @@ function TopicResolve({
 
   const handleResolveSubmit = useCallback((type) => {
     if (type === 'arbitrator') {
+
       topicInstance.methods.addArbitratorVote(Web3.utils.stringToHex(options[selectedOption].optionName.toString()), false)
         .send({ from: accountAddress })
         .then(() => {
@@ -83,7 +85,7 @@ function TopicResolve({
             {' '}
             {`${userType}`}
             {' '}
-            for this topic. Click begin resolution.
+            for this topic. Click begin resolution if the date today is after {`${formatDate(expiryDate)}.`}
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
@@ -95,7 +97,7 @@ function TopicResolve({
               <TopicOptions options={options} selectedOption={selectedOption} setSelectedOption={setSelectedOption} />
             </Grid>
             <Grid item xs={12}>
-              <Button variant="contained" color="primary" className={classes.button} onClick={() => { handleResolveSubmit(userType); }}>
+              <Button variant={expiryDate < Date.now() ? "contained" : "disabled"} color="primary" className={classes.button} onClick={() => { handleResolveSubmit(userType); }}>
                 Submit
               </Button>
             </Grid>

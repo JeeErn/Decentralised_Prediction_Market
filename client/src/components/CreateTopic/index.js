@@ -81,9 +81,9 @@ const getSelectedArbitratorAddresses = (selectedArbitrators, arbitrators, arbitr
 
 function CreateTopic({ predictionMarketInstance, accountAddress }) {
   const classes = useStyles();
-  const [name, setName] = useState('Will Joe Biden Win the election');
-  const [description, setDescription] = useState('Default Description');
-  const [options, setOptions] = useState(['yes', 'no', 'others']);
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [options, setOptions] = useState([]);
   const [expiryDate, setExpiryDate] = useState(0);
   const [selectedArbitrators, setSelectedArbitrators] = useState([]);
   const [creatorBond, setCreatorBond] = useState(0.1);
@@ -95,8 +95,10 @@ function CreateTopic({ predictionMarketInstance, accountAddress }) {
   const handleCreateTopic = useCallback(() => {
     const options32Bytes = options.map((option) => Web3.utils.fromAscii(option));
     const selectedArbitratorAddresses = getSelectedArbitratorAddresses(selectedArbitrators, arbitrators, arbitratorNames);
+    const date = new Date(expiryDate).getTime()
+    console.log(date);
     predictionMarketInstance.methods
-      .createTopic(name, description, options32Bytes, expiryDate, selectedArbitratorAddresses)
+      .createTopic(name, description, options32Bytes, date, selectedArbitratorAddresses)
       .send({ from: accountAddress, value: Web3.utils.toWei(creatorBond.toString(), 'ether') })
       .then(() => {
         window.location.reload(false);
@@ -176,7 +178,7 @@ function CreateTopic({ predictionMarketInstance, accountAddress }) {
                   onChange={(event) => { setSelectedArbitrators(event.target.value); }}
                 >
                   {arbitratorNames.map((arbName, index) => (
-                    <MenuItem value={arbName}>
+                    <MenuItem value={arbName} key={arbName + index}>
                       {`${arbName} - Reputation: ${arbitratorReputations[index]}`}
                       {' '}
                     </MenuItem>
@@ -192,6 +194,9 @@ function CreateTopic({ predictionMarketInstance, accountAddress }) {
                 className={classes.textField}
                 InputLabelProps={{
                   shrink: true,
+                }}
+                onChange={ (event) => {
+                  setExpiryDate(event.target.value)
                 }}
               />
             </Grid>

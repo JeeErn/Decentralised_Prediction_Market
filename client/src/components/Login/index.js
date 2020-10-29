@@ -4,7 +4,7 @@
 import {
   makeStyles, Paper, TextField, Button, Typography,
 } from '@material-ui/core';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import Web3 from 'web3';
 
 const useStyles = makeStyles(() => ({
@@ -28,21 +28,22 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-function Login({ predictionMarketInstance, accountAddress }) {
+function Login({ predictionMarketInstance, accountAddress}) {
   const classes = useStyles();
   const [name, setName] = useState('');
-  const handleSignUp = (type) => {
+  const handleSignUp = useCallback((type) => {
     if (type === 'trader and arbitrator') {
       predictionMarketInstance.methods.createTrader()
         .send({ from: accountAddress })
         .then(() => {
-          window.location.reload(false);
+          alert(" You have successfully created a trader account, accept your metamask transaction to create an arbitrator account")
+          predictionMarketInstance.methods.createArbitrator(Web3.utils.asciiToHex(name))
+          .send({ from: accountAddress })
+          .then(() => {
+            window.location.reload(false);
+          });
         });
-      predictionMarketInstance.methods.createArbitrator(Web3.utils.asciiToHex(name))
-        .send({ from: accountAddress })
-        .then(() => {
-          window.location.reload(false);
-        });
+    
     }
     if (type === 'trader') {
       predictionMarketInstance.methods.createTrader()
@@ -51,7 +52,7 @@ function Login({ predictionMarketInstance, accountAddress }) {
           window.location.reload(false);
         });
     }
-  };
+  }, [accountAddress, name, predictionMarketInstance]);
   return (
     <Paper className={classes.root} elevation={2}>
       <Typography align="center" variant="h5">

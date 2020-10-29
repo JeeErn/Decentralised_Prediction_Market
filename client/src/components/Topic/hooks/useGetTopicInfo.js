@@ -34,6 +34,7 @@ function useGetTopicInfo({ topicInstance, accountAddress, web3 }) {
   const [contractPhase, setContractPhase] = useState(null);
   const [juryAddresses, setJuryAddresses] = useState([]);
   const [winningOptionIndex, setWinningOptionIndex] = useState(null);
+  const [expiryDate, setExpiryDate] = useState(null);
 
   useEffect(() => {
     if (accountAddress && topicInstance) {
@@ -124,8 +125,15 @@ function useGetTopicInfo({ topicInstance, accountAddress, web3 }) {
         .then((_winningOption) => {
           setWinningOptionIndex(parseInt(_winningOption, 10));
         });
+      
+      // Get expiry date
+      topicInstance.methods.expiryDate()
+      .call({ from: accountAddress })
+      .then((_expiryDate) => {
+        setExpiryDate(new Date(parseInt(_expiryDate,10)))
+      });
     }
-  }, [topicInstance, accountAddress, web3, contractPhase]);
+  }, [topicInstance, accountAddress, expiryDate]);
 
   const parseOptionData = useCallback(() => {
     const options = [];
@@ -142,7 +150,7 @@ function useGetTopicInfo({ topicInstance, accountAddress, web3 }) {
   }, [optionNames, optionPendingPrices, lastTradedPrices, winScores, loseScores]);
 
   return {
-    name, description, balance, arbitratorAddresses, juryAddresses, contractPhase, options: parseOptionData(), winningOptionIndex,
+    name, description, balance, arbitratorAddresses, juryAddresses, contractPhase, options: parseOptionData(), winningOptionIndex, expiryDate
   };
 }
 

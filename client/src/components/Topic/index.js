@@ -12,7 +12,7 @@ import TopicVotingBox from './TopicVotingBox';
 import TopicResolve from './TopicResolve';
 // TODO: Bring this hook out of create topic
 import useGetArbitrators from '../CreateTopic/hooks/useGetArbitrators';
-import { getArbitratorNamesFromAddress } from './Util';
+import { getArbitratorNamesFromAddress, formatDate } from './Util';
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -44,7 +44,7 @@ function Topic({
 }) {
   const classes = useStyles();
   const {
-    name, description, balance, options, arbitratorAddresses, contractPhase, juryAddresses, winningOptionIndex,
+    name, description, balance, options, arbitratorAddresses, contractPhase, juryAddresses, winningOptionIndex, expiryDate
   } = useGetTopicInfo({ topicInstance, accountAddress, web3 });
 
   const { arbitrators, arbitratorNames } = useGetArbitrators({ predictionMarketInstance });
@@ -78,6 +78,7 @@ function Topic({
               <Typography variant="subtitle1">
                 {description}
               </Typography>
+              {expiryDate && <Typography className={classes.arbitratorNames} variant="subtitle1">{`Expiry Date: ${formatDate(expiryDate)}`}</Typography>}
               <Typography display="inline" className={classes.arbitratorNames}>Selected Arbitrators:</Typography>
               {' '}
               {getArbitratorNamesFromAddress({ selectedAddresses: arbitratorAddresses, allAddresses: arbitrators, allNames: arbitratorNames }).map((_name) => (
@@ -112,9 +113,9 @@ function Topic({
           }
 
           {/* WinningOptionIndex Might Be 0 */}
-          {options && winningOptionIndex !== null && (
+          {expiryDate && options && winningOptionIndex !== null &&  (
           <Grid item xs={12}>
-            <TopicResolve options={options} topicInstance={topicInstance} accountAddress={accountAddress} userType={userType} winningOptionIndex={winningOptionIndex} />
+            <TopicResolve options={options} topicInstance={topicInstance} accountAddress={accountAddress} userType={userType} winningOptionIndex={winningOptionIndex} expiryDate={expiryDate} />
           </Grid>
           )}
         </Grid>
