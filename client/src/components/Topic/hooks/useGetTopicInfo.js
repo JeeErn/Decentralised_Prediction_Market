@@ -133,7 +133,7 @@ function useGetTopicInfo({ topicInstance, accountAddress, web3 }) {
         setExpiryDate(new Date(parseInt(_expiryDate,10)))
       });
     }
-  }, [topicInstance, accountAddress, expiryDate]);
+  }, [topicInstance, accountAddress,web3, contractPhase, expiryDate]);
 
   const parseOptionData = useCallback(() => {
     const options = [];
