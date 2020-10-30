@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.21 <=0.7.0;
 import "./Topic.sol";
+import "./SafeMath.sol";
 
 contract PredictionMarket {
+    using SafeMath for uint256;
     // Structs for users and arbitrators. Default scores = 100
     struct Trader {
         uint winScore;
@@ -155,7 +157,8 @@ contract PredictionMarket {
     }
 
     function updateWinScore(address winnerAddress, uint amount) public {
-        traders[winnerAddress].winScore += amount;
+        // traders[winnerAddress].winScore += amount;
+        traders[winnerAddress].winScore = traders[winnerAddress].winScore.add(amount);
     }
 
     function getWinScore(address winnerAddress) public view returns (uint){
@@ -164,7 +167,8 @@ contract PredictionMarket {
     }
 
     function updateLoseScore(address loserAddress, uint amount) public {
-        traders[loserAddress].loseScore += amount;
+        // traders[loserAddress].loseScore += amount;
+        traders[loserAddress].loseScore = traders[loserAddress].loseScore.add(amount);
     }
 
     function getLoseScore(address loserAddress) public view returns (uint){
