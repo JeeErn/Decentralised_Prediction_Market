@@ -8,7 +8,6 @@ accounts[0], accounts[1], accounts[4]
 Arbitrator accounts:
 accounts[2], accounts[3], accounts[4]
 */
-var BigNumber = require('bignumber.js');
 const stringUtils = require("./utils/stringUtil.js");
 const PredictionMarket = artifacts.require("./PredictionMarket.sol");
 

@@ -355,10 +355,10 @@ contract Topic {
         if (confirmedTrades[i].shareOwners[j] != address(uint160(0x0))){
           temp = temp + 10;
           if(j == winIndex){
-            marketInstance.updateWinScore(confirmedTrades[i].shareOwners[j], 100*(1-confirmedTrades[i].price[j]));
+            marketInstance.updateWinScore(confirmedTrades[i].shareOwners[j], 100-(100*confirmedTrades[i].price[j]/1000000000000000000));
             payoutToWinners(confirmedTrades[i].shareOwners[j]);
           } else {
-            marketInstance.updateLoseScore(confirmedTrades[i].shareOwners[j], 100*confirmedTrades[i].price[j]);
+            marketInstance.updateLoseScore(confirmedTrades[i].shareOwners[j], 100*confirmedTrades[i].price[j]/1000000000000000000);
           }
         }
       }

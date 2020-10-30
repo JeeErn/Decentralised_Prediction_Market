@@ -117,6 +117,10 @@ contract("Topic", accounts => {
             const accountSixBalanceBef = await web3.eth.getBalance(accounts[6]);
             const accountSevenBalanceBef = await web3.eth.getBalance(accounts[7]);
             const accountEightBalanceBef = await web3.eth.getBalance(accounts[8]);
+            const winningVoterWinScoreBef = await predictionMarketInstance.getWinScore(accounts[1]);
+            const winningVoterLoseScoreBef = await predictionMarketInstance.getLoseScore(accounts[1]); 
+            const losingVoterWinScoreBef = await predictionMarketInstance.getWinScore(accounts[2]);
+            const losingVoterLoseScoreBef = await predictionMarketInstance.getLoseScore(accounts[2]); 
 
             await withoutTieTopicInstance.addArbitratorVote(options[1], validArbTimeStamp, false, { from: accounts[9] });
 
@@ -126,6 +130,10 @@ contract("Topic", accounts => {
             const accountSixBalanceAft = await web3.eth.getBalance(accounts[6]);
             const accountSevenBalanceAft = await web3.eth.getBalance(accounts[7]);
             const accountEightBalanceAft = await web3.eth.getBalance(accounts[8]);
+            const winningVoterWinScoreAft = await predictionMarketInstance.getWinScore(accounts[1]);
+            const winningVoterLoseScoreAft = await predictionMarketInstance.getLoseScore(accounts[1]); 
+            const losingVoterWinScoreAft = await predictionMarketInstance.getWinScore(accounts[2]);
+            const losingVoterLoseScoreAft = await predictionMarketInstance.getLoseScore(accounts[2]); 
 
             const winningVoterDiff = winningVoterBalanceAft - winningVoterBalanceBef;
             assert.strictEqual(winningVoterDiff.toString(), web3.utils.toWei("0.98"), "0.98 ETH is transferred to winning voter");
@@ -147,6 +155,11 @@ contract("Topic", accounts => {
             const amountTransferredToCreator = Math.floor(marketCap / 100) + creatorBond;
             const topicCreatorDiff = topicCreatorBalanceAft - topicCreatorBalanceBef;
             assert.strictEqual(topicCreatorDiff.toString(), amountTransferredToCreator.toString(), "creator bond and 1% of market cap is transferred to creator");
+            
+            assert.strictEqual(Number(winningVoterWinScoreAft),Number(winningVoterWinScoreBef)+50);
+            assert.strictEqual(Number(winningVoterLoseScoreAft),Number(winningVoterLoseScoreBef));
+            assert.strictEqual(Number(losingVoterWinScoreAft),Number(losingVoterWinScoreBef));
+            assert.strictEqual(Number(losingVoterLoseScoreAft),Number(losingVoterLoseScoreBef)+50);
         });
 
         it("shifts contract to resolved state and does not allow any other actions", async () => {
@@ -308,6 +321,10 @@ contract("Topic", accounts => {
             const accountSevenBalanceBef = await web3.eth.getBalance(accounts[7]);
             const accountThreeBalanceBef = await web3.eth.getBalance(accounts[3]);
             const accountFourBalanceBef = await web3.eth.getBalance(accounts[4]);
+            const winningVoterWinScoreBef = await predictionMarketInstance.getWinScore(accounts[1]);
+            const winningVoterLoseScoreBef = await predictionMarketInstance.getLoseScore(accounts[1]); 
+            const losingVoterWinScoreBef = await predictionMarketInstance.getWinScore(accounts[2]);
+            const losingVoterLoseScoreBef = await predictionMarketInstance.getLoseScore(accounts[2]); 
 
             await withTieTopicInstance.addJuryVote(options[1], false, { from: accounts[5] });
 
@@ -318,6 +335,10 @@ contract("Topic", accounts => {
             const accountSevenBalanceAft = await web3.eth.getBalance(accounts[7]);
             const accountThreeBalanceAft = await web3.eth.getBalance(accounts[3]);
             const accountFourBalanceAft = await web3.eth.getBalance(accounts[4]);
+            const winningVoterWinScoreAft = await predictionMarketInstance.getWinScore(accounts[1]);
+            const winningVoterLoseScoreAft = await predictionMarketInstance.getLoseScore(accounts[1]); 
+            const losingVoterWinScoreAft = await predictionMarketInstance.getWinScore(accounts[2]);
+            const losingVoterLoseScoreAft = await predictionMarketInstance.getLoseScore(accounts[2]); 
 
             const winningVoterDiff = winningVoterBalanceAft - winningVoterBalanceBef;
             assert.strictEqual(winningVoterDiff.toString(), web3.utils.toWei("0.98"), "0.98 ETH is transferred to winning voter");
@@ -345,6 +366,11 @@ contract("Topic", accounts => {
             const accountFourDiff = Number(accountFourBalanceAft - accountFourBalanceBef);
             assert.isTrue(accountThreeDiff <= upperBoundJury && accountThreeDiff >= lowerBoundJury, "winning jury received promised share");
             assert.isTrue(accountFourDiff <= upperBoundJury && accountFourDiff >= lowerBoundJury, "winning jury received promised share");
+            
+            assert.strictEqual(Number(winningVoterWinScoreAft),Number(winningVoterWinScoreBef)+50);
+            assert.strictEqual(Number(winningVoterLoseScoreAft),Number(winningVoterLoseScoreBef));
+            assert.strictEqual(Number(losingVoterWinScoreAft),Number(losingVoterWinScoreBef));
+            assert.strictEqual(Number(losingVoterLoseScoreAft),Number(losingVoterLoseScoreBef)+50);
         });
 
         it("shifts contract to resolved state and does not allow any other actions", async () => {
