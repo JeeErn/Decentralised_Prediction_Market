@@ -154,8 +154,8 @@ contract PredictionMarket {
         return true;
     }
 
-    function updateWinScore(address winnerAddress) public {
-        traders[winnerAddress].winScore += 1;
+    function updateWinScore(address winnerAddress, uint amount) public {
+        traders[winnerAddress].winScore += amount;
     }
 
     function getWinScore(address winnerAddress) public view returns (uint){
@@ -163,8 +163,8 @@ contract PredictionMarket {
         return winner.winScore;
     }
 
-    function updateLoseScore(address loserAddress) public {
-        traders[loserAddress].loseScore += 1;
+    function updateLoseScore(address loserAddress, uint amount) public {
+        traders[loserAddress].loseScore += amount;
     }
 
     function getLoseScore(address loserAddress) public view returns (uint){

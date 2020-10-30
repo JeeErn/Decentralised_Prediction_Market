@@ -53,15 +53,15 @@
       "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.5.16+commit.9c3226ce\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"constant\":true,\"inputs\":[],\"name\":\"last_completed_migration\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"completed\",\"type\":\"uint256\"}],\"name\":\"setCompleted\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/Users/collinlim/Desktop/Desktop.nosync/School/CZ4153/Project/Decentralised_Prediction_Market/contracts/Migrations.sol\":\"Migrations\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/collinlim/Desktop/Desktop.nosync/School/CZ4153/Project/Decentralised_Prediction_Market/contracts/Migrations.sol\":{\"keccak256\":\"0x5861ab1be45cda86de53df1b6ec582a6603886922d5230bdee6af9ff378afaa7\",\"urls\":[\"bzz-raw://8f372445f3653a8f7706344346dbcda3f4e007f016821340fc5fb85c4d4cee84\",\"dweb:/ipfs/QmNvUEF5QwKBCqnJRE5EBggoguCC3VzUXF1aursHGPQG4u\"]}},\"version\":1}",
-  "bytecode": "0x608060405234801561001057600080fd5b50600080546001600160a01b0319163317905560fc806100316000396000f3fe6080604052348015600f57600080fd5b5060043610603c5760003560e01c8063445df0ac1460415780638da5cb5b146059578063fdacd57614607b575b600080fd5b60476097565b60408051918252519081900360200190f35b605f609d565b604080516001600160a01b039092168252519081900360200190f35b609560048036036020811015608f57600080fd5b503560ac565b005b60015481565b6000546001600160a01b031681565b6000546001600160a01b031633141560c45760018190555b5056fea265627a7a7231582008650ca51f5249e8bdf245bdb1121601e72e3026ec4d46ea12bbc3a9a7e469d264736f6c63430005100032",
-  "deployedBytecode": "0x6080604052348015600f57600080fd5b5060043610603c5760003560e01c8063445df0ac1460415780638da5cb5b146059578063fdacd57614607b575b600080fd5b60476097565b60408051918252519081900360200190f35b605f609d565b604080516001600160a01b039092168252519081900360200190f35b609560048036036020811015608f57600080fd5b503560ac565b005b60015481565b6000546001600160a01b031681565b6000546001600160a01b031633141560c45760018190555b5056fea265627a7a7231582008650ca51f5249e8bdf245bdb1121601e72e3026ec4d46ea12bbc3a9a7e469d264736f6c63430005100032",
+  "metadata": "{\"compiler\":{\"version\":\"0.5.16+commit.9c3226ce\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"constant\":true,\"inputs\":[],\"name\":\"last_completed_migration\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"completed\",\"type\":\"uint256\"}],\"name\":\"setCompleted\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/Users/gwynethang/Documents/Academics/Y4S1/Blockchain/Decentralised_Prediction_Market/contracts/Migrations.sol\":\"Migrations\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/gwynethang/Documents/Academics/Y4S1/Blockchain/Decentralised_Prediction_Market/contracts/Migrations.sol\":{\"keccak256\":\"0x5861ab1be45cda86de53df1b6ec582a6603886922d5230bdee6af9ff378afaa7\",\"urls\":[\"bzz-raw://8f372445f3653a8f7706344346dbcda3f4e007f016821340fc5fb85c4d4cee84\",\"dweb:/ipfs/QmNvUEF5QwKBCqnJRE5EBggoguCC3VzUXF1aursHGPQG4u\"]}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b50600080546001600160a01b0319163317905560fc806100316000396000f3fe6080604052348015600f57600080fd5b5060043610603c5760003560e01c8063445df0ac1460415780638da5cb5b146059578063fdacd57614607b575b600080fd5b60476097565b60408051918252519081900360200190f35b605f609d565b604080516001600160a01b039092168252519081900360200190f35b609560048036036020811015608f57600080fd5b503560ac565b005b60015481565b6000546001600160a01b031681565b6000546001600160a01b031633141560c45760018190555b5056fea265627a7a72315820081ed046a7d7eec5a7fc103a1a4cb633971c29ad667f3d84bab3962940df32c864736f6c63430005100032",
+  "deployedBytecode": "0x6080604052348015600f57600080fd5b5060043610603c5760003560e01c8063445df0ac1460415780638da5cb5b146059578063fdacd57614607b575b600080fd5b60476097565b60408051918252519081900360200190f35b605f609d565b604080516001600160a01b039092168252519081900360200190f35b609560048036036020811015608f57600080fd5b503560ac565b005b60015481565b6000546001600160a01b031681565b6000546001600160a01b031633141560c45760018190555b5056fea265627a7a72315820081ed046a7d7eec5a7fc103a1a4cb633971c29ad667f3d84bab3962940df32c864736f6c63430005100032",
   "sourceMap": "67:311:0:-;;;219:50;8:9:-1;5:2;;;30:1;27;20:12;5:2;-1:-1;246:5:0;:18;;-1:-1:-1;;;;;;246:18:0;254:10;246:18;;;67:311;;;;;;",
   "deployedSourceMap": "67:311:0:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;67:311:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;115:36;;;:::i;:::-;;;;;;;;;;;;;;;;91:20;;;:::i;:::-;;;;-1:-1:-1;;;;;91:20:0;;;;;;;;;;;;;;273:103;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;-1:-1;273:103:0;;:::i;:::-;;115:36;;;;:::o;91:20::-;;;-1:-1:-1;;;;;91:20:0;;:::o;273:103::-;202:5;;-1:-1:-1;;;;;202:5:0;188:10;:19;184:26;;;335:24;:36;;;184:26;273:103;:::o",
   "source": "// SPDX-License-Identifier: MIT\npragma solidity >=0.4.21 <=0.7.0;\n\ncontract Migrations {\n  address public owner;\n  uint public last_completed_migration;\n\n  modifier restricted() {\n    if (msg.sender == owner) _;\n  }\n\n  constructor() public {\n    owner = msg.sender;\n  }\n\n  function setCompleted(uint completed) public restricted {\n    last_completed_migration = completed;\n  }\n}\n",
-  "sourcePath": "/Users/collinlim/Desktop/Desktop.nosync/School/CZ4153/Project/Decentralised_Prediction_Market/contracts/Migrations.sol",
+  "sourcePath": "/Users/gwynethang/Documents/Academics/Y4S1/Blockchain/Decentralised_Prediction_Market/contracts/Migrations.sol",
   "ast": {
-    "absolutePath": "/Users/collinlim/Desktop/Desktop.nosync/School/CZ4153/Project/Decentralised_Prediction_Market/contracts/Migrations.sol",
+    "absolutePath": "/Users/gwynethang/Documents/Academics/Y4S1/Blockchain/Decentralised_Prediction_Market/contracts/Migrations.sol",
     "exportedSymbols": {
       "Migrations": [
         36
@@ -472,7 +472,7 @@
     "src": "32:347:0"
   },
   "legacyAST": {
-    "absolutePath": "/Users/collinlim/Desktop/Desktop.nosync/School/CZ4153/Project/Decentralised_Prediction_Market/contracts/Migrations.sol",
+    "absolutePath": "/Users/gwynethang/Documents/Academics/Y4S1/Blockchain/Decentralised_Prediction_Market/contracts/Migrations.sol",
     "exportedSymbols": {
       "Migrations": [
         36
@@ -890,12 +890,12 @@
     "5777": {
       "events": {},
       "links": {},
-      "address": "0xA2B28C228a33de17Dc8877B908a4d5A97c1af54C",
-      "transactionHash": "0x3343c2c39e345cdedae5b66b056a0e3d05608762178cc96f19cd931b17f3b16f"
+      "address": "0xefEE56C6493Bd04C1E4aA5454881633eb182d5e4",
+      "transactionHash": "0x33cec7b427a3a9a787a026c70674c37caf6e6262af98c3eadd1875fa3a15a3e7"
     }
   },
-  "schemaVersion": "3.2.5",
-  "updatedAt": "2020-10-29T02:48:40.187Z",
+  "schemaVersion": "3.3.1",
+  "updatedAt": "2020-10-30T05:12:20.207Z",
   "networkType": "ethereum",
   "devdoc": {
     "methods": {}
