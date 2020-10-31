@@ -43,7 +43,7 @@ function TopicVotingBox({
     () => {
       // // Make the bet
       topicInstance.methods
-        .voteOption(selectedOption.toString())
+        .voteOption(selectedOption.toString(), Date.now())
         .send({ from: accountAddress, value: web3.utils.toWei(sliderValue.toString()) })
         .then(() => {
           alert('Congratuations! You have just made a bet!');

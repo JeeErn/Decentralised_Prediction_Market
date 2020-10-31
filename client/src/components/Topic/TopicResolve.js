@@ -39,7 +39,7 @@ function TopicResolve({
   const handleResolveSubmit = useCallback((type) => {
     if (type === 'arbitrator') {
 
-      topicInstance.methods.addArbitratorVote(Web3.utils.stringToHex(options[selectedOption].optionName.toString()), false)
+      topicInstance.methods.addArbitratorVote(Web3.utils.stringToHex(options[selectedOption].optionName.toString()), Date.now())
         .send({ from: accountAddress })
         .then(() => {
           alert('Your vote has been recorded! ');
@@ -47,7 +47,7 @@ function TopicResolve({
         });
     }
     if (type === 'juror') {
-      topicInstance.methods.addJuryVote(Web3.utils.stringToHex(options[selectedOption].optionName.toString()), false)
+      topicInstance.methods.addJuryVote(Web3.utils.stringToHex(options[selectedOption].optionName.toString()))
         .send({ from: accountAddress })
         .then(() => {
           alert('Your vote has been recorded! ');
