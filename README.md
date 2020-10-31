@@ -27,11 +27,11 @@ Traders are regular accounts that are tied to the address indicated in your Ethe
 rep = win / (win + lose)
 ```
 
-More on the reputation system later. 
-
-Arbitrators are special, trusted parties that are in charge of result reporting. While trader accounts are nameless, arbitrator accounts have a display name attached to the address, which used for identification purposes when a topic is being created. Every arbitrator account has a trustworthiness score that starts at 50 and changes between 0 and 100 inclusive as the arbitrator reports on topics. More on the trustworthiness system later. 
+Arbitrators are special, trusted parties that are in charge of result reporting. While trader accounts are nameless, arbitrator accounts have a display name attached to the address, which used for identification purposes when a topic is being created. Every arbitrator account has a trustworthiness score that starts at 50 and changes between 0 and 100 inclusive as the arbitrator reports on topics. 
 
 _Because we require every user to have a trader account, users who wish to become arbitrators will have to pay the account creation gas fee twice - once for a trader account, once for an arbitrator account._
+
+More on the reputation and trustworthiness system [later](#reputation-and-trustworthiness-system). 
 
 ## **Topics**
 Topics are the essence of our platform. Traders can select any topic they wish to predict on and place a stake on the outcome that they believe will be most likely to happen. There are several key components to each topic:
@@ -61,7 +61,7 @@ Once the expiry date has passed, the topic will transit to the verification stat
 
 In the event of a **tie** occurs in deciding the correct result, the topic will transit to the **Jury** state. During the transition to this state, a panel of Jurors are selected from the list of arbitrators. The jury will then have another round of voting. The outcome that the jury selects is final and will be used as the correct outcome of the topic. 
 
-Once the topic has received a final outcome, either from the selected arbitrators or from the jury, all users that are due to receive their payouts will automatically receive them when the topic transits to the Resolved state. The payouts system is explained in more detail later. Once the topic is in the resolved state, no other actions can be performed on the topic. 
+Once the topic has received a final outcome, either from the selected arbitrators or from the jury, all users that are due to receive their payouts will automatically receive them when the topic transits to the Resolved state. The payouts system is explained in more detail [later](#payout). Once the topic is in the resolved state, no other actions can be performed on the topic. 
 
 ### 2. Title [^](#Topics)
 The title is the name of the topic. As multiple topics of the same title may exists at the same time, traders should choose the topic to vote for carefully and at their own discretion. 
@@ -73,7 +73,7 @@ The description provides more information about the topic to give context to the
 Market cap is the amount of Ether that has been placed into the topic by voters. 
 
 ### 5. Expiry Date [^](#Topics)
-Expiry date is the cutoff date for voting. Ideally, it should be the day that the correct outcome of the topic can confidently determined by arbitrators. 
+Expiry date is the cutoff date for voting. Ideally, it should be the day where a correct outcome of the topic can confidently determined by arbitrators. 
 
 _Traders: do note that voting will only be open till the day **BEFORE** the expiry date._
 
@@ -88,8 +88,8 @@ Weighted probability is the probability that the option will be the correct one.
 
 The formula for calculating the weighted probability is as follows:
 ```math
-option_win = sum(voter_win * price_of_vote);  
-option_lose = sum(voter_lose * price_of_vote);  
+option_win = sum(voter_win x price_of_vote);  
+option_lose = sum(voter_lose x price_of_vote);  
 option_rep = option_win / (option_win + option_lose);  
 option_weighted_prob = option_rep / sum(all_option_rep);
 ```
@@ -113,9 +113,9 @@ In the first case, all votes will remain stuck in pending state until a higher p
 
 In the second case, the pending vote will have to await for more votes to be cast for other options in order to make up a valid trade and be processed by the market. 
 
-Voting will be explained in greater detail later.
+Voting will be explained in greater detail [later](#voting).
 
-_In the event that there are votes that are still pending and the topic transits from Open state to Verification state, all pending prices will be refunded to the voters and those votes will be discarded. However, the gas price used to cast the vote will not be refunded._
+>_In the event that there are votes that are still pending and the topic transits from Open state to Verification state, all pending prices will be refunded to the voters and those votes will be discarded. However, the gas price used to cast the vote will not be refunded._
 
 
 ## **Topic Creation**
@@ -147,7 +147,81 @@ Arbitrators selected for reporting should perform their due diligence in researc
 Once the final selected arbitrator votes (e.g. for a topic with 5 selected arbitrators, the 5th arbitrator votes), the votes of all arbitrators will be tallied and the topic will transit to the next state. 
 
 ### Jury Voting
-Jury voting works in the same manner as arbitrator voting, but only occurs when the selected arbitrators cannot come to a majority conclusion on the topic's final outcome. Only selected jurors for the topic will be allowed to vote during the jury selection stage. Jury selection is discussed in more detail later. 
+Jury voting works in the same manner as arbitrator voting, but only occurs when the selected arbitrators cannot come to a majority conclusion on the topic's final outcome. Only selected jurors for the topic will be allowed to vote during the jury selection stage. Jury selection is discussed in more detail [later](#jury-selection). 
+
+## **Resolution**
+Once the last selected arbitrator or jury places his/her vote, the topic will move into a temporary resolution state. During resolution, the votes for the final outcome will be tallied. In the case of counting selected arbitrators' votes, if the final outcome contains a tie, the topic will resolve as an tied-outcome and the topic will transit to the Jury state and the jury will be selected. In the case of jury voting, it is assumed that the jury will definitely have a majority outcome. 
+
+Once a majority outcome has been achieved, the topic will automatically trigger a payout event, as well as a reputation and trustworthiness update event for all parties involved. 
+
+## **Jury Selection**
+Jury selection happens whenever a topic transits to the Jury state. A maximum of 5 jurors will be selected randomly for the jury. The steps for jury selection is as follows:
+1. All arbitrator accounts are retrieved
+2. From the pool of all arbitrator accounts, in the event that the topic creator was an arbitrator, his/her account will be removed from the pool
+3. All selected arbitrators for the topic will be removed from the pool
+4. Any arbitrator who had voted as a trader in the topic will be removed from the pool
+5. **In the event 5 or fewer arbitrators are left for selection, all of them will be selected for jury and the selection event ends here**
+6. From the remaining pool of arbitrators, a ballot is formed. For each arbitrator in the pool:
+    * The trustworthiness score of the arbitrator will be retrieved
+    * For every 10 trustworthiness score, 1 ballot chance will be added into the ballot in the arbitrator's name (e.g. for a score of 75, 7 chances are added)
+7. Once all the ballot chances are added, arbitrators are randomly retrieved from the ballot
+8. If the arbitrator has not yet been selected as a juror, add him/her to the list of jury. Otherwise, ignore this and continue
+9. Repeat steps 7-8 until 5 jurors are selected
+
+## **Payout**
+Once the final outcome (a.k.a winning option) is achieved, a payout will be automatically triggered. The payout calculations and conditions for each involved party is detailed below. 
+
+### Topic Creator
+In the event that there was no tie during the selected arbitrator voting stage, the topic creator will be refunded his/her 1 Ether creator bond. In addition to that, the topic creator will receive 1% of the market cap of the topic. 
+
+Otherwise, in the event that there was a tie, the topic creator forfeits both the creator bond and the 1% benefit, and will not receive any payout. 
+> Note: this is separate from any payouts the topic creator might be due to receive if he/she participates in trader voting.
+
+### Trader Payout
+Regardless of whether there was a tie at the arbitrator voting stage, all winning trader voters will receive 0.98 Ether for each confirmed vote they placed on the topic's winning option. Traders who voted on the non-winning option will receive nothing as payout. 
+
+### Arbitrator Payout
+Regardless of whether there was a tie at the arbitrator voting stage, each winning arbitrator who voted for the winning option will receive 
+```math
+(1% x market_cap) / number_of_winning_arbitrators
+```
+Arbitrators who voted for the non-winning option will not receive any payout.
+
+### Jury Payout
+In the event that jury voting took place, the forfeited creator bond and 1% of market cap previously entitled to the creator will be used to pay the jury. Each winning juror who voted for the winning option will receive
+```math
+(1 ETH + 1% x market_cap) / number_of_winning_jurors
+```
+Jurors who voted for the non-winning option will not receive any payout. 
+
+## **Reputation and Trustworthiness System**
+Traders follow a reputation system and arbitrators have a trustworthiness system. The respective systems and update mechanisms are detailed below. 
+
+### Trader Reputation System
+The trader reputation system is comprised of 2 scores, a "win score" and "lose score" that starts at 100 each for every trader. The reputation of the trader will affect how much influence the trader will have on the weighted probability of the topic. 
+
+Whenever a topic resolves, every trader with a confirmed vote in the topic will go through a reputation update process. The process repeats for every confirmed vote that the trader has in the topic. 
+
+In the event the trader voted on the winning option, his/her "win score" will be increased. The trader's lose score will not change in this case. The calculation is as follows:
+```math
+new_win_score = prev_win_score + 100 x (1 - price_of_vote)
+```
+
+In the event that the trader voted on the non-winning option, his/her "lose score" will be increased. The trader's win score will not change in this case. The calculation is as follows:
+```math
+new_lose_score = prev_lose_score + 100 x price_of_vote
+```
+
+Our reputation update formula results in votes for popular options (and thus higher prices) becoming less rewarding and more risky for the trader's reputation. On the other hand, less popular options provide greater reward when it is the winning option and punishes less when it is not the winning option. 
+
+### Arbitrator Trustworthiness System
+The arbitrator trustworthiness system only has one score. This trustworthiness score starts at 50 for every new arbitrator. The trustworthiness of the arbitrator directly affects his/her chances to be selected as a juror in the future, so the arbitrator is incentivised to keep his/her trustworthiness high.
+
+Whenever a topic resolves, if the arbitrator had voted in the topic either as a selected arbitrator or as a juror, his/her trustworthiness will be updated.
+
+In the event the arbitrator voted on the winning option, his/her trustworthiness will be increased by **5** points, and will be capped at a maximum of **100** points. 
+
+In the event the arbitrator voted on the non-winning option, his/her trustworthiness will immediately be set to **0** points. This harsh punishment stems from the fact that arbitrators are supposed to be trusted parties. 
 
 <br />
 
