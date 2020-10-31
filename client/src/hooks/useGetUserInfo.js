@@ -20,10 +20,12 @@ function useGetUserInfo({ predictionMarketInstance, accountAddress }) {
   }, [accountAddress, predictionMarketInstance]);
 
   useEffect(() => {
-    if (userType === 'Trader and Arbitrator' || userType === 'Arbitrator') {
+    if (predictionMarketInstance && userType !== 'Invalid') {
       predictionMarketInstance.methods.getVotersReputation(accountAddress)
       .call()
       .then(([win, lose]) => { setReputation(parseInt(win, 10) / (parseInt(lose, 10) + parseInt(win, 10))); });
+    }
+    if (userType === 'Trader and Arbitrator' || userType === 'Arbitrator') {
 
       predictionMarketInstance.methods.getArbitratorName()
         .call({ from: accountAddress })
