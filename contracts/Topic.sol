@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.21 <=0.7.0;
 import "./PredictionMarket.sol";
-// import "github.com/OpenZeppelin/zeppelin-solidity/contracts/math/SafeMath.sol";
 
 contract Topic {
   // Public attirbutes
@@ -106,7 +105,6 @@ contract Topic {
         }
     }
 
-// TODO: TEST CASES
   function updateWeightedVotes() private {
     PredictionMarket pm = PredictionMarket(parentContract);
     trade memory lastTrade = confirmedTrades[confirmedTrades.length - 1];
@@ -207,7 +205,7 @@ contract Topic {
     }
   }
 
-  function openPhaseToVerificationPhase() public { // FIXME: Change visibility to internal before deploying on testnet!
+  function openPhaseToVerificationPhase() internal { 
     if (contractPhase == Phase.Open) { 
       contractPhase = Phase.Verification;
     }
@@ -232,7 +230,7 @@ contract Topic {
     }
   }
 
-  function addArbitratorVote(bytes32 _option, uint256 timeStamp, bool forUnitTest) public { // FIXME: Remove unit test options before deploying to testnet!
+  function addArbitratorVote(bytes32 _option, uint256 timeStamp) public { 
     // Shift contract phase
     require(timeStamp > expiryDate);
     if (contractPhase == Phase.Open) {
@@ -249,12 +247,11 @@ contract Topic {
     // Trigger resolve if all selected arbitrators have voted
     numArbitratorVoted++;
     if (numArbitratorVoted == arbitrators.length) {
-      emit ResolveCalled("Arbitrator");
-      resolve(forUnitTest);
+      resolve();
     }
   }
 
-  function addJuryVote(bytes32 _option, bool forUnitTest) public { // FIXME: Remove unit test options before deploying to testnet!
+  function addJuryVote(bytes32 _option) public { 
     require(contractPhase == Phase.Jury); // require it to be in jury phase
     require(!selectedJurys[msg.sender].hasVoted); //no double voting
     require(selectedJurys[msg.sender].isAssigned);
@@ -266,8 +263,7 @@ contract Topic {
     // Trigger resolve if all selected jury have voted
     numJuryVoted++;
     if (numJuryVoted == numOfJury) {
-      emit ResolveCalled("Jury");
-      resolve(forUnitTest);
+      resolve();
     }
   }
 
@@ -278,24 +274,21 @@ contract Topic {
 
   /*
   resolve() will be called after all selected arbitrators have voted for the truth
-  TODO: figure out how to make last arbitrator call resolve function and are we going to charge gas fees to last arbitrator? 
-  NOTE: Events for testing purpose. Can see if FE requires events as well else remove before deployment on testnet
   */
-  event ResolveCalled(string source);
 
-  function resolve(bool forUnitTest) internal { // FIXME: Remove unit test options before deploying to testnet!
+  function resolve() internal { 
     require(contractPhase != Phase.Open && contractPhase != Phase.Resolved);
     if(contractPhase == Phase.Jury){ 
       uint finalWinIndex = getJuryVerdict();
       winningOptionIndex = finalWinIndex;
-      resolveWithoutTie(finalWinIndex, forUnitTest);
+      resolveWithoutTie(finalWinIndex);
       return;
     }
     
     (bool hasTie, uint winIndex) = getArbitratorVerdict();
     if (!hasTie) {
       winningOptionIndex = winIndex;
-      resolveWithoutTie(winIndex, forUnitTest);
+      resolveWithoutTie(winIndex);
     } else {
       resolveWithTie();
     }
@@ -344,8 +337,7 @@ contract Topic {
       }
   }
 
-  // TODO: Payout to arbitrators, jury/creator
-  function resolveWithoutTie(uint winIndex, bool forUnitTest) public payable returns(uint) { // FIXME: Remove unit test options before deploying to testnet!
+  function resolveWithoutTie(uint winIndex) internal returns(uint) { 
     require(contractPhase != Phase.Open && contractPhase != Phase.Resolved); // Check required as function is public
     PredictionMarket marketInstance = PredictionMarket(parentContract);
     uint temp = 0;
@@ -366,13 +358,11 @@ contract Topic {
 
     updateArbitratorsTrustworthiness(winIndex);
 
-    if (!forUnitTest) {
-      payoutToArbitrators(winIndex);
-      if (contractPhase != Phase.Jury) {
-        payoutToCreator();
-      } else {
-        payoutToJury(winIndex);
-      }
+    payoutToArbitrators(winIndex);
+    if (contractPhase != Phase.Jury) {
+      payoutToCreator();
+    } else {
+      payoutToJury(winIndex);
     }
     contractPhase = Phase.Resolved;
     return temp;
@@ -414,7 +404,7 @@ contract Topic {
     }
   }
 
-  function payoutToWinners(address payable winner) public {
+  function payoutToWinners(address payable winner) internal {
     if (!hasReceivedPayout[winner]) {
       hasReceivedPayout[winner] = true;
       winner.transfer(0.98 ether);
@@ -422,9 +412,7 @@ contract Topic {
     }
   }
  
-  // FIXME: Change visibility to internal before deploying on testnet!
-  // Use public for unit tests
-  function resolveWithTie() public {
+  function resolveWithTie() internal {
     contractPhase = Phase.Jury;
     selectJury();
   }

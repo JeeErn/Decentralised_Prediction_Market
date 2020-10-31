@@ -138,7 +138,6 @@ contract PredictionMarket {
         address payable topicAddress = address(uint160(address(newTopic))); // to cast from address to address payable
         marketTopics[topicAddress] = newTopic;
         topicAddresses.push(topicAddress);
-        emit TopicCreated(topicAddress);
     }
 
     function getAllTopics() public view returns (address[] memory) {
@@ -198,10 +197,6 @@ contract PredictionMarket {
     function getTrustworthinessScore(address arbitrator) public view returns (uint){
         return arbitrators[arbitrator].trustworthiness;
     }
-    // ===============================================================
-    // For testing purposes
-    // ===============================================================
-    event TopicCreated(address _topicAddress);
 
     function getCreatorAddress(address topicAddress) public view returns (address payable) {
         return marketTopics[topicAddress].topicCreator();
