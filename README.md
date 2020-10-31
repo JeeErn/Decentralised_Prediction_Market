@@ -1,6 +1,12 @@
 # Decentralised Prediction Market
 A Decentralised Prediction Market application using Ethereum, inspired by Augur and Omen. Sign up, create a topic, and predict which outcome will be resolved as true. Rake up win points every time you predict the outcome correctly, and become a legendary trader that has the ability to influence others' perception through our reputation based prediction scoring system. 
 
+## Table of Contents
+* [Requirements](#requirements)
+* [Market Mechanisms](#market-mechanisms)
+* [Development](#development)
+* [Acknowledgements](#acknowledgements)
+
 <br />
 
 # Requirements
@@ -78,7 +84,7 @@ Selected arbitrators are arbitrators that have been selected to report on the fi
 Vote options are the available options for voting. These represent the possible outcomes that the topic can resolve to. There should exist a minimum of 2 options and a maximum of 4 options for each topic. Ideally, the options given will cover all possible scenarios that the topic can resolve towards. 
 
 ### 8. Weighted Probability [^](#Topics)
-Weighted probability is the probability that the option will be the correct one. This probability is derived from the sum of all previous voters' weighted bets. the This probability accounts for the voter's reputation at the time of voting, as well as the price the voter paid for the vote. 
+Weighted probability is the probability that the option will be the correct one. This probability is derived from the sum of all previous voters' weighted bets. This probability accounts for the voter's reputation at the time of voting, as well as the price the voter paid for the vote. 
 
 The formula for calculating the weighted probability is as follows:
 ```math
@@ -96,7 +102,7 @@ On the other hand, a voter with a very low reputation score may in turn lower th
 ### 9. Last Traded Price [^](#Topics)
 The last traded price shows the prices of the last trade that got accepted by the system. The numbers shown merely serves as a guide for voters to place their price for the vote. 
 
-> Disclaimer: Voters should place their prices according to their own comfort levels. In no way are we responsible for influencing the decision of any voter to vote above what they are comfortable with. 
+> Disclaimer: Voters should select their prices according to their own comfort levels. In no way are we responsible for influencing the decision of any voter to vote above what they are comfortable with. 
 
 ### 10. Pending Price [^](#Topics)
 The pending price shows the current votes that have not been converted into a confirmed trade. On our platform, confirmed trades must make up exactly 1 Ether, and must comprise of at least 2 different voted options. Therefore, votes may be stuck in pending price for 2 reasons:
@@ -118,7 +124,30 @@ Anyone can create a topic, as long as they have a trader account. When creating 
 * The topic creator will receive 0.1% of the topic's market cap. This encourages topic creators to create interesting topics that have high voting activity.
 
 ## **Voting**
-Voting 
+Voting can be categorised into 3 categories: trader voting, arbitrator voting and jury voting. Each type will be discussed in detail below. 
+
+### Trader Voting
+Trader voting is the act of casting a vote for an outcome on any topic when the topic is in the Open state. This type of voting is the one that most users will engage in. Anyone can engage in trader voting, **except the selected arbitrators**. 
+
+To vote on a topic, the user will have select a price in Ether that he/she believes is worth the outcome, as well as the option that he/she wants to vote for. Submitting the vote will place it in a pending phase, whereby it will be submitted to a matching by the system with other votes. 
+
+In the event that the user tries to vote for an option with an existing pending vote, the vote with the higher price will be kept by the system, and the lower priced vote will be refunded to the voter. 
+
+During the matching phase, the system will match votes for different options together, _in the order that the votes were received_. 
+* If the sum of prices of pending votes is less than 1 Ether, then all the pending votes remain as pending until a new vote increases the sum to 1 Ether. 
+* If the sum of prices of pending votes is equal to or exceed 1 Ether, then the votes will be combined together as a confirmed trade and the votes will become confirmed. When the sum of prices exceed 1 Ether, the excess will be refunded to the last voter. 
+
+Once the votes are confirmed, the weighted probabilities for each option will be updated with the newest values. The buffer of pending votes will be cleared and the system will be ready to receive new votes to fill up the pending votes buffer. 
+
+### Arbitrator Voting
+Arbitrator voting happens once the topic is on, or passes the expiry date. Only arbitrators selected to report on the result for a particular topic can vote on that topic's outcome. 
+
+Arbitrators selected for reporting should perform their due diligence in researching the final outcome of the topic before placing their votes. While there is no deadline for arbitrator voting, arbitrators should place their votes as soon as possible. Also, arbitrators will not be aware of the votes that other arbitrators have placed. 
+
+Once the final selected arbitrator votes (e.g. for a topic with 5 selected arbitrators, the 5th arbitrator votes), the votes of all arbitrators will be tallied and the topic will transit to the next state. 
+
+### Jury Voting
+Jury voting works in the same manner as arbitrator voting, but only occurs when the selected arbitrators cannot come to a majority conclusion on the topic's final outcome. Only selected jurors for the topic will be allowed to vote during the jury selection stage. Jury selection is discussed in more detail later. 
 
 <br />
 
@@ -205,3 +234,7 @@ Note: you may need to refresh the page for the changes to take effect.
 
 If you see the front page for creating a new trader or arbitrator account, the set up is complete and you may start development!
 
+<br />
+
+# Acknowledgements
+This project was developed as a course project for Nanyang Technological University's CX4153 Intro to Blockchain course. All code in this project belongs entirely to the 3 original contributors of the project, and may not be redeployed on any blockchain network, in part or in whole, without explicit consent from all 3 members. You may, however, deploy the project on local Ganache and Ethereum testnet for the purpose of testing and reference. 
