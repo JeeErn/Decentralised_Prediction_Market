@@ -1,6 +1,10 @@
 # Decentralised Prediction Market
 A Decentralised Prediction Market application using Ethereum, inspired by Augur and Omen. Sign up, create a topic, and predict which outcome will be resolved as true. Rake up win points every time you predict the outcome correctly, and become a legendary trader that has the ability to influence others' perception through our reputation based prediction scoring system. 
 
+### Video Demo
+Here's a video demo explaining our system: 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/Fie5UeRsZyQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 ## Table of Contents
 * [Requirements](#requirements)
 * [Market Mechanisms](#market-mechanisms)
@@ -73,18 +77,18 @@ In the event of a **tie** occurs in deciding the correct result, the topic will 
 Once the topic has received a final outcome, either from the selected arbitrators or from the jury, all users that are due to receive their payouts will automatically receive them when the topic transits to the Resolved state. The payouts system is explained in more detail [later](#payout). Once the topic is in the resolved state, no other actions can be performed on the topic. 
 
 ### 2. Title [^](#Topics)
-The title is the name of the topic. As multiple topics of the same title may exists at the same time, traders should choose the topic to vote for carefully and at their own discretion. 
+The title is the name of the topic. As multiple topics of the same title may exist at the same time, traders should choose the topic to vote for carefully and at their own discretion. 
 
 ### 3. Description [^](#Topics)
 The description provides more information about the topic to give context to the topic title. As certain titles may be ambiguous or misleading, traders and arbitrators alike should read through the topic description before placing their votes. 
 
 ### 4. Market Cap [^](#Topics)
-Market cap is the amount of Ether that has been placed into the topic by voters. 
+Market cap is the amount of Ether that has been placed into the topic by voters, regardless of whether the vote is pending or confirmed. 
 
 ### 5. Expiry Date [^](#Topics)
 Expiry date is the cutoff date for voting. Ideally, it should be the day where a correct outcome of the topic can confidently determined by arbitrators. 
 
-_Traders: do note that voting will only be open till the day **BEFORE** the expiry date._
+_Traders: do note that voting will only be open till **the day BEFORE** the expiry date._
 
 ### 6. Selected Arbitrators [^](#Topics)
 Selected arbitrators are arbitrators that have been selected to report on the final outcome of the topic. A minimum of 1 and maximum of 5 arbitrators can be selected for each topic. 
@@ -131,6 +135,7 @@ Voting will be explained in greater detail [later](#voting).
 Anyone can create a topic, as long as they have a trader account. When creating topics, there are some things to note:
 * The topic creator has to put down a mandatory 1 Ether topic creation bond. This bond will be refunded to the topic creator if the selected arbitrators resolve the outcome **without any tie**. This encourages topic creators to create options that are unambiguous and also select their topic's arbitrators carefully.
 * The topic creator will receive 0.1% of the topic's market cap. This encourages topic creators to create interesting topics that have high voting activity.
+* When creating topics, each option is limited to 32 ASCII characters or lesser. This is due to a limitation when transferring the information to the blockchain. 
 
 ## **Voting**
 Voting can be categorised into 3 categories: trader voting, arbitrator voting and jury voting. Each type will be discussed in detail below. 
@@ -336,4 +341,4 @@ If you see the front page for creating a new trader or arbitrator account, the s
 <br />
 
 # Acknowledgements
-This project was developed as a course project for Nanyang Technological University's CX4153 Intro to Blockchain course. All code in this project belongs entirely to the 3 original contributors of the project, and may not be redeployed on any blockchain network, in part or in whole, without explicit consent from all 3 members. You may, however, deploy the project on local Ganache and Ethereum testnet for the purpose of testing and reference. 
+This project was developed as a course project for Nanyang Technological University's CX4153 Intro to Blockchain course. All code in this project belong entirely to the 3 original contributors of the project, and may not be redeployed on any blockchain network, in part or in whole, without explicit consent from all 3 members. You may, however, deploy the project on local Ganache and Ethereum testnet for the purpose of testing and reference. 
