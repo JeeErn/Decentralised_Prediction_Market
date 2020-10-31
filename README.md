@@ -73,9 +73,9 @@ When a topic is first created, it will be in the _Open_ state. It will exist in 
 
 Once the expiry date has passed, the topic will transit to the _Verification_ state. In this state, the arbitrators selected to report the correct result of the topic will place their votes. Once the last selected arbitrator has placed his/her vote, the topic will transit to the next state depending on the outcome of the arbitrators' votes. 
 
-In the event where a **tie** occurs while deciding the correct result(ie, tally of arbitrators' votes results in more than one option having the same _top_ number of votes), the topic will transit to the _**Jury**_ state. During the transition to this state, a panel of Jurors are selected from the list of arbitrators. The jury will then have another round of voting. The outcome that the jury selects is final and will be used as the correct outcome of the topic. 
+In the event where a **tie** occurs while deciding the correct result(ie, tally of arbitrators' votes results in more than one option having the same _top_ number of votes), the topic will transit to the _**Jury**_ state. During the transition to this state, a panel of Jurors are [selected](#jury-selection) from the list of arbitrators. The jury will then have another round of voting. The outcome that the jury selects is final and will be used as the correct outcome of the topic. 
 
-Once the topic has received a final outcome, either from the selected arbitrators or from the jury, all users that are due to receive their payouts will automatically receive them when the topic transits to the Resolved state. The payouts system is explained in more detail [later](#payout). Once the topic is in the resolved state, no other actions can be performed on the topic. 
+Once the topic has received a final outcome, either from the selected arbitrators or from the jury, all users that are due to receive their payouts will automatically receive them when the topic transits to the _Resolved_ state. The payouts system is explained in more detail [later](#payout). Once the topic is in the resolved state, no other actions can be performed on the topic. 
 
 ### 2. Title [^](#Topics)
 The title is the name of the topic. As multiple topics of the same title may exist at the same time, traders should choose the topic to vote for carefully and at their own discretion. 
@@ -89,7 +89,7 @@ Market cap is the amount of Ether that has been placed into the topic by voters,
 ### 5. Expiry Date [^](#Topics)
 Expiry date is the cutoff date for voting. Ideally, it should be the day where a correct outcome of the topic can confidently determined by arbitrators. 
 
-_Traders: do note that voting will only be open till **the day BEFORE** the expiry date._
+_Note to Traders: Voting will only be open till **the day BEFORE** the expiry date._
 
 ### 6. Selected Arbitrators [^](#Topics)
 Selected arbitrators are arbitrators that have been selected to report on the final outcome of the topic. A minimum of 1 and maximum of 5 arbitrators can be selected for each topic. 
@@ -123,7 +123,7 @@ The pending price shows the current votes that have not been converted into a co
 1. The sum of prices in the pending prices is less than 1 Ether
 2. Only 1 option has been voted for in the pending options
 
-In the first case, all votes will remain stuck in pending state until a higher priced vote is made for 1 or more of the options, making the sum of prices go above of equal 1 Ether.
+In the first case, all votes will remain stuck in pending state until a higher priced vote is made for 1 or more of the options, making the sum of prices go above of or equal to 1 Ether.
 
 In the second case, the pending vote will have to await for more votes to be cast for other options in order to make up a valid trade and be processed by the market. 
 
@@ -134,17 +134,17 @@ Voting will be explained in greater detail [later](#voting).
 
 ## **Topic Creation**
 Anyone can create a topic, as long as they have a trader account. When creating topics, there are some things to note:
-* The topic creator has to put down a mandatory 1 Ether topic creation bond. This bond will be refunded to the topic creator if the selected arbitrators resolve the outcome **without any tie**. This encourages topic creators to create options that are unambiguous and also select their topic's arbitrators carefully.
-* The topic creator will receive 0.1% of the topic's market cap. This encourages topic creators to create interesting topics that have high voting activity.
+* The topic creator has to put down a mandatory 1 Ether topic creation bond. This bond will be refunded to the topic creator if the selected arbitrators resolve the outcome **without any tie**. This encourages topic creators to create options that are unambiguous and also select their topic's arbitrators carefully(choose arbitrators that are more _trusthworthy_). 
+* The topic creator will receive 1% of the topic's market cap when the topic has been resolved **without any tie**. This encourages topic creators to create interesting topics that will garner high voting activity.
 * When creating topics, each option is limited to 32 ASCII characters or lesser. This is due to a limitation when transferring the information to the blockchain. 
 
 ## **Voting**
 Voting can be categorised into 3 categories: trader voting, arbitrator voting and jury voting. Each type will be discussed in detail below. 
 
 ### Trader Voting
-Trader voting is the act of casting a vote for an outcome on any topic when the topic is in the Open state. This type of voting is the one that most users will engage in. Anyone can engage in trader voting, **except the selected arbitrators**. 
+Trader voting is the act of casting a vote for an outcome on any topic when the topic is in the _Open_ state. This type of voting is the one that most users will engage in. Anyone can engage in trader voting, **except the selected arbitrators**. 
 
-To vote on a topic, the user will have select a price in Ether that he/she believes is worth the outcome, as well as the option that he/she wants to vote for. Submitting the vote will place it in a pending phase, whereby it will be submitted to a matching by the system with other votes. 
+To vote on a topic, the user will first select a price in Ether that he/she believes is worth the outcome, as well as the option that he/she wants to vote for. Submitting the vote will place it in a pending phase, whereby it will be submitted if succesfully matched by the system to other votes.
 
 In the event that the user tries to vote for an option with an existing pending vote, the vote with the higher price will be kept by the system, and the lower priced vote will be refunded to the voter. 
 
@@ -157,20 +157,20 @@ Once the votes are confirmed, the weighted probabilities for each option will be
 ### Arbitrator Voting
 Arbitrator voting happens once the topic is on, or passes the expiry date. Only arbitrators selected to report on the result for a particular topic can vote on that topic's outcome. 
 
-Arbitrators selected for reporting should perform their due diligence in researching the final outcome of the topic before placing their votes. While there is no deadline for arbitrator voting, arbitrators should place their votes as soon as possible. Also, arbitrators will not be aware of the votes that other arbitrators have placed. 
+Arbitrators selected for reporting should perform their due diligence in researching the true final outcome of the topic before placing their votes. While there is no deadline for arbitrator voting, arbitrators should place their votes as soon as possible. Also, arbitrators will not be aware of the votes that other arbitrators have placed. 
 
-Once the final selected arbitrator votes (e.g. for a topic with 5 selected arbitrators, the 5th arbitrator votes), the votes of all arbitrators will be tallied and the topic will transit to the next state. 
+Once the final selected arbitrator votes (e.g. for a topic with 5 selected arbitrators, the 5th arbitrator votes), the votes of all arbitrators will be tallied and the topic will transit to the next state(either _Jury_ or _Resolved_). 
 
 ### Jury Voting
 Jury voting works in the same manner as arbitrator voting, but only occurs when the selected arbitrators cannot come to a majority conclusion on the topic's final outcome. Only selected jurors for the topic will be allowed to vote during the jury selection stage. Jury selection is discussed in more detail [later](#jury-selection). 
 
 ## **Resolution**
-Once the last selected arbitrator or jury places his/her vote, the topic will move into a temporary resolution state. During resolution, the votes for the final outcome will be tallied. In the case of counting selected arbitrators' votes, if the final outcome contains a tie, the topic will resolve as an tied-outcome and the topic will transit to the Jury state and the jury will be selected. In the case of jury voting, it is assumed that the jury will definitely have a majority outcome. 
+Once the last selected arbitrator or jury places his/her vote, the topic will move into a temporary resolution state. During resolution, the votes for the final outcome will be tallied. In the case of counting selected arbitrators' votes, if the final outcome contains a tie, the topic will resolve as an tied-outcome and the topic will transit to the _Jury_ state and the jury will be selected. In the case of jury voting, it is assumed that the jury will definitely have a majority outcome. 
 
 Once a majority outcome has been achieved, the topic will automatically trigger a payout event, as well as a reputation and trustworthiness update event for all parties involved. 
 
 ## **Jury Selection**
-Jury selection happens whenever a topic transits to the Jury state. A maximum of 5 jurors will be selected randomly for the jury. The steps for jury selection is as follows:
+Jury selection happens whenever a topic transits to the _Jury_ state. A maximum of 5 jurors will be selected randomly for the jury. The steps for jury selection are as follows:
 1. All arbitrator accounts are retrieved
 2. From the pool of all arbitrator accounts, in the event that the topic creator was an arbitrator, his/her account will be removed from the pool
 3. All selected arbitrators for the topic will be removed from the pool
@@ -230,7 +230,7 @@ new_lose_score = prev_lose_score + 100 x price_of_vote
 Our reputation update formula results in votes for popular options (and thus higher prices) becoming less rewarding and more risky for the trader's reputation. On the other hand, less popular options provide greater reward when it is the winning option and punishes less when it is not the winning option. 
 
 ### Arbitrator Trustworthiness System
-The arbitrator trustworthiness system only has one score. This trustworthiness score starts at 50 for every new arbitrator. The trustworthiness of the arbitrator directly affects his/her chances to be selected as a juror in the future, so the arbitrator is incentivised to keep his/her trustworthiness high.
+The arbitrator trustworthiness system only has one score. This trustworthiness score starts at 50 for every new arbitrator. The trustworthiness of the arbitrator directly affects his/her chances to be selected as a juror in the future, so the arbitrator is incentivised to keep his/her trustworthiness high in order to be called to jury duty and earn the incentives of being a honest juror.
 
 Whenever a topic resolves, if the arbitrator had voted in the topic either as a selected arbitrator or as a juror, his/her trustworthiness will be updated.
 
@@ -250,9 +250,9 @@ We recognise that within our trader reputation system, the "win score" and "lose
 ### Malicious Collusion Amongst Arbitrators
 We recognise that our arbitrator system may become susceptible to collusion amongst the arbitrators. Our safeguard against this is the jury system, whereby the jury is selected randomly without any juror knowing who are the other jurors. 
 
-Our working assumption is that the there will be sufficient honest selected arbitrators in each topic that will report the correct outcome, which will be enough to make the topic go into Jury state. As the jurors are unaware of who else is the juror, there is little risk of collusion at the jury voting stage. 
+Our working assumption is that the there will be sufficient honest selected arbitrators in each topic that will report the correct outcome, which will be enough to make the topic go into _Jury_ state. As the jurors are unaware of who else is the juror, there is little risk of collusion at the jury voting stage. 
 
-As any arbitrator who falsely reported in the past gets their trustworthiness score set to 0, these dishonest arbitrators will have very little chance to become a juror in another topic, which limits the damaging effects a dishonest arbitrator can have on the system. Also, during topic creation, the arbitrator's trustworthiness is displayed, and any logical topic creator will avoid choosing an arbitrator with low trustworthiness score to report on their topic. 
+Any arbitrator who reports falsely will get their trustworthiness score set to 0. As a result, these dishonest arbitrators will have very little chance to become a juror in another topic, which limits the damaging effects that a dishonest arbitrator can have on the system. Also, during topic creation, the arbitrator's trustworthiness is displayed, and any logical/rational topic creator will avoid choosing an arbitrator with low trustworthiness score to report on their topic as it might affect the likelihood of the topic creator getting back his/her topic creation bond and 1% of market cap. 
 
 <br />
 
@@ -298,7 +298,7 @@ In order to build and run the smart contracts in local environment, you will nee
 
 1. Open **Ganache**
 
-> You may either use a Quickstart Workspace or create a new Workspace, both are fine for development purposes. **Ensure that Ethereum is the selected option, and not Corda!**
+> You may either use a Quickstart Workspace or create a new Workspace, both are fine for development purposes. **Ensure that Ethereum is the selected option, and not Corda!** 
 
 2. Use the terminal and navigate to the main folder of the project
 3. Run the following commands in sequence:
