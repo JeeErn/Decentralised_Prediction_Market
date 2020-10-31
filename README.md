@@ -30,12 +30,12 @@ In order to run the project in local environment, the following are minimum requ
 * [npm](https://www.npmjs.com/) (use _`npm -v`_ to ensure it is installed correctly)
 * [Metamask Extension](https://metamask.io/download.html) and at least 1 account created
 
-> As we developed the project using a newer version of node, we recommended installing the following instead for the best development experience:
+> As we developed the project using a newer version of node, we recommend installing the following instead for the best development experience:
 > * node v12.18.4
 
 After installing the requirements, use the following code to install truffle
 ```bash
-npm install truffle -g # you may need to use `sudo` depending permission settings
+npm install truffle -g # you may need to use `sudo` depending on your permission settings
 truffle version # ensure successful installation
 ```
 If you used the recommended settings, you should see the following installed when you call `truffle version`:
@@ -60,7 +60,7 @@ npm i # installs all dependencies required
 ## **Building the Smart Contract**
 In order to build and run the smart contracts in local environment, you will need to have a local blockchain instance running. To do so:
 
-1. Open **Ganache**.
+1. Open **Ganache**
 
 > You may either use a Quickstart Workspace or create a new Workspace, both are fine for development purposes. **Ensure that Ethereum is the selected option, and not Corda!**
 
@@ -94,7 +94,7 @@ npm start
 Your browser should open a new tab with http://localhost:3000. 
 > Important: Ensure that the tab opens in the browser with the Metamask Extention installed!  
 
-3. Open the web browser with Metamask Extension installed. 
+3. Open the web browser with Metamask Extension installed 
 4. Use the dropdown within the Metamask Extension and select _Custom RPC_
 5. Add the new network. For the _New RPC URL_, use the RCP Server URL found in your Ganache instance
 6. Import the private keys of the Ganache accounts into the Metamask Wallet manager
