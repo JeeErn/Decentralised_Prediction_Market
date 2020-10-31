@@ -25,8 +25,6 @@ This section covers the installation process and steps to build and run the proj
 Note that the instructions provided are for MacOS and may not necessarily be followed step-by-step for other OS. 
   
 ## **Installation**
----
-
 In order to run the project in local environment, the following are minimum requirements:
 * [node](https://nodejs.org/en/) v8.9.4 or later
 * [npm](https://www.npmjs.com/) (use _`npm -v`_ to ensure it is installed correctly)
@@ -63,7 +61,6 @@ npm i # installs all dependencies required
 <br />
 
 ## **Building the Smart Contract**
----
 In order to build and run the smart contracts in local environment, you will need to have a local blockchain instance running. To do so:
 
 1. Open **Ganache**.
@@ -89,7 +86,6 @@ However, note that not all tests may pass as there are some differences between 
 <br />
 
 ## **Starting the Client**
----
 In this project, we use a web client to interact with the smart contracts instead of using the command line interface. To start the web client on localhost:
 
 1. Navigate to the client directory in terminal using
