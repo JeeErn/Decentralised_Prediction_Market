@@ -78,7 +78,7 @@ Selected arbitrators are arbitrators that have been selected to report on the fi
 Vote options are the available options for voting. These represent the possible outcomes that the topic can resolve to. There should exist a minimum of 2 options and a maximum of 4 options for each topic. Ideally, the options given will cover all possible scenarios that the topic can resolve towards. 
 
 ### 8. Weighted Probability [^](#Topics)
-Weighted probability is the aggregated probability that the option will be the correct one. This probability accounts for the voter's reputation at the time of voting, as well as the price the voter paid for the vote to happen. 
+Weighted probability is the probability that the option will be the correct one. This probability is derived from the sum of all previous voters' weighted bets. the This probability accounts for the voter's reputation at the time of voting, as well as the price the voter paid for the vote. 
 
 The formula for calculating the weighted probability is as follows:
 ```math
@@ -91,7 +91,7 @@ With this weighted probability, a trader with a higher reputation score would af
 
 On the other hand, a voter with a very low reputation score may in turn lower the weighted probability of the outcome he/she voted for, given his poor track record of predicting outcomes correctly.
 
-> Disclaimer: The weighted probability does not indicate that the option will be correct, but instead is a visualisation of the sentiment of previous voters, with the individual voter reputation taken into account. 
+> Disclaimer: The weighted probability does not indicate that the option will be correct. 
 
 ### 9. Last Traded Price [^](#Topics)
 The last traded price shows the prices of the last trade that got accepted by the system. The numbers shown merely serves as a guide for voters to place their price for the vote. 
@@ -110,6 +110,15 @@ In the second case, the pending vote will have to await for more votes to be cas
 Voting will be explained in greater detail later.
 
 _In the event that there are votes that are still pending and the topic transits from Open state to Verification state, all pending prices will be refunded to the voters and those votes will be discarded. However, the gas price used to cast the vote will not be refunded._
+
+
+## **Topic Creation**
+Anyone can create a topic, as long as they have a trader account. When creating topics, there are some things to note:
+* The topic creator has to put down a mandatory 1 Ether topic creation bond. This bond will be refunded to the topic creator if the selected arbitrators resolve the outcome **without any tie**. This encourages topic creators to create options that are unambiguous and also select their topic's arbitrators carefully.
+* The topic creator will receive 0.1% of the topic's market cap. This encourages topic creators to create interesting topics that have high voting activity.
+
+## **Voting**
+Voting 
 
 <br />
 
