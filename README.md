@@ -2,7 +2,8 @@
 A Decentralised Prediction Market application using Ethereum, inspired by Augur and Omen. Sign up, create a topic, and predict which outcome will be resolved as true. Rake up win points every time you predict the outcome correctly, and become a legendary trader that has the ability to influence others' perception through our reputation based prediction scoring system. 
 
 ### Video Demo
-Here's a video demo explaining our system: 
+The following is a video explaining our system. Clicking on the image will redirect the browser to the YouTube video. 
+
 [![](http://img.youtube.com/vi/Fie5UeRsZyQ/0.jpg)](http://www.youtube.com/watch?v=Fie5UeRsZyQ "Video Demo")
 
 ## Table of Contents
