@@ -4,6 +4,15 @@ A Decentralised Prediction Market application using Ethereum, inspired by Augur 
 ## Table of Contents
 * [Requirements](#requirements)
 * [Market Mechanisms](#market-mechanisms)
+    * [Account Creation](#account-creation)
+    * [Details about Topics](#topics)
+    * [Topic Creation](#topic-creation)
+    * [Voting](#voting)
+    * [Resolution](#resolution)
+    * [Jury Selection](#jury-selection)
+    * [Payout](#payout)
+    * [Reputation and Trustworthiness System](#reputation-and-trustworthiness-system)
+    * [Security Considerations](#security-considerations)
 * [Development](#development)
 * [Acknowledgements](#acknowledgements)
 
@@ -222,6 +231,22 @@ Whenever a topic resolves, if the arbitrator had voted in the topic either as a 
 In the event the arbitrator voted on the winning option, his/her trustworthiness will be increased by **5** points, and will be capped at a maximum of **100** points. 
 
 In the event the arbitrator voted on the non-winning option, his/her trustworthiness will immediately be set to **0** points. This harsh punishment stems from the fact that arbitrators are supposed to be trusted parties. 
+
+## **Security Considerations**
+To safeguard our smart contracts, we have erected some security features to guard against re-entrancy attacks, integer overflow and malicious collusion amongst arbitrators. 
+
+### Re-entrancy Attacks
+In order to guard against malicious scripts that can launch a re-entrancy attack, we ensure that our contracts do not transfer Ether to the same address within the same window. Before transferring Ether to an address, the address is checked against a "cache". If the address is found in the cache, future transfers to the address within the same window is denied. If the address was not found, the address is added to the "cache" before the transfer occurs, and is removed from the cache after the transfer is successful. 
+
+### Integer Overflow
+We recognise that within our trader reputation system, the "win score" and "lose score" could theoretically increase towards the maximum unsigned integer limit. As such, we use [OpenZeppelin's SafeMath](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/math/SafeMath.sol) contract to perform the integer addition. This prevents integer overflow from happening silently.
+
+### Malicious Collusion Amongst Arbitrators
+We recognise that our arbitrator system may become susceptible to collusion amongst the arbitrators. Our safeguard against this is the jury system, whereby the jury is selected randomly without any juror knowing who are the other jurors. 
+
+Our working assumption is that the there will be sufficient honest selected arbitrators in each topic that will report the correct outcome, which will be enough to make the topic go into Jury state. As the jurors are unaware of who else is the juror, there is little risk of collusion at the jury voting stage. 
+
+As any arbitrator who falsely reported in the past gets their trustworthiness score set to 0, these dishonest arbitrators will have very little chance to become a juror in another topic, which limits the damaging effects a dishonest arbitrator can have on the system. Also, during topic creation, the arbitrator's trustworthiness is displayed, and any logical topic creator will avoid choosing an arbitrator with low trustworthiness score to report on their topic. 
 
 <br />
 
