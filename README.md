@@ -29,16 +29,16 @@ _Because we require every user to have a trader account, users who wish to becom
 
 ## **Topics**
 Topics are the essence of our platform. Traders can select any topic they wish to predict on and place a stake on the outcome that they believe will be most likely to happen. There are several key components to each topic:
-1. [Topic state](#1.-Topic-State)
-2. [Title](#2.-Title)
-3. [Description](#3.-Description)
-4. [Market cap](#4.-Market-Cap)
-5. [Expiry date](#5.-Expiry-Date)
-6. [Selected arbitrators](#6.-Selected-Arbitrators)
-7. [Vote options](#7.-Vote-Options)
-8. [Weighted probability](#8.-Weighted-Probability)
-9. [Last traded price](#9.-Last-Traded-Price)
-10. [Pending price](#10.-Pending-Price)
+1. [Topic state](#1.-Topic-State-^)
+2. [Title](#2.-Title-^)
+3. [Description](#3.-Description-^)
+4. [Market cap](#4.-Market-Cap-^)
+5. [Expiry date](#5.-Expiry-Date-^)
+6. [Selected arbitrators](#6.-Selected-Arbitrators-^)
+7. [Vote options](#7.-Vote-Options-^)
+8. [Weighted probability](#8.-Weighted-Probability-^)
+9. [Last traded price](#9.-Last-Traded-Price-^)
+10. [Pending price](#10.-Pending-Price-^)
 
 The details of each key component is explained below. 
 
