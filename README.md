@@ -47,8 +47,6 @@ Web3.js v1.2.1
 ```
 You will also need to install [Ganache](https://www.trufflesuite.com/ganache). 
 
-<br />
-
 ### **Client-Side Installations**
 We used React.js to develop the web client. In order to install the dependencies, go to the main folder of this project and navigate to the client folder using
 ```bash
@@ -58,7 +56,6 @@ then run
 ```bash
 npm i # installs all dependencies required
 ```
-<br />
 
 ## **Building the Smart Contract**
 In order to build and run the smart contracts in local environment, you will need to have a local blockchain instance running. To do so:
@@ -82,8 +79,6 @@ Note: you may try running unit tests using
 truffle test
 ```
 However, note that not all tests may pass as there are some differences between the function signatures that we use for unit testing and for actual deployment. You may see this [commit history](insert URL to commit history of cleanup) to find the function signatures that changed. 
-
-<br />
 
 ## **Starting the Client**
 In this project, we use a web client to interact with the smart contracts instead of using the command line interface. To start the web client on localhost:
