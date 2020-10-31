@@ -24,7 +24,7 @@ The following is a video explaining our system. Clicking on the image will redir
 <br />
 
 # Requirements
-In order to participate in the market activities, an Etherium wallet manager such as [Metamask](https://metamask.io) with sufficient Ether is required. For developers looking for development requirements, see our [Development section](#Development). 
+In order to participate in the market activities, an Ethereum wallet manager such as [Metamask](https://metamask.io) with sufficient Ether is required. For developers looking for development requirements, see our [Development section](#Development). 
 
 <br />
 
@@ -36,19 +36,19 @@ There are 2 types of accounts that the platform uses:
 * Trader account
 * Arbitrator account  
 
-Traders are regular accounts that are tied to the address indicated in your Etherium wallet. Each address can only create **_one_** trader account. Every trader account starts with 100 win score and 100 lose score for a reputation score of 0.5 and changes as the trader votes on topics. Reputation score is calculated as follows:
+Traders are regular accounts that are tied to the address indicated in your Ethereum wallet. Each address can only create **_one_** trader account. Every trader account starts with a win score of 100 and a lose score of 100, which translates to a reputation score of 0.5. This reputation score changes each time the traders' votes on a topic is resolved. Reputation score is calculated as follows:
 ```math
 rep = win / (win + lose)
 ```
 
-Arbitrators are special, trusted parties that are in charge of result reporting. While trader accounts are nameless, arbitrator accounts have a display name attached to the address, which used for identification purposes when a topic is being created. Every arbitrator account has a trustworthiness score that starts at 50 and changes between 0 and 100 inclusive as the arbitrator reports on topics. 
+Arbitrators are special, trusted parties that are in charge of result reporting. While trader accounts are nameless, arbitrator accounts have a display name attached to the address, which used for identification purposes when a topic is being created. Every arbitrator account has a trustworthiness score that starts at 50 and changes between 0 and 100 (inclusive) as the arbitrator reports on topics. 
 
 _Because we require every user to have a trader account, users who wish to become arbitrators will have to pay the account creation gas fee twice - once for a trader account, once for an arbitrator account._
 
 More on the reputation and trustworthiness system [later](#reputation-and-trustworthiness-system). 
 
 ## **Topics**
-Topics are the essence of our platform. Traders can select any topic they wish to predict on and place a stake on the outcome that they believe will be most likely to happen. There are several key components to each topic:
+Topics are the essence of our platform. Traders can select any topic they wish to predict on and place a stake on the outcome that they believe will be most likely to happen. They can also [create topics](#topic-creation) for other traders to vote on. There are several key components to each topic:
 1. [Topic state](#1-topic-state-)
 2. [Title](#2-title-)
 3. [Description](#3-description-)
@@ -63,17 +63,17 @@ Topics are the essence of our platform. Traders can select any topic they wish t
 The details of each key component is explained below. 
 
 ### 1. Topic State [^](#Topics)
-A topic can exist in one of following 4 states:
+A topic can exist in one of the following 4 states:
 1. Open
 2. Verification
 3. Jury
 4. Resolved
 
-When a topic is first created, it will be in the open state. It will exist in this state until after the expiry date. In this state, any trader who is not selected as an arbitrator for the topic can place their votes on the outcome they think is most likely to happen. 
+When a topic is first created, it will be in the _Open_ state. It will exist in this state until after the expiry date. In this state, any trader who is not selected as an arbitrator for the topic can place their votes on the outcome they think is most likely to happen. 
 
-Once the expiry date has passed, the topic will transit to the verification state. In this state, the arbitrators selected to report the correct result of the topic will place their votes. Once the last selected arbitrator has placed his/her vote, the topic will transit to the next state depending on the outcome. 
+Once the expiry date has passed, the topic will transit to the _Verification_ state. In this state, the arbitrators selected to report the correct result of the topic will place their votes. Once the last selected arbitrator has placed his/her vote, the topic will transit to the next state depending on the outcome of the arbitrators' votes. 
 
-In the event of a **tie** occurs in deciding the correct result, the topic will transit to the **Jury** state. During the transition to this state, a panel of Jurors are selected from the list of arbitrators. The jury will then have another round of voting. The outcome that the jury selects is final and will be used as the correct outcome of the topic. 
+In the event where a **tie** occurs while deciding the correct result(ie, tally of arbitrators' votes results in more than one option having the same _top_ number of votes), the topic will transit to the _**Jury**_ state. During the transition to this state, a panel of Jurors are selected from the list of arbitrators. The jury will then have another round of voting. The outcome that the jury selects is final and will be used as the correct outcome of the topic. 
 
 Once the topic has received a final outcome, either from the selected arbitrators or from the jury, all users that are due to receive their payouts will automatically receive them when the topic transits to the Resolved state. The payouts system is explained in more detail [later](#payout). Once the topic is in the resolved state, no other actions can be performed on the topic. 
 
