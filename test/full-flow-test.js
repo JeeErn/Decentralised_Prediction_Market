@@ -25,6 +25,7 @@ contract("Topic", accounts => {
     const options = stringUtils.stringToBytes(["option 1", "option 2"]);
 
     before(async () => {
+        console.log("**NOTE: Function signatures that we use for unit testing and for actual deployment are different, hence some unit tests are not able to pass now due to the change in visibitlity modifiers.**");
         predictionMarketInstance = await PredictionMarket.deployed();
         const testName = stringUtils.stringToBytes("test");
 

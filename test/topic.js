@@ -16,6 +16,7 @@ contract("Topic", accounts => {
     let resolveTopicInstance = null;
     let payoutTopicInstance = null;
     before( async () => {
+        console.log("**NOTE: Function signatures that we use for unit testing and for actual deployment are different, hence some unit tests are not able to pass now due to the change in visibitlity modifiers.**");
         // Creates a test topic and initializes 1 trader and 2 arbitrators
         predictionMarketInstance = await PredictionMarket.deployed();
         await predictionMarketInstance.createTrader({from: accounts[0]});
