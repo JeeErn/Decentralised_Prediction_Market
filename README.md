@@ -1,6 +1,11 @@
 # Decentralised Prediction Market
 A Decentralised Prediction Market application using Ethereum, inspired by Augur and Omen. Sign up, create a topic, and predict which outcome will be resolved as true. Rake up win points every time you predict the outcome correctly, and become a legendary trader that has the ability to influence others' perception through our reputation based prediction scoring system. 
 
+### Submission Note
+* This project was not deployed on Ethereum testnet. It was only deployed on local Ganache instance.
+* Further information regarding installation, building the contract and starting the client can be found in the [Development](#development) section below.
+
+
 ### Video Demo
 The following is a video explaining our system. Clicking on the image will redirect the browser to the YouTube video. 
 
