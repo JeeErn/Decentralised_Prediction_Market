@@ -346,5 +346,18 @@ If you see the front page for creating a new trader or arbitrator account, the s
 
 <br />
 
+# Testing out application features 
+To test out the different flows of this application (e.g. verification and jury phase), a recommended flow will be:
+1. Import Ganache accounts into meta mask.
+2. Create 10 different (arbitrator and trader) accounts on the platform. (Tip: Setting the arbitrator names to be the same as the metamask name of the account will help alot in nagivating between accounts.)
+3. Using 1 account, create 2 (Or as many as you want) topics with 2 options, both with 2 (any even number) arbitrators and an expiry date 1 day after today. 
+4. Go to the arbitrator accounts and try resolving the topics. You should not be able to. 
+5. After 8am on the expiry date, try to resolve the topics with the arbitrator accounts. 
+6. On 1 topic, make a tie occur by having the arbitrators resolve differently. On the other topic, allow the arbitrators resolve to the same option. 
+7. Observe the arbtirator trustworthiness score by going to : create topic -> select arbitrators. 
+8. Observe the reputation scores of the voters; those who got it right and those who did not.
+9. Observe the balances of the topic creator, arbitrators and voters. 
+10. Try to make the voters vote on a new topic. Observe how their reputation scores affect the weighted probablity
+
 # Acknowledgements
 This project was developed as a course project for Nanyang Technological University's CX4153 Intro to Blockchain course. All code in this project belong entirely to the 3 original contributors of the project, and may not be redeployed on any blockchain network, in part or in whole, without explicit consent from all 3 members. You may, however, deploy the project on local Ganache and Ethereum testnet for the purpose of testing and reference. 
