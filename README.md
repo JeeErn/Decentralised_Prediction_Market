@@ -24,6 +24,7 @@ The following is a video explaining our system. Clicking on the image will redir
     * [Reputation and Trustworthiness System](#reputation-and-trustworthiness-system)
     * [Security Considerations](#security-considerations)
 * [Development](#development)
+* [Testing out application features](#Testing out application features)
 * [Acknowledgements](#acknowledgements)
 
 <br />
