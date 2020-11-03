@@ -24,7 +24,7 @@ The following is a video explaining our system. Clicking on the image will redir
     * [Reputation and Trustworthiness System](#reputation-and-trustworthiness-system)
     * [Security Considerations](#security-considerations)
 * [Development](#development)
-* [Testing out application features](#Testing out application features)
+* [Recommended Test Flow](#recommended test flow)
 * [Acknowledgements](#acknowledgements)
 
 <br />
@@ -347,7 +347,7 @@ If you see the front page for creating a new trader or arbitrator account, the s
 
 <br />
 
-# Testing out application features 
+# recommended test flow
 To test out the different flows of this application (e.g. verification and jury phase), a recommended flow will be:
 1. Import Ganache accounts into meta mask.
 2. Create 10 different (arbitrator and trader) accounts on the platform. (Tip: Setting the arbitrator names to be the same as the metamask name of the account will help alot in nagivating between accounts.)
