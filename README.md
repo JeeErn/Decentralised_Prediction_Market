@@ -9,7 +9,7 @@ A Decentralised Prediction Market application using Ethereum, inspired by Augur 
 ### Video Demo
 The following is a video explaining our system. Clicking on the image will redirect the browser to the YouTube video. 
 
-[![](http://img.youtube.com/vi/Fie5UeRsZyQ/0.jpg)](http://www.youtube.com/watch?v=Fie5UeRsZyQ "Video Demo")
+[![](http://img.youtube.com/vi/J-FDntnHnkk/0.jpg)](http://www.youtube.com/watch?v=J-FDntnHnkk "Video Demo")
 
 ## Table of Contents
 * [Requirements](#requirements)
