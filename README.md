@@ -106,7 +106,7 @@ Vote options are the available options for voting. These represent the possible 
 ### 8. Weighted Probability [^](#Topics)
 The motivation behind the weighted probability is to to give a depiction of the outcome of the event taking into consideration 3 factors: 
 1. The price that a trader has traded at
-2. The ratio to the number of times the trader is right to the number of times the trader was wrong (Reputation Score) 
+2. The ratio of the number of times the trader is right to the number of times the trader was wrong (Reputation Score) 
 3. The number of times that a trader has traded in the past.
 
 To calculate this weighted probability, each option will have a win score and a lose score. From the win/lose scores, an option reputation score will be derived from it. The option weighted probability is then derived from the option reputation score.
