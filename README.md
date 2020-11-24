@@ -109,10 +109,54 @@ Weighted probability is the probability that the option will be the correct one.
 The formula for calculating the weighted probability is as follows:
 ```math
 option_win = sum(voter_win x price_of_vote);  
-option_lose = sum(voter_lose x price_of_vote);  
+option_lose = sum(voter_lose x (1-price_of_vote));  
 option_rep = option_win / (option_win + option_lose);  
 option_weighted_prob = option_rep / sum(all_option_rep);
 ```
+In the following example, we will look at how the bets of 2 people with different reputation scores will affect the weighted probability of an outcome.
+Example: 
+```math
+Alice Win Score = 900
+Alice Lose Score = 100
+Bob Win Score = 100
+Bob Lose Score = 100
+Alice Rep Score = 0.9 
+Bob Rep Score = 0.5
+```
+Intuitively, this means that Alice is more credible than Bob. 
+
+``` math
+Option A Win Score = 100 
+Option A Lose Score = 100 
+Option B Win Score = 100
+Option B Lose Score = 100 
+
+Current weights: 
+- Option A: 100/200 = 0.5
+- Option B: 100/200 = 0.5
+
+Weighted Probability:
+Option A: 0.5/(0.5+0.5) = 0.5 
+Option B: 0.5/(0.5+0.5) = 0.5 
+
+--> Alice now makes a bet of 0.9 on option A, Bob makes a bet of 0.1 on option B. 
+
+New Win/Lose Scores:
+Option A Win Score = 100 + (0.9)*900 = 910
+Option A Lose Score = 100 + (0.1)*100 = 110
+Option B Win Score = 100 + (0.1)*100 = 110
+Option B Lose Score = 100 + (0.9)*100 = 190
+
+New Weights:
+Option A: 910/1020 = 0.892
+Option B: 110/300 = 0.366 
+
+New Weighted Probabilities:
+Option A: 0.892/1.258 = 0.71
+Option B: 0.366/1.258 = 0.29
+```
+This is aligned with the intuition that the weighted probability will sway in Alice's direction more than Bob's, as Alice is more credible. Conversely, if Bob's reputation score is higher, with the same total win+lose scores, the same bet will sway the vote in Bob's direction.
+
 With this weighted probability, a trader with a higher reputation score would affect these numbers more than a trader with a lower reputation score, given the same voting price. 
 
 On the other hand, a voter with a very low reputation score may in turn lower the weighted probability of the outcome he/she voted for, given his poor track record of predicting outcomes correctly.
