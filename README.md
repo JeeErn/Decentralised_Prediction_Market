@@ -104,8 +104,12 @@ Selected arbitrators are arbitrators that have been selected to report on the fi
 Vote options are the available options for voting. These represent the possible outcomes that the topic can resolve to. There should exist a minimum of 2 options and a maximum of 4 options for each topic. Ideally, the options given will cover all possible scenarios that the topic can resolve towards. 
 
 ### 8. Weighted Probability [^](#Topics)
-Weighted probability is the probability that the option will be the correct one. This probability is derived from the sum of all previous voters' weighted bets. This probability accounts for the voter's reputation at the time of voting, as well as the price the voter paid for the vote. 
+The motivation behind the weighted probability is to to give a depiction of the outcome of the event taking into consideration 3 factors: 
+1. The price that a trader has traded at
+2. The ratio to the number of times the trader is right to the number of times the trader was wrong (Reputation Score) 
+3. The number of times that a trader has traded in the past.
 
+To calculate this weighted probability, each option will have a win score and a lose score. From the win/lose scores, an option reputation score will be derived from it. The option weighted probability is then derived from the option reputation score.
 The formula for calculating the weighted probability is as follows:
 ```math
 option_win = sum(voter_win x price_of_vote);  
@@ -123,7 +127,7 @@ Bob Lose Score = 100
 Alice Rep Score = 0.9 
 Bob Rep Score = 0.5
 ```
-Intuitively, this means that Alice is more credible than Bob. 
+Intuitively, this means that Alice is more credible than Bob. Let's now look at the following scenario where there is one Topic with 2 options: Option A and Option B.
 
 ``` math
 Option A Win Score = 100 
@@ -139,8 +143,9 @@ Weighted Probability:
 Option A: 0.5/(0.5+0.5) = 0.5 
 Option B: 0.5/(0.5+0.5) = 0.5 
 
---> Alice now makes a bet of 0.9 on option A, Bob makes a bet of 0.1 on option B. 
-
+```
+Alice now makes a bet of 0.9 on option A, Bob makes a bet of 0.1 on option B. 
+```
 New Win/Lose Scores:
 Option A Win Score = 100 + (0.9)*900 = 910
 Option A Lose Score = 100 + (0.1)*100 = 110
